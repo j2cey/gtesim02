@@ -12,23 +12,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-/**
- * Class User
- *
- * @package App\Models\Esims
- * @property integer $id
- * @property string $uuid
- * @property bool $is_default
- * @property string|null $tags
- *
- * @property string $name
- * @property string $login
- * @property string $email
- * @property string $password
- * @property string $avatar
- *
- * @method User find(int $id)
- */
 class User extends Authenticatable implements Auditable
 {
     use HasFactory, Notifiable, HasRoles, \OwenIt\Auditing\Auditable, BaseTrait;

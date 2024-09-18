@@ -1,7 +1,9 @@
 import axios from "axios";
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { useStorage } from '@vueuse/core'
+import { useStorage } from '@vueuse/core';
+import { getActiveLanguage } from "laravel-vue-i18n";
+import { loadLanguageAsync } from 'laravel-vue-i18n';
 
 export const useSettingStore = defineStore('SettingStore', () => {
     const settings = ref({
@@ -23,5 +25,29 @@ export const useSettingStore = defineStore('SettingStore', () => {
             });
     };
 
-    return { settings, getSettings, theme, changeTheme };
+    const currlang = ref(getActiveLanguage());
+
+    const applyLang = () => {
+        loadLanguageAsync(currlang.value);
+    }
+
+    const setLocal = (lang) => {
+        axios.post('/api/locale', {
+            language: lang
+        })
+            .then((response) => {
+                currlang.value = response.data;
+                applyLang();
+            })
+    };
+
+    const getLocal = async () => {
+        await axios.get('/api/locale')
+            .then((response) => {
+                currlang.value = response.data;
+                applyLang();
+            })
+    };
+
+    return { settings, getSettings, theme, changeTheme, currlang, setLocal, getLocal };
 });

@@ -33,7 +33,13 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
     const ability = inject(ABILITY_TOKEN);
     const getAbilities = async() => {
         axios.get('/api/abilities').then(response => {
-            permissions.value = response.data;
+
+            console.log('STORE response: ', response);
+            console.log('STORE response.data.roles: ', response.data.roles);
+
+            permissions.value = response.data.permissions;
+            userroles.value = response.data.roles.map(role => role.toLowerCase());
+
             const { can, rules } = new AbilityBuilder(Ability);
 
             if (includesAny(userroles.value, adminroles.value)) {
@@ -42,7 +48,6 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
 
             can(permissions.value);
             ability.update(rules);
-            console.log('STORE abilities: ', permissions.value);
         });
     };
 

@@ -16,18 +16,10 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::create(
-            ['name' => "admin",'login' => "admin",'email' => "admin@sheundani.net",'password' => bcrypt( config('app.admin_password') ), 'status_id' => Status::active()->first()->id]);
+        $user_admin = User::create(['name' => "admin",'login' => "admin",'email' => "admin@sheundani.net",'password' => bcrypt( config('app.admin_password') ), 'status_id' => Status::active()->first()->id]);
+        $user_simple = User::create(['name' => "John DOE",'login' => "simple",'email' => "simple@sheundani.net",'password' => bcrypt( config('app.admin_password') ), 'status_id' => Status::active()->first()->id]);
 
-        $adminrole = Role::create(['name' => 'Admin']);
-
-        $permissions = Permission::pluck('id','id')->all();
-
-        $adminrole->syncPermissions($permissions);
-        $adminrole->revokePermissionTo('permission-create');
-        $adminrole->revokePermissionTo('permission-update');
-        $adminrole->revokePermissionTo('permission-delete');
-
-        $user->assignRole([$adminrole->id]);
+        $user_admin->assignRole([Role::find(1)->id]);
+        $user_simple->assignRole([Role::find(2)->id]);
     }
 }

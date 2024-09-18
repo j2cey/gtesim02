@@ -1,14 +1,12 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Esims\EsimController;
 use App\Http\Controllers\ApplicationController;
-use App\Http\Controllers\EsimHeadFileController;
-use App\Http\Controllers\EsimBodyFileController;
-use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Auth\PermissionController;
 use App\Http\Controllers\Admin\DashboardStatController;
@@ -28,21 +26,27 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
+Route::get('/api/locale', function () {
+    return App::currentLocale();
+});
+Route::post('/api/locale', function () {
+    // Validate
+    $validated = request()->validate([
+        'language' => ['required'],
+    ]);
+    // Set locale
+    App::setLocale($validated['language']);
+    // Session
+    session()->put('locale', $validated['language']);
+    // Response
+    //return redirect()->back();
+    return App::currentLocale();
+});
 
 Route::middleware('auth')->group(function () {
-    Route::get('/api/abilities', function(Request $request) {
-        return $request->user()->roles()->with('permissions')
-            ->get()
-            ->pluck('permissions')
-            ->flatten()
-            ->pluck('name')
-            ->unique()
-            ->values()
-            ->toArray();
-    });
+    Route::get('/api/abilities', [ProfileController::class, 'abilities']);
 
-    //Route::get('permissions', PermissionController::class);
+    Route::get('permissions', PermissionController::class);
     Route::get('/api/permissions/', [PermissionController::class, 'index']);
     Route::get('/api/permissions/count/', [PermissionController::class, 'count']);
     Route::get('roles', RoleController::class);
@@ -53,26 +57,15 @@ Route::middleware('auth')->group(function () {
     Route::patch('/api/roles/{role}/assign-permissions', [RoleController::class, 'assignPermissions']);
     Route::patch('/api/roles/{role}/revoke-permissions', [RoleController::class, 'revokePermissions']);
 
-
-
     Route::get('/api/stats/appointments', [DashboardStatController::class, 'appointments']);
     Route::get('/api/stats/users', [DashboardStatController::class, 'users']);
 
-    /*Route::get('/api/users/', [UserController::class, 'index']);
+    Route::get('/api/users/', [UserController::class, 'index']);
     Route::post('/api/users/', [UserController::class, 'store']);
     Route::put('/api/users/{user}', [UserController::class, 'update']);
     Route::patch('/api/users/{user}/change-role', [UserController::class, 'changeRole']);
     Route::delete('/api/users/{user}', [UserController::class, 'destory']);
-    Route::delete('/api/users', [UserController::class, 'bulkDelete']);*/
-
-
-
-    Route::get('/api/esims/', [EsimController::class, 'index']);
-    Route::post('/api/esims/', [EsimController::class, 'store']);
-    Route::put('/api/esims/{esims}', [EsimController::class, 'update']);
-    Route::patch('/api/esims/{esims}/change-role', [EsimController::class, 'changeRole']);
-    Route::delete('/api/esims/{esims}', [EsimController::class, 'destory']);
-    Route::delete('/api/esims/', [EsimController::class, 'bulkDelete']);
+    Route::delete('/api/users', [UserController::class, 'bulkDelete']);
 
     Route::get('/api/settings/fetch', [SettingController::class, 'fetch']);
     Route::get('/api/settings', [SettingController::class, 'index']);

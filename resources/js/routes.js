@@ -7,15 +7,6 @@ import SettingForm from "./pages/settings/SettingForm.vue";
 import UpdateProfile from "./pages/profile/UpdateProfile.vue";
 import Login from './pages/auth/Login.vue';
 
-import EsimList from "./pages/esims/EsimList.vue";
-import EsimForm from "./pages/esims/EsimForm.vue";
-
-
-
-
-
-
-
 export default [
     {
         path: '/login',
@@ -23,7 +14,7 @@ export default [
         component: Login,
     },
     {
-        path: '/dashboard',
+        path: '/admin/dashboard',
         name: 'admin.dashboard',
         component: Dashboard,
     },
@@ -61,32 +52,5 @@ export default [
         path: '/admin/profile',
         name: 'admin.profile',
         component: UpdateProfile,
-    },
-    {
-        path: '/esims',
-        name: 'admin.esims',
-        component: EsimList,
-    },
-    {
-        path: '/admin/esims/create',
-        name: 'admin.esims.create',
-        component: EsimForm,
-    },
-    {
-        path: '/esims/:id/edit',
-        name: 'esims.edit',
-        component: EsimForm,
-    },
-    {
-        path: '/login',
-        name: 'admin.login',
-        component: Login,
-    },
-    {
-        path: '/admin/esims/ClientEsim',
-        name: 'admin.esims.client',
-        component: EsimList,
-    },
-
-
+    }
 ]

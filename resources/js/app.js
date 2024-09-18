@@ -15,6 +15,9 @@ import { useSettingStore } from './stores/SettingStore';
 import { abilitiesPlugin, Can } from '@casl/vue';
 import ability from './services/ability';
 
+// localization
+import { i18nVue } from "laravel-vue-i18n";
+
 const pinia = createPinia();
 const app = createApp(App);
 
@@ -22,6 +25,13 @@ const router = createRouter({
     routes: Routes,
     history: createWebHistory(),
 });
+
+app.use(i18nVue, {
+    resolve: async lang => {
+        const langs = import.meta.glob('../../lang/*.json');
+        return await langs[`../../lang/${lang}.json`]();
+    }
+})
 
 app
     .use(abilitiesPlugin, ability, {useGlobalProperties: true})
@@ -32,6 +42,7 @@ router.beforeEach(async (to, from) => {
         const settingStore = useSettingStore();
         await Promise.all([
             authUserStore.getAuthUser(),
+            settingStore.getLocal(),
             settingStore.getSettings(),
             authUserStore.getAbilities(),
         ]);

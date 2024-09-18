@@ -16,6 +16,6 @@ class Roles extends SettingNode
     {
         parent::__construct("roles",null,null,null,null,"Roles settings");
 
-        $this->addChild("default", "1", "integer","Role par défaut à la création d un utilisateur dont le role n est pas explicitement déterminé.");
+        $this->addChild("default", "2", "integer","Role par défaut à la création d un utilisateur dont le role n est pas explicitement déterminé.");
     }
 }

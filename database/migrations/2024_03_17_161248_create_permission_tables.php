@@ -27,8 +27,6 @@ return new class extends Migration
         Schema::create($tableNames['permissions'], function (Blueprint $table) {
             $table->bigIncrements('id'); // permission id
             $table->string('name');       // For MySQL 8.0 use string('name', 125);
-            // TODO: Retirer la ligne de dessous
-            $table->integer('level')->comment('permission importance level: 1 = very high, 2 = high, 3 = medium, 4 = low');
             $table->string('guard_name'); // For MySQL 8.0 use string('guard_name', 125);
             $table->timestamps();
 

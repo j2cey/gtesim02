@@ -1,8 +1,14 @@
 <script setup>
-import { onMounted } from 'vue';
+import {onMounted, ref} from 'vue';
 import { useSettingStore } from '../stores/SettingStore';
 
 const settingStore = useSettingStore();
+const availableLanguages = ref([{name: 'Fr', value: "fr"}, {name: 'En', value: "en"}]);
+
+const setLanguage = (event) => {
+    console.log('setLocal, event.target.value:', event.target.value)
+    settingStore.setLocal(event.target.value.toLowerCase());
+};
 
 const saveToggleMenu = () => {
     const toggleMenuIcon = document.getElementById('toggleMenuIcon');
@@ -35,20 +41,22 @@ onMounted(() => {
                 <a href="#" @click.prevent="saveToggleMenu" class="nav-link" data-widget="pushmenu" role="button"><i class="fas fa-bars"></i></a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="index3.html" class="nav-link">
-                    <i class="fas fa-home"></i>
-                    Home
-
-
-                </a>
-
+                <a href="index3.html" class="nav-link">Home</a>
             </li>
-
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href="#" class="nav-link">Contact</a>
+            </li>
         </ul>
         <li class="nav-item d-none d-sm-inline-block">
             <a @click.prevent="settingStore.changeTheme" href="#" class="nav-link">
                 <i class="far" :class="settingStore.theme === 'dark' ? 'fa-moon' : 'fa-sun'"></i>
             </a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+            <!-- Locale Selector -->
+            <select @change="setLanguage" style="height: 2rem; outline: 2px solid transparent;" class="px-1 rounded border-0">
+                <option v-for="language in availableLanguages" :selected="(settingStore.currlang === language.value)">{{ language.name }}</option>
+            </select>
         </li>
 
         <ul class="navbar-nav ml-auto">
@@ -75,7 +83,10 @@ onMounted(() => {
             </li>
 
             <li class="nav-item dropdown">
-
+                <a class="nav-link" data-toggle="dropdown" href="#">
+                    <i class="far fa-comments"></i>
+                    <span class="badge badge-danger navbar-badge">3</span>
+                </a>
                 <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                     <a href="#" class="dropdown-item">
 
@@ -170,6 +181,5 @@ onMounted(() => {
 </template>
 
 <style scoped>
-
 
 </style>

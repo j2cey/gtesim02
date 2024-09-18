@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
+import i18n from 'laravel-vue-i18n/vite';
 import {viteStaticCopy} from 'vite-plugin-static-copy';
 import path from 'node:path';
 import { normalizePath } from 'vite'
@@ -42,6 +43,7 @@ export default defineConfig({
                     includeAbsolute: false,
                 }
             }
-        })
+        }),
+        i18n()
     ],
 });

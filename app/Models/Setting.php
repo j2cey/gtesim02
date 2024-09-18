@@ -131,7 +131,8 @@ class Setting extends Model implements Auditable
         if (!is_null($description)) {
             $data['description'] = $description;
         }
-        $setting = Setting::create($data);
+        //$setting = Setting::upsert($data, uniqueBy: $data, update: $data);
+        $setting = Setting::firstOrCreate ($data, $data);
 
         if (!is_null($group)) {
             $setting->setGroup($group);

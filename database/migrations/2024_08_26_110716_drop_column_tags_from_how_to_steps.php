@@ -14,7 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('how_to_steps', function (Blueprint $table) {
-            $table->dropColumn(['tags']);
+            if (Schema::hasColumn('how_to_steps', 'tags')) {
+                $table->dropColumn(['tags']);
+            }
         });
     }
 

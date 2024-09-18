@@ -131,6 +131,29 @@ onUnmounted(() => {
 
                     <li v-if="can('manage-all')" class="nav-header">ADMINISTRATION</li>
 
+                    <li v-if="can('esim-list')" class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-id-card"></i>
+                            <p>
+                                Profiles E-SIM
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <router-link to="/esims" active-class="active" class="nav-link text text-xs">
+                                    <i class="fas fa-list nav-icon text-success"></i>
+                                    <p>Liste</p>
+                                </router-link>
+                            </li>
+                            <li class="nav-item">
+                                <router-link to="/esims/create" active-class="active" class="nav-link text text-xs">
+                                    <i class="fas fa-plus nav-icon text-danger"></i>
+                                    <p>Nouveau</p>
+                                </router-link>
+                            </li>
+                        </ul>
+                    </li>
                     <li v-if="can('manage-all')" class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-cogs"></i>

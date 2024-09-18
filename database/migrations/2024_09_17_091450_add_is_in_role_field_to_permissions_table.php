@@ -13,7 +13,10 @@ return new class extends Migration
     {
         $tableNames = config('permission.table_names');
         Schema::table($tableNames['permissions'], function (Blueprint $table) {
-            $table->boolean('is_in_role')->default(false)->comment('tell if permission is in specified role, when listing');
+            $tableNames = config('permission.table_names');
+            if (! Schema::hasColumn($tableNames['permissions'], 'is_in_role')) {
+                $table->boolean('is_in_role')->default(false)->comment('tell if permission is in specified role, when listing');
+            }
         });
     }
 

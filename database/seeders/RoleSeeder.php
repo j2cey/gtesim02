@@ -14,8 +14,11 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $adminrole = Role::firstOrCreate(['name' => 'Admin']);
-        $simpleuser_role = Role::firstOrCreate(['name' => 'Simple UserResource']);
+        //$adminrole = Role::upsert(['name' => 'Admin'], uniqueBy: ['name' => 'Admin'], update: ['name' => 'Admin']);
+        $adminrole = Role::firstOrCreate (['name' => 'Admin'], ['name' => 'Admin']);
+
+        //$simpleuser_role = Role::upsert(['name' => 'Simple UserResource'], uniqueBy: ['name' => 'Simple UserResource'], update: ['name' => 'Simple UserResource']);
+        $simpleuser_role = Role::firstOrCreate (['name' => 'Simple UserResource'], ['name' => 'Simple UserResource']);
 
         $permissions = Permission::pluck('id','id')->all();
 

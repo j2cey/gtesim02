@@ -33,11 +33,13 @@ class AppServiceProvider extends ServiceProvider
          */
         Blueprint::macro('baseFields', function () {
             $this->uuid('uuid');
-            //$this->string('tags')->nullable()->comment('Tags, if any');
+            $this->string('tags')->nullable()->comment('Tags, if any');
             $this->foreignId('status_id')->nullable()
                 ->comment('status reference')
                 ->constrained('statuses')->onDelete('set null');
             $this->boolean('is_default')->default(false)->comment('determine whether is the default one.');
+
+            $this->timestamps();
 
             // foreign creator & updator user
             $this->foreignId('created_by')->nullable()
@@ -48,7 +50,6 @@ class AppServiceProvider extends ServiceProvider
                 ->comment('user updator reference')
                 ->constrained('users')->onDelete('set null');
 
-            $this->timestamps();
         });
         Blueprint::macro('dropBaseForeigns', function () {
 

@@ -12,9 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $table->foreignId('main_group_id')->nullable()
-                ->comment('reference du goupe principal de l entrée (le cas échéant)')
-                ->constrained('settings')->onDelete('set null');
+            if (! Schema::hasColumn('settings', 'main_group_id')) {
+                $table->foreignId('main_group_id')->nullable()
+                    ->comment('reference du goupe principal de l entrée (le cas échéant)')
+                    ->constrained('settings')->onDelete('set null');
+            }
         });
     }
 

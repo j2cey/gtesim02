@@ -19,6 +19,16 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            $table->string('image')->nullable()->comment('Avatar de l utilisateur');
+            $table->boolean('is_local')->default(false)->comment('indique si le compte est locale');
+            $table->boolean('is_ldap')->default(false)->comment('indique si le compte est LDAP');
+            $table->string('objectguid')->nullable()->comment('GUID du compte');
+
+            $table->string('login_type')->default("local")->comment('type de connexion');
+
+            $table->timestamp('last_seen')->nullable()->comment('if user login then it will update last_seen time and add key for online in cache');
+
             $table->rememberToken();
         });
 

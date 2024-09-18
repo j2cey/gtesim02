@@ -16,10 +16,17 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $user_admin = User::create(['name' => "admin",'login' => "admin",'email' => "admin@sheundani.net",'password' => bcrypt( config('app.admin_password') ), 'status_id' => Status::active()->first()->id]);
-        $user_simple = User::create(['name' => "John DOE",'login' => "simple",'email' => "simple@sheundani.net",'password' => bcrypt( config('app.admin_password') ), 'status_id' => Status::active()->first()->id]);
+        $data_uniq = ['name' => "admin",'login' => "admin",'email' => "admin@sheundani.net"];
+        $data = ['password' => bcrypt( config('app.admin_password') ), 'status_id' => Status::active()->first()->id];
+        //$user_admin = User::upsert($data, uniqueBy: $data, update: $data);
+        $user_admin = User::firstOrCreate ($data_uniq, $data);
 
-        $user_admin->assignRole([Role::find(1)->id]);
-        $user_simple->assignRole([Role::find(2)->id]);
+        $data_uniq = ['name' => "John DOE",'login' => "simple",'email' => "simple@sheundani.net"];
+        $data = ['password' => bcrypt( config('app.admin_password') ), 'status_id' => Status::active()->first()->id];
+        //$user_simple = User::upsert($data, uniqueBy: $data, update: $data);
+        $user_simple = User::firstOrCreate ($data_uniq, $data);
+
+        $user_admin->assignRole([Role::where('name', "Admin")->first()->id]);
+        $user_simple->assignRole([Role::where('name', "Simple UserResource")->first()->id]);
     }
 }

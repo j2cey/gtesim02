@@ -18,7 +18,8 @@ class StatusSeeder extends Seeder
             ['name' => "inactive", 'code' => "inactive", 'style' => "danger", 'is_default' => 0]
         ];
         foreach ($statuses as $status) {
-            Status::create($status);
+            //Status::upsert($status, uniqueBy: $status, update: $status);
+            Status::firstOrCreate ($status, $status);
         }
     }
 }

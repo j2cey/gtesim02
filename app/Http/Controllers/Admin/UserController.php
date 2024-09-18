@@ -29,8 +29,9 @@ class UserController extends Controller implements HasMiddleware
                 $query->where('name', 'like', "%{$searchQuery}%");
             })
             ->with('roles')
+            ->skip(10)->take(300)
             ->latest()
-            ->paginate(5);
+            ->paginate(50);
 
         return $users;
     }

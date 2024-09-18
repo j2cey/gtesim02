@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableNames = config('permission.table_names');
+        // TODO: Decommenter cette partie pour etre en phase avec les bonnes pratiques de Laravel
+        /*$tableNames = config('permission.table_names');
         Schema::table($tableNames['permissions'], function (Blueprint $table) {
             $table->integer('level')->comment('permission importance level: 1 = very high, 2 = high, 3 = medium, 4 = low');
-        });
+        });*/
     }
 
     /**
@@ -22,9 +23,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableNames = config('permission.table_names');
+        /*$tableNames = config('permission.table_names');
         Schema::table($tableNames['permissions'], function (Blueprint $table) {
             $table->dropColumn('level');
-        });
+        });*/
     }
 };

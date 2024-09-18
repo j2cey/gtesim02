@@ -35,11 +35,15 @@ onMounted(() => {
                 <a href="#" @click.prevent="saveToggleMenu" class="nav-link" data-widget="pushmenu" role="button"><i class="fas fa-bars"></i></a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="index3.html" class="nav-link">Home</a>
+                <a href="index3.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    Home
+
+
+                </a>
+
             </li>
-            <li class="nav-item d-none d-sm-inline-block">
-                <a href="#" class="nav-link">Contact</a>
-            </li>
+
         </ul>
         <li class="nav-item d-none d-sm-inline-block">
             <a @click.prevent="settingStore.changeTheme" href="#" class="nav-link">
@@ -71,10 +75,7 @@ onMounted(() => {
             </li>
 
             <li class="nav-item dropdown">
-                <a class="nav-link" data-toggle="dropdown" href="#">
-                    <i class="far fa-comments"></i>
-                    <span class="badge badge-danger navbar-badge">3</span>
-                </a>
+
                 <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                     <a href="#" class="dropdown-item">
 
@@ -169,5 +170,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
+
 
 </style>

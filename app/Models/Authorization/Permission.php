@@ -2,6 +2,7 @@
 
 namespace App\Models\Authorization;
 
+
 use Illuminate\Support\Carbon;
 use App\Traits\Base\HasCreator;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -24,6 +25,7 @@ use Spatie\Permission\Models\Permission as SpatiePermission;
  * @property int|null $updated_by user updator reference
  * @property Carbon $deleted_at
  */
+
 class Permission extends SpatiePermission
 {
     use HasCreator, SoftDeletes;

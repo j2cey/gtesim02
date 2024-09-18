@@ -7,11 +7,12 @@ import AppFooter from './components/AppFooter.vue';
 import {useAuthUserStore} from "./stores/AuthUserStore.js";
 import { useSettingStore } from './stores/SettingStore';
 
+
 const authUserStore = useAuthUserStore();
 const settingStore = useSettingStore();
 
 const currentThemeMode = computed(() => {
-    return settingStore.theme === 'dark' ? 'dark-mode' : '';
+    return settingStore.theme === 'blue' ? 'dark-mode' : '';
 });
 </script>
 
@@ -20,14 +21,17 @@ const currentThemeMode = computed(() => {
         <AppNavbar />
         <SidebarLeft />
         <div class="content-wrapper">
+
             <router-view></router-view>
         </div>
+
         <SidebarRight />
         <AppFooter />
     </div>
     <div v-else class="login-page" :class="currentThemeMode">
         <router-view></router-view>
     </div>
+
 </template>
 
 <style scoped>

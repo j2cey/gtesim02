@@ -5,7 +5,9 @@ import { useRouter } from 'vue-router';
 import { useSettingStore } from '../stores/SettingStore';
 import { Can } from "@casl/vue";
 import { useAbility } from "@casl/vue";
-import imgUrl from '../../assets/img/app_logo.png'
+import imgUrl from '../../assets/img/Logo_Fond_Bleu.png'
+
+
 
 
 const { can, cannot } = useAbility();
@@ -48,7 +50,7 @@ onUnmounted(() => {
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
 
         <a href="index3.html" class="brand-link">
-            <img :src="imgUrl" alt="Admin-IT Logo" class="brand-image img-rounded elevation-3" style="opacity: .8">
+            <img :src="imgUrl" alt="Logo_Fond_Bleu" class="brand-image img-rounded elevation-3" style="opacity: .8">
             <span class="brand-text font-weight-light">{{ settingStore.settings.app.name }}</span>
         </a>
 
@@ -59,7 +61,7 @@ onUnmounted(() => {
                     <img :src="authUserStore.user.avatar" class="img-circle elevation-2" alt="User Image">
                 </div>
                 <div class="info">
-                    <a href="#" @click.prevent="goToProfile" class="d-block">{{ authUserStore.user.name }}</a>
+                    <a href="" @click.prevent="goToProfile" class="d-block">{{ authUserStore.user.name }}</a>
                 </div>
             </div>
 
@@ -67,7 +69,7 @@ onUnmounted(() => {
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
                     <li class="nav-item">
-                        <router-link to="/admin/dashboard" active-class="active" class="nav-link">
+                        <router-link to="/dashboard" active-class="active" class="nav-link">
                             <i class="nav-icon fas fa-tachometer-alt"></i>
                             <p>
                                 Dashboard
@@ -75,39 +77,27 @@ onUnmounted(() => {
                         </router-link>
                     </li>
 
+
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-columns"></i>
+                            <i class="nav-icon fas fa-id-card"></i>
                             <p>
-                                Reports
+                                Clients
                                 <i class="fas fa-angle-left right"></i>
-                                <span class="badge badge-info right">6</span>
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="#" class="nav-link">
-                                    <i class="fas fa-circle nav-icon text-success"></i>
-                                    <p>Reports List</p>
+                                    <router-link v-if="can('user-list')" to="/esims" class="nav-link">
+                                        <p>Listes clients</p>
+                                    </router-link>
+
                                 </a>
                             </li>
+
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="fas fa-circle nav-icon text-danger"></i>
-                                    <p>
-                                        Treatments
-                                        <span class="badge badge-danger right">6</span>
-                                    </p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>
-                                        Report Parameters
-                                        <i class="fas fa-angle-left right"></i>
-                                    </p>
-                                </a>
+
                                 <ul class="nav nav-treeview">
                                     <li class="nav-item">
                                         <a href="pages/examples/login.html" class="nav-link">
@@ -122,7 +112,7 @@ onUnmounted(() => {
 
                     <li v-if="can('profile-list')" class="nav-item">
                         <router-link to="/admin/profile" active-class="active" class="nav-link">
-                            <i class="nav-icon fas fa-user"></i>
+                            <i class="nav-icon fas fa-user" style="color: #0080FF;"></i>
                             <p>
                                 Profile
                             </p>
@@ -132,22 +122,10 @@ onUnmounted(() => {
                     <li v-if="can('manage-all')" class="nav-header">ADMINISTRATION</li>
 
                     <li v-if="can('manage-all')" class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-cogs"></i>
-                            <p>
-                                Parameters
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
+
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>
-                                        IT Ressource
-                                        <i class="fas fa-angle-left right"></i>
-                                    </p>
-                                </a>
+
                                 <ul class="nav nav-treeview">
                                     <li class="nav-item">
                                         <a href="pages/examples/login.html" class="nav-link">
@@ -164,13 +142,7 @@ onUnmounted(() => {
                                 </ul>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>
-                                        IT Parameters
-                                        <i class="fas fa-angle-left right"></i>
-                                    </p>
-                                </a>
+
                                 <ul class="nav nav-treeview">
                                     <li class="nav-item">
                                         <a href="pages/examples/login-v2.html" class="nav-link">
@@ -196,30 +168,130 @@ onUnmounted(() => {
                     </li>
 
                     <li class="nav-item">
-                        <router-link v-if="can('user-list')" to="/admin/users" active-class="active" class="nav-link">
-                            <i class="nav-icon fas fa-users"></i>
+                        <router-link v-if="can('user-list')" to="/" active-class="active" class="nav-link">
+                            <i class="nav-icon fas fa-sim-card"></i>
                             <p>
-                                Users
+                                Profiles E-sims
+                                <i class="fas fa-angle-left right"></i>
                             </p>
                         </router-link>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <router-link v-if="can('user-list')" to="/esims" class="nav-link">
+                                        <p>E-sims </p>
+                                    </router-link>
+
+
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+
+                                <ul class="nav nav-treeview">
+
+                                </ul>
+                            </li>
+                        </ul>
                     </li>
 
                     <li class="nav-item">
                         <router-link v-if="can('role-list')" to="/admin/roles" active-class="active" class="nav-link">
                             <i class="nav-icon fas fa-id-badge"></i>
                             <p>
-                                Roles
+                                Utilisateurs
+                                <i class="fas fa-angle-left right"></i>
                             </p>
+
                         </router-link>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                        <p>Listes </p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+
+                                <ul class="nav nav-treeview">
+
+                                </ul>
+                            </li>
+                        </ul>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+
+                                    <p>profiles </p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+
+                                <ul class="nav nav-treeview">
+
+                                </ul>
+                            </li>
+                        </ul>
+
                     </li>
+
 
                     <li v-if="can('setting-list')" class="nav-item">
                         <router-link to="/admin/settings" active-class="active" class="nav-link">
                             <i class="nav-icon fas fa-cog"></i>
                             <p>
-                                Settings
+                                System
+                                <i class="fas fa-angle-left right"></i>
                             </p>
                         </router-link>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+
+                                    <p>Index </p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+
+                                <ul class="nav nav-treeview">
+
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+
+                                    <p>Users Online </p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+
+                                <ul class="nav nav-treeview">
+
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+
+                                    <p>Audit </p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+
+                                <ul class="nav nav-treeview">
+
+                                </ul>
+                            </li>
+                        </ul>
                     </li>
 
                     <li class="nav-item">
@@ -241,5 +313,18 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.nav-item {
+    margin-bottom: 5px; /* Ajuste la valeur selon l'espacement désiré */
+
+}
+
+/* Ajouter de l'espace en haut de chaque section principale */
+.nav-header {
+    margin-top: 20px; /* Ajuste la valeur selon l'espacement désiré */
+}
+
+
+
+
 
 </style>

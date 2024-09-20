@@ -164,7 +164,7 @@ onMounted(() => {
 
             <div class="d-flex justify-content-between">
                 <div class="d-flex">
-                    <router-link to="admin/esims/create">
+                    <router-link to="esims/create">
                         <button @click="addEsim" type="button" class="mb-2 btn btn-primary">
                             <i class="fa fa-plus-circle mr-1"></i>
                             Ajouter une nouvelle E-sim

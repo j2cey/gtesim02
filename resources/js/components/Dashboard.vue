@@ -71,7 +71,7 @@ onMounted(() => {
                         <div class="icon">
                             <i class="ion ion-bag"></i>
                         </div>
-                        <router-link to="/admin/appointments" class="small-box-footer">
+                        <router-link to="/appointments" class="small-box-footer">
                             View Treatments
                             <i class="fas fa-arrow-circle-right"></i>
                         </router-link>
@@ -97,7 +97,7 @@ onMounted(() => {
                         <div class="icon">
                             <i class="ion ion-bag"></i>
                         </div>
-                        <router-link to="/admin/users" class="small-box-footer">
+                        <router-link to="/users" class="small-box-footer">
                             View Users
                             <i class="fas fa-arrow-circle-right"></i>
                         </router-link>

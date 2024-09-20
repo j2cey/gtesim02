@@ -25,7 +25,7 @@ const logout = () => {
 };
 
 const goToProfile = () => {
-    router.push('/admin/profile');
+    router.push('/profile');
 }
 
 onMounted( () => {
@@ -67,7 +67,7 @@ onUnmounted(() => {
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
                     <li class="nav-item">
-                        <router-link to="/admin/dashboard" active-class="active" class="nav-link">
+                        <router-link to="/dashboard" active-class="active" class="nav-link">
                             <i class="nav-icon fas fa-tachometer-alt"></i>
                             <p>
                                 Dashboard
@@ -121,7 +121,7 @@ onUnmounted(() => {
                     </li>
 
                     <li class="nav-item">
-                        <router-link to="/admin/profile" active-class="active" class="nav-link">
+                        <router-link to="/profile" active-class="active" class="nav-link">
                             <i class="nav-icon fas fa-user"></i>
                             <p>
                                 Profile
@@ -219,7 +219,7 @@ onUnmounted(() => {
                     </li>
 
                     <li class="nav-item">
-                        <router-link v-if="can('user-list')" to="/admin/users" active-class="active" class="nav-link">
+                        <router-link v-if="can('user-list')" to="/users" active-class="active" class="nav-link">
                             <i class="nav-icon fas fa-users"></i>
                             <p>
                                 Users
@@ -228,7 +228,7 @@ onUnmounted(() => {
                     </li>
 
                     <li class="nav-item">
-                        <router-link v-if="can('role-list')" to="/admin/roles" active-class="active" class="nav-link">
+                        <router-link v-if="can('role-list')" to="/roles" active-class="active" class="nav-link">
                             <i class="nav-icon fas fa-id-badge"></i>
                             <p>
                                 Roles
@@ -237,7 +237,7 @@ onUnmounted(() => {
                     </li>
 
                     <li v-if="can('setting-list')" class="nav-item">
-                        <router-link to="/admin/settings" active-class="active" class="nav-link">
+                        <router-link to="/settings" active-class="active" class="nav-link">
                             <i class="nav-icon fas fa-cog"></i>
                             <p>
                                 Settings

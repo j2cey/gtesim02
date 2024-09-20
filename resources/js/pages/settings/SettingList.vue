@@ -170,7 +170,7 @@ onMounted(() => {
 
             <div class="d-flex justify-content-between">
                 <div class="d-flex">
-                    <router-link to="/admin/settings/create">
+                    <router-link to="/settings/create">
                         <button type="button" class="mb-2 btn btn-primary">
                             <i class="fa fa-plus-circle mr-1"></i>
                             Add New Setting

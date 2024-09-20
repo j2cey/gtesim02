@@ -42,7 +42,7 @@ onMounted(() => {
         <td class="text text-xs" >{{ setting.group?.name }}</td>
         <td class="text text-xs" >{{ setting.maingroup?.name }}</td>
         <td>
-            <router-link v-if="can('setting-update')" :to="`/admin/settings/${setting.id}/edit`">
+            <router-link v-if="can('setting-update')" :to="`/settings/${setting.id}/edit`">
                 <i class="fa fa-edit mr-2 text text-xs"></i>
             </router-link>
             <a class="text text-xs" v-if="can('setting-delete')" href="#" @click.prevent="$emit('confirmRoleDeletion', setting)"><i class="fa fa-trash text-danger ml-2"></i></a>

@@ -40,7 +40,7 @@ const handleSubmit = (values, actions) => {
 const createEsim = (values, actions) => {
     axios.post('/api/esims', form)
         .then((response) => {
-            // router.push('/admin/esims');
+            // router.push('/esims');
             esim.value = response.data;
             esimid.value = response.data.id;
             editMode.value = true;
@@ -236,7 +236,7 @@ watch(searchQuery, debounce(() => {
 }, 300));
 
 onMounted(() => {
-    if (route.name === 'admin.esims.edit') {
+    if (route.name === 'esims.edit') {
         esimid.value = route.params.id;
         editMode.value = true;
         getEsim();
@@ -259,10 +259,10 @@ onMounted(() => {
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item">
-                            <router-link to="/admin/dashboard">Home</router-link>
+                            <router-link to="/dashboard">Home</router-link>
                         </li>
                         <li class="breadcrumb-item">
-                            <router-link to="/admin/esims">Esims</router-link>
+                            <router-link to="/esims">Esims</router-link>
                         </li>
                         <li class="breadcrumb-item active">
                             <span v-if="editMode">Edit</span>
@@ -356,7 +356,7 @@ onMounted(() => {
                                 </div>
                                 <div class="btn-group">
                                     <button type="submit" class="btn btn-sm btn-primary m-2">Create</button>
-                                    <router-link to="/admin/esims">
+                                    <router-link to="/esims">
                                         <button type="submit" class="btn btn-sm btn-default m-2">Back</button>
                                     </router-link>
                                 </div>

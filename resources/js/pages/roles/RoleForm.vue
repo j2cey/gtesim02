@@ -32,7 +32,7 @@ const handleSubmit = (values, actions) => {
 const createRole = (values, actions) => {
     axios.post('/api/roles', form)
         .then((response) => {
-            // router.push('/admin/roles');
+            // router.push('/roles');
             role.value = response.data;
             roleid.value = response.data.id;
             editMode.value = true;
@@ -210,7 +210,7 @@ watch(searchQuery, debounce(() => {
 }, 300));
 
 onMounted(() => {
-    if (route.name === 'admin.roles.edit') {
+    if (route.name === 'roles.edit') {
         roleid.value = route.params.id;
         editMode.value = true;
         getRole();
@@ -233,10 +233,10 @@ onMounted(() => {
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item">
-                            <router-link to="/admin/dashboard">Home</router-link>
+                            <router-link to="/dashboard">Home</router-link>
                         </li>
                         <li class="breadcrumb-item">
-                            <router-link to="/admin/roles">Roles</router-link>
+                            <router-link to="/roles">Roles</router-link>
                         </li>
                         <li class="breadcrumb-item active">
                             <span v-if="editMode">Edit</span>
@@ -273,7 +273,7 @@ onMounted(() => {
                                 </div>
                                 <div class="btn-group">
                                     <button type="submit" class="btn btn-sm btn-primary m-2">Submit</button>
-                                    <router-link to="/admin/roles">
+                                    <router-link to="/roles">
                                         <button type="submit" class="btn btn-sm btn-default m-2">Back</button>
                                     </router-link>
                                 </div>

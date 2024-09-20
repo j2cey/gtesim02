@@ -24,14 +24,6 @@ return new class extends Migration
 
             $table->string('title')->comment('type title');
             $table->string('description')->nullable()->comment('type description');
-
-            /*$table->foreignId('created_by')->nullable()
-                ->comment('user creator reference')
-                ->constrained('users')->onDelete('set null');
-
-               $table->foreignId('updated_by')->nullable()
-                ->comment('user updator reference')
-                ->constrained('users')->onDelete('set null');*/
             $table->baseFields();
         });
         $this->setTableComment($this->table_name,$this->table_comment);

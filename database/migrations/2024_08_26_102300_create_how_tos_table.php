@@ -28,11 +28,11 @@ return new class extends Migration
             $table->string('description')->nullable()->comment('how-to description');
             $table->longText('htmlbody')->nullable()->comment('how-to description');
 
-            /*   $table->foreignId('how_to_type_id')->nullable()
+            $table->foreignId('how_to_type_id')->nullable()
                   ->comment('how_to_type reference')
                   ->constrained('how_to_types')->onDelete('set null');
 
-              $table->foreignId('created_by')->nullable()
+              /*$table->foreignId('created_by')->nullable()
                   ->comment('user creator reference')
                   ->constrained('users')->onDelete('set null');
 

@@ -22,9 +22,9 @@ use App\Http\Controllers\Admin\DashboardStatController;
 |
 */
 
-Route::get('/', function () {
+/*Route::get('/', function () {
     return view('welcome');
-});
+});*/
 
 Route::get('/api/locale', function () {
     return App::currentLocale();

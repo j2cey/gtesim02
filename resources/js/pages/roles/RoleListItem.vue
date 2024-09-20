@@ -38,7 +38,7 @@ onMounted(() => {
             ({{role.permissions.length}})<span v-for="permission in role.permissions.slice(0, 10)" class="badge" :class="(permission.level === 1 ? 'text-danger' : (permission.level === 2 || permission.level === 3 ? 'text-orange' : 'text-default'))">{{ permission.name }}</span>
         </td>
         <td>
-            <router-link v-if="can('role-update')" :to="`/admin/roles/${role.id}/edit`">
+            <router-link v-if="can('role-update')" :to="`/roles/${role.id}/edit`">
                 <i class="fa fa-edit mr-2 text text-xs"></i>
             </router-link>
             <a class="text text-xs" v-if="can('role-delete')" href="#" @click.prevent="$emit('confirmRoleDeletion', role)"><i class="fa fa-trash text-danger ml-2"></i></a>

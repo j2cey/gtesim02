@@ -38,7 +38,7 @@ app
     .component(Can.name, Can);
 router.beforeEach(async (to, from) => {
     const authUserStore = useAuthUserStore();
-    if (authUserStore.user.name === '' && to.name !== 'admin.login') {
+    if (authUserStore.user.name === '' && to.name !== 'login') {
         const settingStore = useSettingStore();
         await Promise.all([
             authUserStore.getAuthUser(),

@@ -35,7 +35,7 @@ const handleSubmit = (values, actions) => {
 const createSetting = (values, actions) => {
     axios.post('/api/settings', form)
         .then((response) => {
-            // router.push('/admin/settings');
+            // router.push('/settings');
             setting.value = response.data;
             settingid.value = response.data.id;
             editMode.value = true;
@@ -136,7 +136,7 @@ const confirmSettingDeletion = (setting) => {
 };
 
 const initComponent = () => {
-    if (route.name === 'admin.settings.edit') {
+    if (route.name === 'settings.edit') {
         settingid.value = route.params.id;
         editMode.value = true;
         getSetting();
@@ -175,10 +175,10 @@ onMounted(() => {
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item">
-                            <router-link to="/admin/dashboard">Home</router-link>
+                            <router-link to="/dashboard">Home</router-link>
                         </li>
                         <li class="breadcrumb-item">
-                            <router-link to="/admin/settings">Settings</router-link>
+                            <router-link to="/settings">Settings</router-link>
                         </li>
                         <li class="breadcrumb-item active">
                             <span v-if="editMode">Edit</span>
@@ -229,7 +229,7 @@ onMounted(() => {
                                 </div>
                                 <div class="btn-group">
                                     <button type="submit" class="btn btn-sm btn-primary m-2">Submit</button>
-                                    <router-link to="/admin/settings">
+                                    <router-link to="/settings">
                                         <button type="submit" class="btn btn-sm btn-default m-2">Back</button>
                                     </router-link>
                                 </div>

@@ -18,9 +18,9 @@ const handleSubmit = () => {
     axios.post('/login', form)
         .then(() => {
             // authUserStore.getAbilities();
-            router.push('/admin/dashboard');
+            router.push('/dashboard');
             // authUserStore.getAuthUser();
-            //window.location.href="/admin/dashboard";
+            //window.location.href="/dashboard";
         })
         .catch((error) => {
             errorMessage.value = error.response.data.message;

@@ -34,17 +34,17 @@ class RoleController extends Controller implements HasMiddleware
     }
 
     public function index()
-    {
-        $roles = Role::query()
-            ->when(request('query'), function ($query, $searchQuery) {
-                $query->where('name', 'like', "%{$searchQuery}%");
-            })
-            ->with('permissions')
-            ->latest()
-            ->paginate(5);
+{
+    $roles = Role::query()
+        ->when(request('query'), function ($query, $searchQuery) {
+            $query->where('name', 'like', "%{$searchQuery}%");
+        })
+        ->with('permissions')
+        ->latest()
+        ->paginate(5);
 
-        return $roles;
-    }
+    return $roles;
+}
 
     public function store() {
         request()->validate([

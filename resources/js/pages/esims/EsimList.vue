@@ -13,6 +13,7 @@ const esims = ref({'data': []});
 const editing = ref(false);
 const form = ref(null);
 const formValues = ref();
+const resultLimit = ref(300);
 
 const esimIdBeingDeleted = ref(null);
 
@@ -35,6 +36,7 @@ const getEsims = (page = 1) => {
         }
     })
         .then((response) => {
+            console.log("getEsims, response: ", response);
             esims.value = response.data;
             selectedEsims.value = [];
             selectAll.value = false;
@@ -134,8 +136,13 @@ const selectAllEsims = () => {
     }
 }
 
-watch(searchQuery, debounce(() => {
+const clearSearchQuery = () => {
+    searchQuery.value = '';
     getEsims();
+}
+
+watch(searchQuery, debounce(() => {
+    //getEsims();
 }, 300));
 
 onMounted(() => {
@@ -165,9 +172,9 @@ onMounted(() => {
             <div class="d-flex justify-content-between">
                 <div class="d-flex">
                     <router-link to="esims/create">
-                        <button @click="addEsim" type="button" class="mb-2 btn btn-primary">
+                        <button @click="addEsim" type="button" class="mb-2 btn btn-sm btn-primary">
                             <i class="fa fa-plus-circle mr-1"></i>
-                            Ajouter une nouvelle E-sim
+                            Nouveau
                         </button>
                     </router-link>
                     <div v-if="selectedEsims.length > 0">
@@ -178,9 +185,17 @@ onMounted(() => {
                         <span class="ml-2">Selected {{ selectedEsims.length }} esims</span>
                     </div>
                 </div>
-                <div>
 
-                    <input type="text" v-model="searchQuery" class="form-control" placeholder="Search..." />
+                <div class="d-flex">
+                    <div class="input-group mb-3">
+                        <input type="search" v-model="searchQuery" class="form-control text-xs" placeholder="Search text..." />
+                        <button v-if="searchQuery" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+                            <i class="fa fa-times"></i>
+                        </button>
+                        <div class="input-group-append">
+                            <button class="btn btn-sm btn-default" @click="getEsims"><i class="fa fa-search"></i></button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -192,12 +207,11 @@ onMounted(() => {
                         <tr>
                             <th><input type="checkbox" v-model="selectAll" @change="selectAllEsims" /></th>
                             <th style="width: 10px">#</th>
-                            <th>Nom</th>
-                            <th>Numéro téléphone</th>
-                            <th>Adresse Email</th>
-                            <th>user</th>
-                            <th>Département</th>
-                            <th>Détails</th>
+                            <th>imsi</th>
+                            <th>iccid</th>
+                            <th>ac</th>
+                            <th>Date Création</th>
+                            <th>Options</th>
                         </tr>
                         </thead>
                         <tbody v-if="esims.data.length > 0">
@@ -217,7 +231,7 @@ onMounted(() => {
                     </table>
                 </div>
             </div>
-            <Bootstrap4Pagination :data="esims" @pagination-change-page="getEsims" align="right" />
+            <Bootstrap4Pagination :data="esims" @pagination-change-page="getEsims" size="small" :limit="resultLimit" />
 
         </div>
     </div>
@@ -235,11 +249,11 @@ onMounted(() => {
                     </button>
                 </div>
                 <div class="modal-body">
-                    <h5>Are you sure you want to delete this esim ?</h5>
+                    <h5>Etes-vous sûr de vouloir supprimer cette Esim ?</h5>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button @click.prevent="deleteEsim" type="button" class="btn btn-primary">Delete Esim</button>
+                    <button type="button" class="btn btn-xs btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button @click.prevent="deleteEsim" type="button" class="btn btn-xs btn-danger">Delete Esim</button>
                 </div>
             </div>
         </div>

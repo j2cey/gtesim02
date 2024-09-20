@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Esims;
 
 use Exception;
-use \Illuminate\View\View;
+use Illuminate\View\View;
 use App\Models\Esims\Esim;
 
 use Illuminate\Http\Request;
@@ -20,40 +20,10 @@ use App\Models\Esims\EsimBodyFile;
 use App\Http\Resources\Esims\EsimResource;
 use App\Http\Requests\Esim\UpdateEsimRequest;
 use Illuminate\Contracts\Foundation\Application;
-use App\Http\Requests\ISearchFormRequest;
-
-
-
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class EsimController extends Controller
 {
-    /**
-     * @var IEsimRepositoryContract
-     */
-    private IEsimRepositoryContract $repository;
-
-    /**
-     * EsimController constructor.
-     *
-     * @param IEsimRepositoryContract $repository [description]
-     */
-    public function __construct(IEsimRepositoryContract $repository) {
-        $this->repository = $repository;
-    }
-
-    /**
-     * Fetch records.
-     *
-     * @param  FetchRequest     $request [description]
-     * @return SearchCollection          [description]
-     */
-    public function fetch(FetchRequest $request): SearchCollection
-    {
-        return new SearchCollection(
-            $this->repository->search($request), EsimResource::class
-        );
-    }
-
     public function fetchall() {
         return Esim::all();
     }
@@ -68,15 +38,21 @@ class EsimController extends Controller
     /**
      * Display products page.
      *
-     * @return Application|Factory|\Illuminate\Contracts\View\View|View
+     * @return LengthAwarePaginator
      */
     public function index()
     {
-        $statutesims = StatutEsim::all();
-        return view('esims.index')
-            ->with('perPage', new Collection(config('system.per_page')))
-            ->with('defaultPerPage', config('system.default_per_page'))
-            ->with('statutesims', $statutesims);
+        $esims = Esim::query()
+            ->when(request('query'), function ($query, $searchQuery) {
+                $query->where('imsi', 'like', "%{$searchQuery}%")
+                    ->orWhere('iccid', 'like', "%{$searchQuery}%")
+                ;
+            })
+            ->limit(500)
+            ->latest()
+            ->paginate(100);
+
+        return $esims;
     }
 
     /**

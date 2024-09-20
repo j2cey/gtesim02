@@ -63,12 +63,17 @@ export default [
     },
     {
         path: '/esims',
-        name: 'esims.edit',
+        name: 'esims',
         component: EsimList,
     },
     {
         path: '/esims/create',
         name: 'esims.create',
+        component: EsimForm,
+    },
+    {
+        path: '/esims/:id/edit',
+        name: 'esims.edit',
         component: EsimForm,
     },
     {

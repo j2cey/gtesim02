@@ -34,6 +34,9 @@ onMounted(() => {
         <td class="text text-xs" >{{ esim.imsi }}</td>
         <td class="text text-xs" >{{ esim.iccid }}</td>
         <td class="text text-xs" >{{ esim.ac }}</td>
+        <td class="text text-xs" >
+            <span v-if="esim.statutesim" class="badge" :class="'text-' + esim.statutesim.style ">{{ esim.statutesim?.libelle }}</span>
+        </td>
         <td class="text text-xs" >{{ formatDate(esim.created_at) }}</td>
         <td>
             <router-link v-if="can('esim-update')" :to="`/esims/${esim.id}/edit`">

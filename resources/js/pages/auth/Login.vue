@@ -36,10 +36,10 @@ const handleSubmit = () => {
 
         <div class="card card-outline card-primary">
             <div class="card-header text-center">
-                <a href="#" class="h1"><b>AdminIT</b>Login</a>
+                <a href="#" class="h1"><b>GT</b>Esim</a>
             </div>
             <div class="card-body">
-                <p class="login-box-msg">Sign in to start your session</p>
+                <p class="login-box-msg">Connectez-vous</p>
                 <div v-if="errorMessage" class="alert alert-danger" role="alert">
                     {{ errorMessage }}
                 </div>
@@ -65,7 +65,7 @@ const handleSubmit = () => {
                             <div class="icheck-primary">
                                 <input type="checkbox" id="remember">
                                 <label for="remember">
-                                    Remember Me
+                                    Se Souvenir de moi
                                 </label>
                             </div>
                         </div>
@@ -83,7 +83,7 @@ const handleSubmit = () => {
                 </form>
 
                 <p class="mb-1">
-                    <a href="forgot-password.html">I forgot my password</a>
+                    <a href="forgot-password.html">J'ai oublié mon mot de passe</a>
                 </p>
             </div>
 

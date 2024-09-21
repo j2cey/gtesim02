@@ -7,13 +7,19 @@ import { useToastr } from '../../toastr.js';
 import EsimListItem from './EsimListItem.vue';
 import { debounce } from 'lodash';
 import { Bootstrap4Pagination } from 'laravel-vue-pagination';
+import CustomPaginate from "@/components/CustomPaginate.vue";
+import {useAbility} from "@casl/vue";
 
+
+const { can, cannot } = useAbility();
+
+const loading = ref(false);
 const toastr = useToastr();
 const esims = ref({'data': []});
 const editing = ref(false);
 const form = ref(null);
 const formValues = ref();
-const resultLimit = ref(300);
+const paginationLinksLimit = ref(5);
 
 const esimIdBeingDeleted = ref(null);
 
@@ -30,6 +36,7 @@ const toggleSelection = (esim) => {
 };
 
 const getEsims = (page = 1) => {
+    loading.value = true;
     axios.get(`/api/esims?page=${page}`, {
         params: {
             query: searchQuery.value
@@ -40,7 +47,9 @@ const getEsims = (page = 1) => {
             esims.value = response.data;
             selectedEsims.value = [];
             selectAll.value = false;
-        })
+        }).finally(() => {
+            loading.value = false;
+    });
 }
 
 const createEsimSchema = yup.object({
@@ -78,7 +87,6 @@ const addEsim = () => {
     editing.value = false;
     form.value.resetForm();
     $('#esimFormModal').modal('show');
-
 }
 
 const editEsim = (esim) => {
@@ -159,7 +167,7 @@ onMounted(() => {
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">Accueil</a></li>
                         <li class="breadcrumb-item active">Esims</li>
                     </ol>
                 </div>
@@ -171,29 +179,34 @@ onMounted(() => {
 
             <div class="d-flex justify-content-between">
                 <div class="d-flex">
-                    <router-link to="esims/create">
+                    <router-link v-if="can('esim-create')" to="esims/create">
                         <button @click="addEsim" type="button" class="mb-2 btn btn-sm btn-primary">
                             <i class="fa fa-plus-circle mr-1"></i>
                             Nouveau
                         </button>
                     </router-link>
-                    <div v-if="selectedEsims.length > 0">
-                        <button @click="bulkDelete" type="button" class="ml-2 mb-2 btn btn-danger">
+                    <div v-if="can('esim-delete') && selectedEsims.length > 0">
+                        <button @click="bulkDelete" type="button" class="ml-2 mb-2 btn btn-sm btn-danger">
                             <i class="fa fa-trash mr-1"></i>
-                            Delete Selected
+                            Supprimer Sélection
                         </button>
-                        <span class="ml-2">Selected {{ selectedEsims.length }} esims</span>
+                        <span class="ml-2 text-muted"> {{ selectedEsims.length }} esim(s) sélectionnées</span>
                     </div>
                 </div>
 
                 <div class="d-flex">
                     <div class="input-group mb-3">
-                        <input type="search" v-model="searchQuery" class="form-control text-xs" placeholder="Search text..." />
-                        <button v-if="searchQuery" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+                        <input @keyup.enter="getEsims" type="search" v-model="searchQuery" class="form-control text-xs" placeholder="Recherche text..." />
+                        <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
                             <i class="fa fa-times"></i>
                         </button>
                         <div class="input-group-append">
-                            <button class="btn btn-sm btn-default" @click="getEsims"><i class="fa fa-search"></i></button>
+                            <button class="btn btn-sm btn-default" @click="getEsims">
+                                <div v-if="loading" class="spinner-border spinner-border-sm" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <span v-else><i class="fa fa-search"></i></span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -210,6 +223,7 @@ onMounted(() => {
                             <th>imsi</th>
                             <th>iccid</th>
                             <th>ac</th>
+                            <th>Statut</th>
                             <th>Date Création</th>
                             <th>Options</th>
                         </tr>
@@ -225,24 +239,28 @@ onMounted(() => {
                         </tbody>
                         <tbody v-else>
                         <tr>
-                            <td colspan="6" class="text-center">No results found...</td>
+                            <td colspan="6" class="text-center">Aucun Résultats...</td>
                         </tr>
                         </tbody>
                     </table>
+                    <span v-if="esims.total > 0" class="text text-xs text-primary">{{ esims.total }} enregistrement(s)</span>
+                    <br/>
+                    <Bootstrap4Pagination :data="esims" @pagination-change-page="getEsims" size="small" :limit="paginationLinksLimit" align="right" />
                 </div>
+
             </div>
-            <Bootstrap4Pagination :data="esims" @pagination-change-page="getEsims" size="small" :limit="resultLimit" />
+
 
         </div>
     </div>
 
-    <div class="modal fade" id="deleteEsimModal" data-backdrop="static" tabindex="-1" esim="dialog"
+    <div class="modal fade" id="deleteEsimModal" data-backdrop="static" tabindex="-1" type="dialog"
          aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog" esim="document">
+        <div class="modal-dialog" type="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="staticBackdropLabel">
-                        <span>Delete Esim</span>
+                        <span>Suppression Esim</span>
                     </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -259,3 +277,7 @@ onMounted(() => {
         </div>
     </div>
 </template>
+
+<style scoped>
+
+</style>

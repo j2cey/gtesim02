@@ -30,7 +30,7 @@ class StoreEsimRequest extends EsimRequest
      *
      * @return array
      */
-    public function rules()
+    public function rules(): array
     {
         return Esim::createRules();
     }

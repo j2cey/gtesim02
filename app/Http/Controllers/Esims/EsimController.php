@@ -46,11 +46,14 @@ class EsimController extends Controller
             ->when(request('query'), function ($query, $searchQuery) {
                 $query->where('imsi', 'like', "%{$searchQuery}%")
                     ->orWhere('iccid', 'like', "%{$searchQuery}%")
+                    ->orWhereHas('statutesim', function ($query) use ($searchQuery) {
+                        $query->where( 'code', 'like', '%'.$searchQuery.'%' );
+                    })
                 ;
             })
-            ->limit(500)
+            ->with("statutesim")
             ->latest()
-            ->paginate(100);
+            ->paginate(50);
 
         return $esims;
     }

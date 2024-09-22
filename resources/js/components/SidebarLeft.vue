@@ -47,7 +47,7 @@ onUnmounted(() => {
 <template>
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
 
-        <a href="index3.html" class="brand-link">
+        <a href="/" class="brand-link">
             <img :src="imgUrl" alt="Admin-IT Logo" class="brand-image img-rounded elevation-3" style="opacity: .8">
             <span class="brand-text font-weight-light">{{ settingStore.settings.app.name }}</span>
         </a>

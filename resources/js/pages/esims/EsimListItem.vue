@@ -39,7 +39,7 @@ onMounted(() => {
         </td>
         <td class="text text-xs" >{{ formatDate(esim.created_at) }}</td>
         <td>
-            <router-link v-if="can('esim-update')" :to="`/esims/${esim.id}/edit`">
+            <router-link v-if="can('esim-update')" :to="`/esims/${esim.uuid}/edit`">
                 <i class="fa fa-edit mr-2 text text-xs"></i>
             </router-link>
             <a class="text text-xs" v-if="can('esim-delete')" href="#" @click.prevent="$emit('confirmEsimDeletion', esim)"><i class="fa fa-trash text-danger ml-2"></i></a>

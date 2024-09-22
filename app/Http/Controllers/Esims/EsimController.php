@@ -76,6 +76,7 @@ class EsimController extends Controller
      */
     public function store(StoreEsimRequest $request): EsimResource
     {
+        dd($request);
         $esim = Esim::createNew(
             $request->imsi,
             $request->iccid,
@@ -103,11 +104,10 @@ class EsimController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param Esim $esim
-     * @return void
+     * @return Esim
      */
-    public function edit(Esim $esim): void
-    {
-        //
+    public function edit(Esim $esim) {
+        return $esim->load(['statutesim', 'technologieesim', 'phonenum', 'states']);
     }
 
     /**

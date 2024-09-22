@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RoleController;
@@ -9,8 +8,11 @@ use App\Http\Controllers\Esims\EsimController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Esims\EsimStateController;
 use App\Http\Controllers\Auth\PermissionController;
+use App\Http\Controllers\Esims\StatutEsimController;
 use App\Http\Controllers\Admin\DashboardStatController;
+use App\Http\Controllers\Esims\TechnologieEsimController;
 
 /*
 |--------------------------------------------------------------------------
@@ -89,6 +91,14 @@ Route::middleware('auth')->group(function () {
 
     #region ESIMS
     Route::get('/api/esims', [EsimController::class, 'index']);
+    Route::get('/api/esims/{esim}/edit', [EsimController::class, 'edit']);
+    Route::post('/api/esims/', [EsimController::class, 'store']);
+
+    Route::get('/api/esimstatuses', [StatutEsimController::class, 'index']);
+
+    Route::get('/api/esimstates/{esim}/esimindex', [EsimStateController::class, 'esimindex']);
+
+    Route::get('/api/esimtechnologies', [TechnologieEsimController::class, 'index']);
     #endregion
 });
 Route::get('{view}', ApplicationController::class)->where('view', '(.*)')->middleware('auth');

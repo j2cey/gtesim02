@@ -8,7 +8,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Class EsimState
@@ -34,6 +34,7 @@ class EsimState extends BaseModel implements Auditable
     use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable;
 
     protected $guarded = [];
+    protected $with = ['user','statutesim'];
 
     #region Validation Rules
 

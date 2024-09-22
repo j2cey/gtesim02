@@ -7,7 +7,6 @@ import { useToastr } from '../../toastr.js';
 import EsimListItem from './EsimListItem.vue';
 import { debounce } from 'lodash';
 import { Bootstrap4Pagination } from 'laravel-vue-pagination';
-import CustomPaginate from "@/components/CustomPaginate.vue";
 import {useAbility} from "@casl/vue";
 
 
@@ -17,8 +16,7 @@ const loading = ref(false);
 const toastr = useToastr();
 const esims = ref({'data': []});
 const editing = ref(false);
-const form = ref(null);
-const formValues = ref();
+
 const paginationLinksLimit = ref(5);
 
 const esimIdBeingDeleted = ref(null);
@@ -52,61 +50,6 @@ const getEsims = (page = 1) => {
     });
 }
 
-const createEsimSchema = yup.object({
-    name: yup.string().required(),
-    guard_name: yup.string().required(),
-});
-
-const editEsimSchema = yup.object({
-    name: yup.string().required(),
-    guard_name: yup.string().required(),
-});
-
-const updateEsim = (values, { setErrors }) => {
-    axios.put('/api/esims/' + values.id, values)
-        .then((response) => {
-            const index = esims.value.findIndex(esim => esim.id === response.data.id);
-            esims.value.data[index] = response.data;
-            $('#esimFormModal').modal('hide');
-            toastr.success('Esim updated successfully!');
-        }).catch((error) => {
-        console.log("updateEsim-error: ", error);
-        setErrors(error.response.data.errors);
-    });
-}
-
-const handleSubmit = (values, actions) => {
-    if (editing.value) {
-        updateEsim(values, actions);
-    } else {
-        createEsim(values, actions);
-    }
-}
-
-const addEsim = () => {
-    editing.value = false;
-    form.value.resetForm();
-    $('#esimFormModal').modal('show');
-}
-
-const editEsim = (esim) => {
-    editing.value = true;
-    form.value.resetForm();
-    $('#esimFormModal').modal('show');
-
-    // formValues.value = {
-    //     id: esim.id,
-    //     name: esim.name,
-    //     email: esim.email,
-    // };
-
-    form.value.setValues({
-        id: esim.id,
-        name: esim.name,
-        email: esim.email,
-    });
-};
-
 const confirmEsimDeletion = (esim) => {
     esimIdBeingDeleted.value = esim.id;
     $('#deleteEsimModal').modal('show');
@@ -116,7 +59,7 @@ const deleteEsim = () => {
     axios.delete(`/api/esims/${esimIdBeingDeleted.value}`)
         .then(() => {
             $('#deleteEsimModal').modal('hide');
-            toastr.success('Esim deleted successfully!');
+            toastr.success('Esim supprimé avec succès !');
             esims.value.data = esims.value.data.filter(esim => esim.id !== esimIdBeingDeleted.value);
         });
 };
@@ -180,7 +123,7 @@ onMounted(() => {
             <div class="d-flex justify-content-between">
                 <div class="d-flex">
                     <router-link v-if="can('esim-create')" to="esims/create">
-                        <button @click="addEsim" type="button" class="mb-2 btn btn-sm btn-primary">
+                        <button type="button" class="mb-2 btn btn-sm btn-primary">
                             <i class="fa fa-plus-circle mr-1"></i>
                             Nouveau
                         </button>
@@ -232,14 +175,18 @@ onMounted(() => {
                         <EsimListItem v-for="(esim, index) in esims.data"
                                       key="esim.id"
                                       :esim=esim :index=index
-                                      @edit-esim="editEsim"
                                       @confirm-esim-deletion="confirmEsimDeletion"
                                       @toggle-selection="toggleSelection"
                                       :selectAll="selectAll" />
                         </tbody>
                         <tbody v-else>
                         <tr>
-                            <td colspan="6" class="text-center">Aucun Résultats...</td>
+                            <td colspan="8" class="text-center">
+                                <div v-if="loading" class="spinner-border spinner-border-sm" role="status">
+                                    <span class="sr-only">Chargement en cours...</span>
+                                </div>
+                                <span v-else>Aucun résultat trouvé...</span>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
@@ -270,8 +217,8 @@ onMounted(() => {
                     <h5>Etes-vous sûr de vouloir supprimer cette Esim ?</h5>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-xs btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button @click.prevent="deleteEsim" type="button" class="btn btn-xs btn-danger">Delete Esim</button>
+                    <button type="button" class="btn btn-xs btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button @click.prevent="deleteEsim" type="button" class="btn btn-xs btn-danger">Supprimer</button>
                 </div>
             </div>
         </div>

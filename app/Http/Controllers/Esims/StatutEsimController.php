@@ -23,7 +23,7 @@ class StatutEsimController extends Controller
      */
     public function index()
     {
-        //
+        return StatutEsim::active()->get();
     }
 
     /**

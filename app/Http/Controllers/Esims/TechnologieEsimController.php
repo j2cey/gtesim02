@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Esims;
 
-use App\Http\Requests\StoreTechnologieEsimRequest;
-use App\Http\Requests\UpdateTechnologieEsimRequest;
-use App\Models\TechnologieEsim;
+use Illuminate\Http\Response;
+use App\Http\Controllers\Controller;
+use App\Models\Esims\TechnologieEsim;
+use App\Http\Requests\TechnologieEsim\StoreTechnologieEsimRequest;
+use App\Http\Requests\TechnologieEsim\UpdateTechnologieEsimRequest;
 
 
 class TechnologieEsimController extends Controller
@@ -16,7 +18,7 @@ class TechnologieEsimController extends Controller
      */
     public function index()
     {
-        //
+        return TechnologieEsim::active()->get();
     }
 
     /**
@@ -32,8 +34,8 @@ class TechnologieEsimController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\StoreTechnologieEsimRequest  $request
-     * @return \Illuminate\Http\Response
+     * @param StoreTechnologieEsimRequest $request
+     * @return Response
      */
     public function store(StoreTechnologieEsimRequest $request)
     {
@@ -43,8 +45,8 @@ class TechnologieEsimController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\TechnologieEsim  $technologieEsim
-     * @return \Illuminate\Http\Response
+     * @param TechnologieEsim $technologieEsim
+     * @return Response
      */
     public function show(TechnologieEsim $technologieEsim)
     {
@@ -54,8 +56,8 @@ class TechnologieEsimController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\TechnologieEsim  $technologieEsim
-     * @return \Illuminate\Http\Response
+     * @param TechnologieEsim $technologieEsim
+     * @return Response
      */
     public function edit(TechnologieEsim $technologieEsim)
     {
@@ -65,9 +67,9 @@ class TechnologieEsimController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\UpdateTechnologieEsimRequest  $request
-     * @param  \App\Models\TechnologieEsim  $technologieEsim
-     * @return \Illuminate\Http\Response
+     * @param UpdateTechnologieEsimRequest $request
+     * @param TechnologieEsim $technologieEsim
+     * @return Response
      */
     public function update(UpdateTechnologieEsimRequest $request, TechnologieEsim $technologieEsim)
     {
@@ -77,8 +79,8 @@ class TechnologieEsimController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\TechnologieEsim  $technologieEsim
-     * @return \Illuminate\Http\Response
+     * @param TechnologieEsim $technologieEsim
+     * @return Response
      */
     public function destroy(TechnologieEsim $technologieEsim)
     {

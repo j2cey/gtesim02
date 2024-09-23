@@ -17,7 +17,7 @@ class App extends SettingNode
     {
         parent::__construct("app",null,null,null,null,"Application Settings");
 
-        $this->addChild("name", "Admin-IT", "string", "Application Name.");
+        $this->addChild("name", "GT-Esim", "string", "Application Name.");
         $this->addChild("version", "1.0", "string", "Application Version.");
     }
 }

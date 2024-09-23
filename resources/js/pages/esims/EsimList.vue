@@ -7,12 +7,17 @@ import { useToastr } from '../../toastr.js';
 import EsimListItem from './EsimListItem.vue';
 import { debounce } from 'lodash';
 import { Bootstrap4Pagination } from 'laravel-vue-pagination';
+import {useAbility} from "@casl/vue";
 
+
+const { can, cannot } = useAbility();
+
+const loading = ref(false);
 const toastr = useToastr();
 const esims = ref({'data': []});
 const editing = ref(false);
-const form = ref(null);
-const formValues = ref();
+
+const paginationLinksLimit = ref(5);
 
 const esimIdBeingDeleted = ref(null);
 
@@ -29,73 +34,21 @@ const toggleSelection = (esim) => {
 };
 
 const getEsims = (page = 1) => {
+    loading.value = true;
     axios.get(`/api/esims?page=${page}`, {
         params: {
             query: searchQuery.value
         }
     })
         .then((response) => {
+            console.log("getEsims, response: ", response);
             esims.value = response.data;
             selectedEsims.value = [];
             selectAll.value = false;
-        })
-}
-
-const createEsimSchema = yup.object({
-    name: yup.string().required(),
-    guard_name: yup.string().required(),
-});
-
-const editEsimSchema = yup.object({
-    name: yup.string().required(),
-    guard_name: yup.string().required(),
-});
-
-const updateEsim = (values, { setErrors }) => {
-    axios.put('/api/esims/' + values.id, values)
-        .then((response) => {
-            const index = esims.value.findIndex(esim => esim.id === response.data.id);
-            esims.value.data[index] = response.data;
-            $('#esimFormModal').modal('hide');
-            toastr.success('Esim updated successfully!');
-        }).catch((error) => {
-        console.log("updateEsim-error: ", error);
-        setErrors(error.response.data.errors);
+        }).finally(() => {
+            loading.value = false;
     });
 }
-
-const handleSubmit = (values, actions) => {
-    if (editing.value) {
-        updateEsim(values, actions);
-    } else {
-        createEsim(values, actions);
-    }
-}
-
-const addEsim = () => {
-    editing.value = false;
-    form.value.resetForm();
-    $('#esimFormModal').modal('show');
-
-}
-
-const editEsim = (esim) => {
-    editing.value = true;
-    form.value.resetForm();
-    $('#esimFormModal').modal('show');
-
-    // formValues.value = {
-    //     id: esim.id,
-    //     name: esim.name,
-    //     email: esim.email,
-    // };
-
-    form.value.setValues({
-        id: esim.id,
-        name: esim.name,
-        email: esim.email,
-    });
-};
 
 const confirmEsimDeletion = (esim) => {
     esimIdBeingDeleted.value = esim.id;
@@ -106,7 +59,7 @@ const deleteEsim = () => {
     axios.delete(`/api/esims/${esimIdBeingDeleted.value}`)
         .then(() => {
             $('#deleteEsimModal').modal('hide');
-            toastr.success('Esim deleted successfully!');
+            toastr.success('Esim supprimé avec succès !');
             esims.value.data = esims.value.data.filter(esim => esim.id !== esimIdBeingDeleted.value);
         });
 };
@@ -134,8 +87,13 @@ const selectAllEsims = () => {
     }
 }
 
-watch(searchQuery, debounce(() => {
+const clearSearchQuery = () => {
+    searchQuery.value = '';
     getEsims();
+}
+
+watch(searchQuery, debounce(() => {
+    //getEsims();
 }, 300));
 
 onMounted(() => {
@@ -152,7 +110,7 @@ onMounted(() => {
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">Accueil</a></li>
                         <li class="breadcrumb-item active">Esims</li>
                     </ol>
                 </div>
@@ -164,23 +122,36 @@ onMounted(() => {
 
             <div class="d-flex justify-content-between">
                 <div class="d-flex">
-                    <router-link to="esims/create">
-                        <button @click="addEsim" type="button" class="mb-2 btn btn-primary">
+                    <router-link v-if="can('esim-create')" to="esims/create">
+                        <button type="button" class="mb-2 btn btn-sm btn-primary">
                             <i class="fa fa-plus-circle mr-1"></i>
-                            Ajouter une nouvelle E-sim
+                            Nouveau
                         </button>
                     </router-link>
-                    <div v-if="selectedEsims.length > 0">
-                        <button @click="bulkDelete" type="button" class="ml-2 mb-2 btn btn-danger">
+                    <div v-if="can('esim-delete') && selectedEsims.length > 0">
+                        <button @click="bulkDelete" type="button" class="ml-2 mb-2 btn btn-sm btn-danger">
                             <i class="fa fa-trash mr-1"></i>
-                            Delete Selected
+                            Supprimer Sélection
                         </button>
-                        <span class="ml-2">Selected {{ selectedEsims.length }} esims</span>
+                        <span class="ml-2 text-muted"> {{ selectedEsims.length }} esim(s) sélectionnées</span>
                     </div>
                 </div>
-                <div>
 
-                    <input type="text" v-model="searchQuery" class="form-control" placeholder="Search..." />
+                <div class="d-flex">
+                    <div class="input-group mb-3">
+                        <input @keyup.enter="getEsims" type="search" v-model="searchQuery" class="form-control text-xs" placeholder="Recherche text..." />
+                        <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+                            <i class="fa fa-times"></i>
+                        </button>
+                        <div class="input-group-append">
+                            <button class="btn btn-sm btn-default" @click="getEsims">
+                                <div v-if="loading" class="spinner-border spinner-border-sm" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <span v-else><i class="fa fa-search"></i></span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -192,56 +163,68 @@ onMounted(() => {
                         <tr>
                             <th><input type="checkbox" v-model="selectAll" @change="selectAllEsims" /></th>
                             <th style="width: 10px">#</th>
-                            <th>Nom</th>
-                            <th>Numéro téléphone</th>
-                            <th>Adresse Email</th>
-                            <th>user</th>
-                            <th>Département</th>
-                            <th>Détails</th>
+                            <th>imsi</th>
+                            <th>iccid</th>
+                            <th>ac</th>
+                            <th>Statut</th>
+                            <th>Date Création</th>
+                            <th>Options</th>
                         </tr>
                         </thead>
                         <tbody v-if="esims.data.length > 0">
                         <EsimListItem v-for="(esim, index) in esims.data"
                                       key="esim.id"
                                       :esim=esim :index=index
-                                      @edit-esim="editEsim"
                                       @confirm-esim-deletion="confirmEsimDeletion"
                                       @toggle-selection="toggleSelection"
                                       :selectAll="selectAll" />
                         </tbody>
                         <tbody v-else>
                         <tr>
-                            <td colspan="6" class="text-center">No results found...</td>
+                            <td colspan="8" class="text-center">
+                                <div v-if="loading" class="spinner-border spinner-border-sm" role="status">
+                                    <span class="sr-only">Chargement en cours...</span>
+                                </div>
+                                <span v-else>Aucun résultat trouvé...</span>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
+                    <span v-if="esims.total > 0" class="text text-xs text-primary">{{ esims.total }} enregistrement(s)</span>
+                    <br/>
+                    <Bootstrap4Pagination :data="esims" @pagination-change-page="getEsims" size="small" :limit="paginationLinksLimit" align="right" />
                 </div>
+
             </div>
-            <Bootstrap4Pagination :data="esims" @pagination-change-page="getEsims" align="right" />
+
 
         </div>
     </div>
 
-    <div class="modal fade" id="deleteEsimModal" data-backdrop="static" tabindex="-1" esim="dialog"
+    <div class="modal fade" id="deleteEsimModal" data-backdrop="static" tabindex="-1" type="dialog"
          aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog" esim="document">
+        <div class="modal-dialog" type="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="staticBackdropLabel">
-                        <span>Delete Esim</span>
+                        <span>Suppression Esim</span>
                     </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <h5>Are you sure you want to delete this esim ?</h5>
+                    <h5>Etes-vous sûr de vouloir supprimer cette Esim ?</h5>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button @click.prevent="deleteEsim" type="button" class="btn btn-primary">Delete Esim</button>
+                    <button type="button" class="btn btn-xs btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button @click.prevent="deleteEsim" type="button" class="btn btn-xs btn-danger">Supprimer</button>
                 </div>
             </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+
+</style>

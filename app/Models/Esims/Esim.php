@@ -87,18 +87,15 @@ class Esim extends BaseModel implements Auditable
     }
     public static function createRules() {
         return array_merge(self::defaultRules(), [
-
         ]);
     }
     public static function updateRules($model) {
         return array_merge(self::defaultRules(), [
-
         ]);
     }
 
     public static function messagesRules() {
         return [
-
         ];
     }
 

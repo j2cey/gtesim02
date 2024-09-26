@@ -93,12 +93,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/esims', [EsimController::class, 'index']);
     Route::get('/api/esims/{esim}/edit', [EsimController::class, 'edit']);
     Route::post('/api/esims/', [EsimController::class, 'store']);
+    Route::put('/api/esims/{esim}', [EsimController::class, 'update']);
+    Route::delete('/api/esims/{esim}', [EsimController::class, 'destroy']);
 
     Route::get('/api/esimstatuses', [StatutEsimController::class, 'index']);
 
     Route::get('/api/esimstates/{esim}/esimindex', [EsimStateController::class, 'esimindex']);
 
     Route::get('/api/esimtechnologies', [TechnologieEsimController::class, 'index']);
+
     #endregion
 });
 Route::get('{view}', ApplicationController::class)->where('view', '(.*)')->middleware('auth');

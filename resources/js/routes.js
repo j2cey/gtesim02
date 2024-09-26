@@ -10,6 +10,7 @@ import Login from './pages/auth/Login.vue';
 import EsimList from "./pages/esims/EsimList.vue";
 import EsimForm from "./pages/esims/EsimForm.vue";
 
+
 export default [
     {
         path: '/',
@@ -76,6 +77,7 @@ export default [
         name: 'esims.edit',
         component: EsimForm,
     },
+
     {
         path: '/users',
         name: 'users',

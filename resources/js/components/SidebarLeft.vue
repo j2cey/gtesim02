@@ -164,13 +164,10 @@ onUnmounted(() => {
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>
-                                        IT Ressource
-                                        <i class="fas fa-angle-left right"></i>
-                                    </p>
-                                </a>
+                                    <router-link to="/employes" active-class="active" class="nav-link text text-xs">
+                                        <i class="fas fa-plus nav-icon text-danger"></i>
+                                        <p>Emloyes</p>
+                                    </router-link>
                                 <ul class="nav nav-treeview">
                                     <li class="nav-item">
                                         <a href="pages/examples/login.html" class="nav-link">

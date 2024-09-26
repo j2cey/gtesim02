@@ -2,8 +2,23 @@
 
 namespace App\Http\Requests\Esim;
 
+use App\Models\Esims\Esim;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * EsimRequest Class
+ *
+ * @property string $imsi
+ * @property string $iccid
+ * @property string $ac
+ * @property string $pin
+ * @property string $puk
+ * @property string $eki
+ * @property string $pin2
+ * @property string $puk2
+ * @property string $adm1
+ * @property string $opc
+ */
 class EsimRequest extends FormRequest
 {
     /**
@@ -24,5 +39,15 @@ class EsimRequest extends FormRequest
         return [
             //
         ];
+    }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array
+     */
+    public function messages()
+    {
+        return Esim::messagesRules();
     }
 }

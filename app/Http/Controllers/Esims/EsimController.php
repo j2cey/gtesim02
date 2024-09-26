@@ -11,6 +11,7 @@ use App\Models\Esims\StatutEsim;
 use Illuminate\Support\Collection;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
+use App\Models\Esims\TechnologieEsim;
 use Illuminate\Contracts\View\Factory;
 use App\Http\Requests\Esim\FetchRequest;
 use App\Http\Requests\Esim\StoreEsimRequest;
@@ -69,22 +70,28 @@ class EsimController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
      * @param StoreEsimRequest $request
-     * @return EsimResource
+     * @return Esim
      */
-    public function store(StoreEsimRequest $request): EsimResource
+    public function store(StoreEsimRequest $request): Esim
     {
-        dd($request);
+        //dd($request);
         $esim = Esim::createNew(
             $request->imsi,
             $request->iccid,
             $request->ac,
             $request->pin,
-            $request->puk
+            $request->puk,
+            $request->eki,
+            $request->pin2,
+            $request->puk2,
+            $request->adm1,
+            $request->opc,
+            $request->statutesim ? StatutEsim::find($request->statutesim['id']) : null,
+            $request->technologieesim ? TechnologieEsim::find($request->technologieesim['id']) : null
         );
-        return new EsimResource($esim);
+
+        return $esim;
     }
 
     /**
@@ -115,12 +122,26 @@ class EsimController extends Controller
      *
      * @param UpdateEsimRequest $request
      * @param Esim $esim
-     * @return void
+     * @return Esim
      */
-    public function update(UpdateEsimRequest $request, Esim $esim): void
+    public function update(UpdateEsimRequest $request, Esim $esim): Esim
     {
-        //
+
+        $esim->updateOne($request->imsi,$request->iccid,$request->ac,$request->pin,$request->puk,$request->eki,$request->pin2,$request->puk2,$request->adm1,$request->opc);
+
+
+
+        return $esim;
     }
+
+    /*public function deleteesim(Request $request, Esim $esim) {
+
+        $rslt = $esim->removeEsim($request->imsi);
+
+        $data = [ "success" => $rslt ];
+
+        return response()->json($data);
+    }*/
 
     /**
      * Remove the specified resource from storage.
@@ -130,7 +151,7 @@ class EsimController extends Controller
      */
     public function destroy(Esim $esim): void
     {
-        //
+        $esim->delete();
     }
 
     public function headfiles()
@@ -141,6 +162,7 @@ class EsimController extends Controller
     public function headfilespost(Request $request): void
     {
         $formInput = $request->all();
+
 
         $new_esimheadfile = EsimHeadFile::create();
 

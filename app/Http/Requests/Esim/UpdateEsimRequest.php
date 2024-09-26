@@ -7,6 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateEsimRequest extends EsimRequest
 {
+
     /**
      * Determine if the user is authorized to make this request.
      *

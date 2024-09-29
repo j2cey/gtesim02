@@ -27,12 +27,11 @@ const form = reactive({
     technologieesim: {},
 });
 
-const loadingEsimStates = ref(false);
-const loadingSubmitEsim = ref(false);
+const loadingEsim = ref(false);
 const editMode = ref(false);
 const phonenum = ref({});
 const esimstates = ref({'data': []});
-const loadingEsimstates = ref(false);
+const loadingEsimStates = ref(false);
 
 const handleSubmit = (values, actions) => {
     if (editMode.value) {
@@ -43,7 +42,7 @@ const handleSubmit = (values, actions) => {
 };
 
 const createEsim = (values, actions) => {
-    loadingEsimstates.value = true;
+    loadingEsim.value = true;
     axios.post('/api/esims', form)
         .then((response) => {
             // router.push('/esims');
@@ -56,22 +55,41 @@ const createEsim = (values, actions) => {
             actions.setErrors(error.response.data.errors);
         })
         .finally(() => {
-            loadingEsimstates.value = false;
+            loadingEsim.value = false;
         })
 };
 
+
 const updateEsim = (values, actions) => {
-    loadingEsimstates.value = true;
-    axios.put(`/api/esims/${route.params.id}`, form)
+    loadingEsim.value = true;
+    axios.put(`/api/esims/${esimid.value}`, form)
         .then((response) => {
             toastr.success('Esim modifiée avec succès !');
+            router.push('/esims');
         })
         .catch((error) => {
             actions.setErrors(error.response.data.errors);
         })
         .finally(() => {
-            loadingEsimstates.value = false;
+            loadingEsim.value = false;
     })
+};
+const deleteEsim = (values, actions) => {
+    loadingEsim.value = true;
+    axios.delete('/api/esims', form)
+        .then((response) => {
+            // router.push('/esims');
+            esim.value = response.data;
+            esimid.value = response.data.id;
+            editMode.value = true;
+            toastr.success('Esim supprimer avec succès !');
+        })
+        .catch((error) => {
+            actions.setErrors(error.response.data.errors);
+        })
+        .finally(() => {
+            loadingEsim.value = false;
+        })
 };
 
 const esim = ref({})
@@ -112,12 +130,16 @@ const confirmEsimStateDeletion = (esimstate) => {
     $('#deleteEsimStateModal').modal('show');
 };
 
+const loadingEsimDelete= ref(false);
+
 const deleteEsimState = () => {
+    loadingEsimDelete.value = true;
     axios.delete(`/api/esimstates/${esimStateIdBeingDeleted.value}`)
         .then(() => {
             $('#deleteEsimStateModal').modal('hide');
             toastr.success('Etat Esim supprimé avec succès !');
             esimstates.value.data = esimstates.value.data.filter(esimstate => esimstate.id !== esimStateIdBeingDeleted.value);
+            loadingEsimDelete.value = false;
         });
 };
 
@@ -331,7 +353,7 @@ onMounted(() => {
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="adm1">adm1</label>
-                                            <input v-model="form.adm1" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.adm1 }" id="adm1" placeholder="adm1">
+                                            <input v-model="form.adm1" type="text" class="form-control form-control-sm" name="adm1" :class="{ 'is-invalid': errors.adm1 }" id="adm1" placeholder="adm1">
                                             <span class="invalid-feedback">{{ errors.adm1 }}</span>
                                         </div>
                                     </div>
@@ -345,7 +367,7 @@ onMounted(() => {
                                         </div>
                                     </div>
 
-                                    <div v-if="editMode" class="col-md-3">
+                                    <div v-if="editMode && phonenum" class="col-md-3">
                                         <div class="form-group">
                                             <label for="opc" class="text text-danger">Téléphone rattaché</label>
                                             <input v-model="phonenum.numero" type="text" class="form-control form-control-sm" id="phonenum" placeholder="phonenum" readonly>
@@ -354,8 +376,8 @@ onMounted(() => {
                                 </div>
 
                                 <div class="btn-group">
-                                    <button type="submit" class="btn btn-sm btn-primary m-2">
-                                        <span v-if="loadingEsimstates" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <button type="submit" class="btn btn-sm btn-primary m-2" :disabled="loadingEsim">
+                                        <span v-if="loadingEsim" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                         Valider
                                     </button>
                                     <router-link to="/esims">
@@ -478,7 +500,10 @@ onMounted(() => {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-xs btn-secondary" data-dismiss="modal">Annuler</button>
-                    <button @click.prevent="deleteEsimState" type="button" class="btn btn-xs btn-danger">Supprimer</button>
+                    <button @click.prevent="deleteEsimState" type="button" class="btn btn-xs btn-danger" :disabled="loadingEsimDelete">
+                        <span v-if="loadingEsimDelete" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Supprimer
+                    </button>
                 </div>
             </div>
         </div>

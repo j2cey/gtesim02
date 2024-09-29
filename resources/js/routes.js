@@ -92,6 +92,7 @@ export default [
         name: 'esims.edit',
         component: EsimForm,
     },
+
     {
         path: '/esims/:id/show',
         name: 'esims.show',

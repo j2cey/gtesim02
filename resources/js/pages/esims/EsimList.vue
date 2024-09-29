@@ -51,16 +51,20 @@ const getEsims = (page = 1) => {
 }
 
 const confirmEsimDeletion = (esim) => {
-    esimIdBeingDeleted.value = esim.id;
+    esimIdBeingDeleted.value = esim.uuid;
     $('#deleteEsimModal').modal('show');
 };
 
+const loadingEsimDelete= ref(false);
+
 const deleteEsim = () => {
+    loadingEsimDelete.value = true
     axios.delete(`/api/esims/${esimIdBeingDeleted.value}`)
         .then(() => {
             $('#deleteEsimModal').modal('hide');
             toastr.success('Esim supprimé avec succès !');
-            esims.value.data = esims.value.data.filter(esim => esim.id !== esimIdBeingDeleted.value);
+            esims.value.data = esims.value.data.filter(esim => esim.uuid !== esimIdBeingDeleted.value);
+            loadingEsimDelete.value = false
         });
 };
 
@@ -158,6 +162,7 @@ onMounted(() => {
 
             <div class="card">
                 <div class="card-body">
+                    <Bootstrap4Pagination :data="esims" @pagination-change-page="getEsims" size="small" :limit="paginationLinksLimit" align="right" />
                     <table class="table table-bordered ">
                         <thead>
                         <tr>
@@ -191,8 +196,8 @@ onMounted(() => {
                         </tbody>
                     </table>
                     <span v-if="esims.total > 0" class="text text-xs text-primary">{{ esims.total }} enregistrement(s)</span>
-                    <br/>
-                    <Bootstrap4Pagination :data="esims" @pagination-change-page="getEsims" size="small" :limit="paginationLinksLimit" align="right" />
+
+
                 </div>
 
             </div>
@@ -218,7 +223,10 @@ onMounted(() => {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-xs btn-secondary" data-dismiss="modal">Annuler</button>
-                    <button @click.prevent="deleteEsim" type="button" class="btn btn-xs btn-danger">Supprimer</button>
+                    <button @click.prevent="deleteEsim" type="button" class="btn btn-xs btn-danger" :disabled="loadingEsimDelete">
+                        <span v-if="loadingEsimDelete" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Supprimer
+                    </button>
                 </div>
             </div>
         </div>

@@ -34,7 +34,7 @@ class EsimResource extends JsonResource
             'technologieesim' => $this->technologieesim,
             'model_type' => Esim::class,
 
-            'attributor' => UserResource::make($this->attributor),
+            'attributor' => EsimResource::make($this->attributor),
             'states' => EsimStateResource::collection($this->states),
 
             'created_at' => $this->created_at,

@@ -143,6 +143,54 @@ onUnmounted(() => {
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                    <router-link to="/employes" active-class="active" class="nav-link text text-xs">
+                                        <i class="fas fa-plus nav-icon text-danger"></i>
+                                        <p>Emloyes</p>
+                                    </router-link>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a href="pages/examples/login.html" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Account Access</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="pages/examples/register.html" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Servers</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>
+                                        IT Parameters
+                                        <i class="fas fa-angle-left right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a href="pages/examples/login-v2.html" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>File MimeTypes</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="pages/examples/register-v2.html" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Access Protocoles</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="pages/examples/forgot-password-v2.html" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>OS Server</p>
+                                        </a>
+                                    </li>
+                                </ul>
                             <li v-if="can('status-list')" class="nav-item">
                                 <router-link to="/statuses" active-class="active" class="nav-link text text-xs">
                                     <i class="fas fa-flag nav-icon text-primary"></i>

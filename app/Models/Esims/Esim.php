@@ -83,6 +83,15 @@ class Esim extends BaseModel implements Auditable
     public static function defaultRules() {
         return [
             'imsi' => ['required'],
+            'iccid' => ['required'],
+            'ac' => ['required'],
+            'pin' => ['required'],
+            'puk' => ['required'],
+            'eki' => ['required'],
+            'pin2' => ['required'],
+            'puk2' => ['required'],
+            'adm1' => ['required'],
+            'opc' => ['required'],
         ];
     }
     public static function createRules() {
@@ -96,6 +105,16 @@ class Esim extends BaseModel implements Auditable
 
     public static function messagesRules() {
         return [
+            'imsi.required' => 'Le champs IMSI est requis',
+            'iccid.required' => 'Le champs ICCID est requise',
+            'ac.required' => 'Le champs AC est requis',
+            'pin.required' => 'Le champs PIN est requis',
+            'puk.required' => 'Le champs PUK est requis',
+            'eki.required' => 'Le champs EKI est requis',
+            'pin2.required' => 'Le champs PIN2 est requis',
+            'puk2.required' => 'Le champs PUK2 est requis',
+            'adm1.required' => 'Le champs ADM1 est requis',
+            'opc.required' => 'Le champs OPC est requis',
         ];
     }
 
@@ -195,10 +214,10 @@ class Esim extends BaseModel implements Auditable
         }
     }
 
-    public static function createNew($imsi, $iccid, $ac, $pin, $puk, $eki = null, $pin2 = null, $puk2 = null, $adm1 = null, $opc = null)
+    public static function createNew($imsi, $iccid, $ac, $pin, $puk, $eki = null, $pin2 = null, $puk2 = null, $adm1 = null, $opc = null, StatutEsim $statutesim = null, TechnologieEsim $technologieesim = null)
     {
-        $default_statutesim = StatutEsim::getDefault();
-        $default_technologieesim = TechnologieEsim::getDefault();
+        $default_statutesim = is_null($statutesim) ? StatutEsim::getDefault() : $statutesim;
+        $default_technologieesim = is_null($technologieesim) ? TechnologieEsim::getDefault() : $technologieesim;
 
         $esim = Esim::create([
             'imsi' => $imsi,
@@ -219,6 +238,32 @@ class Esim extends BaseModel implements Auditable
         $esim->save();
 
         return $esim;
+    }
+
+    public function updateOne($imsi,$iccid,$ac,$pin,$puk,$eki = null,$pin2 = null,$puk2 = null, $adm1 = null, $opc = null, StatutEsim $statutesim = null, TechnologieEsim $technologieesim = null)
+    {
+        $this->update([
+           'imsi'=> $imsi,
+            'iccid'=> $iccid,
+            'ac'=> $ac,
+            'pin'=> $pin,
+            'puk'=> $puk,
+            'eki'=> $eki,
+            'pin2'=> $pin2,
+            'puk2'=> $puk2,
+            'adm1'=>$adm1,
+            'opc'=> $opc,
+
+        ]);
+
+        if (! is_null($statutesim)) {
+            $this->statutesim()->associate($statutesim);
+        }
+        if (! is_null($technologieesim)) {
+            $this->statutesim()->associate($technologieesim);
+        }
+
+       return $this;
     }
 
     public function saveQrcode()
@@ -260,13 +305,11 @@ class Esim extends BaseModel implements Auditable
     }
 
     #endregion
-
     public static function boot ()
     {
         parent::boot();
 
-        // juste avant suppression
-        self::saving(function($model){
+        self::saved(function($model){
             $model->saveState();
         });
     }

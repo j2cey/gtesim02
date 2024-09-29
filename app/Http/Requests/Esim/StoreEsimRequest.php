@@ -6,11 +6,9 @@ use App\Models\Esims\Esim;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * @property mixed imsi
- * @property mixed iccid
- * @property mixed ac
- * @property mixed pin
- * @property mixed puk
+ * @property \stdClass $statutesim
+ * @property \stdClass $technologieesim
+
  */
 
 class StoreEsimRequest extends EsimRequest
@@ -33,5 +31,11 @@ class StoreEsimRequest extends EsimRequest
     public function rules(): array
     {
         return Esim::createRules();
+    }
+
+    public function prepareForValidation()
+    {
+        //dd($this);
+
     }
 }

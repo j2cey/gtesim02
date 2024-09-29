@@ -87,7 +87,7 @@ class EsimState extends BaseModel implements Auditable
         $user = Auth::user();
         $details = "";
 
-        if ($statutesim->id === $statutesim_attribue->id) {
+        if ($statutesim && $statutesim->id === $statutesim_attribue->id) {
             $details = $esim->phonenum->numero;
             if ( ! $user ) {
                 $user = $esim->phonenum->creator;
@@ -98,7 +98,7 @@ class EsimState extends BaseModel implements Auditable
 
         EsimState::create([
             'esim_id' => $esim->id,
-            'statut_esim_id' => $statutesim->id,
+            'statut_esim_id' => $statutesim?->id,
             'user_id' => $user_id,
             'details' => $details,
         ]);

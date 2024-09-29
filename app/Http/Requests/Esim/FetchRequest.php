@@ -15,7 +15,7 @@ class FetchRequest extends EsimRequest implements ISearchFormRequest
      */
     protected function orderByFields() : array
     {
-        return ['id', 'imsi'];
+        return ['id', 'imsi','iccid'];
     }
 
     /**

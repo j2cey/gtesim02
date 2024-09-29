@@ -31,13 +31,19 @@ onMounted(() => {
     <tr>
         <td><input type="checkbox" :checked="selectAll" @change="toggleSelection" :key="esim.id" /></td>
         <td class="text text-xs" >{{ index + 1 }}</td>
-        <td class="text text-xs" >{{ esim.imsi }}</td>
+        <td class="text text-xs" >
+            <router-link v-if="can('esim-list')" :to="`/esims/${esim.uuid}/show`">
+                {{ esim.imsi }}
+            </router-link>
+            <span v-else>{{ esim.imsi }}</span>
+        </td>
         <td class="text text-xs" >{{ esim.iccid }}</td>
         <td class="text text-xs" >{{ esim.ac }}</td>
         <td class="text text-xs" >
             <span v-if="esim.statutesim" class="badge" :class="'text-' + esim.statutesim.style ">{{ esim.statutesim?.libelle }}</span>
         </td>
-        <td class="text text-xs" >{{ formatDate(esim.created_at) }}</td>
+        <td class="text text-xs small"><small>{{ formatDate(esim.created_at) }}</small></td>
+        <td class="text text-xs small"><small>{{ formatDate(esim.updated_at) }}</small></td>
         <td>
             <router-link v-if="can('esim-update')" :to="`/esims/${esim.uuid}/edit`">
                 <i class="fa fa-edit mr-2 text text-xs"></i>

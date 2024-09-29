@@ -5,9 +5,10 @@ import { useRouter, useRoute } from 'vue-router';
 import { useToastr } from '@/toastr';
 import { Form } from 'vee-validate';
 import {debounce} from "lodash";
-import StateListItem from "@/pages/esims/StateListItem.vue";
+import StateListItem from "./StateListItem.vue";
 import {Bootstrap4Pagination} from "laravel-vue-pagination";
 import Multiselect from 'vue-multiselect';
+import Swal from "sweetalert2";
 
 const router = useRouter();
 const route = useRoute();
@@ -27,16 +28,32 @@ const form = reactive({
     technologieesim: {},
 });
 
+const loading = ref(false);
 const loadingEsim = ref(false);
-const editMode = ref(false);
+const formMode = ref('create');
 const phonenum = ref({});
 const esimstates = ref({'data': []});
 const loadingEsimStates = ref(false);
 
+const initForm = () => {
+    form.imsi = '';
+    form.iccid = '';
+    form.ac = '';
+    form.pin = '';
+    form.puk = '';
+    form.eki = '';
+    form.pin2 = '';
+    form.puk2 = '';
+    form.adm1 = '';
+    form.opc = '';
+    form.statutesim = {};
+    form.technologieesim = {};
+}
+
 const handleSubmit = (values, actions) => {
-    if (editMode.value) {
+    if (formMode.value === 'edit') {
         updateEsim(values, actions);
-    } else {
+    } else if (formMode.value === 'create') {
         createEsim(values, actions);
     }
 };
@@ -47,9 +64,16 @@ const createEsim = (values, actions) => {
         .then((response) => {
             // router.push('/esims');
             esim.value = response.data;
-            esimid.value = response.data.id;
-            editMode.value = true;
-            toastr.success('Esim créée avec succès !');
+            esimid.value = response.data.uuid;
+            formMode.value = 'edit';
+
+            Swal.fire({
+                html: '<small>Esim créée avec succès !</small>',
+                icon: 'success',
+                timer: 3000
+            }).then(() => {
+
+            });
         })
         .catch((error) => {
             actions.setErrors(error.response.data.errors);
@@ -64,8 +88,13 @@ const updateEsim = (values, actions) => {
     loadingEsim.value = true;
     axios.put(`/api/esims/${esimid.value}`, form)
         .then((response) => {
-            toastr.success('Esim modifiée avec succès !');
-            router.push('/esims');
+            Swal.fire({
+                html: '<small>Esim modifiée avec succès !</small>',
+                icon: 'success',
+                timer: 3000
+            }).then(() => {
+                router.push('/esims');
+            });
         })
         .catch((error) => {
             actions.setErrors(error.response.data.errors);
@@ -78,11 +107,13 @@ const deleteEsim = (values, actions) => {
     loadingEsim.value = true;
     axios.delete('/api/esims', form)
         .then((response) => {
-            // router.push('/esims');
-            esim.value = response.data;
-            esimid.value = response.data.id;
-            editMode.value = true;
-            toastr.success('Esim supprimer avec succès !');
+            Swal.fire({
+                html: '<small>Esim supprimer avec succès !</small>',
+                icon: 'success',
+                timer: 3000
+            }).then(() => {
+                router.push('/esims');
+            });
         })
         .catch((error) => {
             actions.setErrors(error.response.data.errors);
@@ -95,6 +126,7 @@ const deleteEsim = (values, actions) => {
 const esim = ref({})
 const esimid = ref(null)
 const getEsim = () => {
+    loading.value = true;
     axios.get(`/api/esims/${route.params.id}/edit`)
         .then((response) => {
             console.log("getEsim, response: ", response)
@@ -117,6 +149,7 @@ const getEsim = () => {
         }).then(() => {
             console.log("exec getEsimStates")
             getEsimStates();
+            loading.value = false;
         }
 
     )
@@ -203,12 +236,38 @@ watch(searchEsimStateQuery, debounce(() => {
     //getEsimStates();
 }, 300));
 
-onMounted(() => {
-    if (route.name === 'esims.edit') {
-        esimid.value = route.params.id;
-        editMode.value = true;
-        getEsim();
+const currentPath = ref('/');
+const lastPath = ref('/');
+const prevRoutePath = computed(() => {
+    return lastPath ? lastPath.value : '/';
+});
+
+watch(route, () => {
+    if (route.fullPath !== currentPath.value) {
+        initComponent();
     }
+});
+
+const initComponent = () => {
+    initForm();
+    lastPath.value = router.options.history.state.back;
+    currentPath.value = route.fullPath;
+    if (route.name === 'esims.edit' || route.name === 'esims.show') {
+        if (route.name === 'esims.edit') {
+            formMode.value = 'edit';
+        } else {
+            formMode.value = 'show';
+        }
+        esimid.value = route.params.id;
+        getEsim();
+    } else {
+        formMode.value = 'create';
+    }
+};
+
+onMounted(() => {
+    initComponent();
+
     getEsimStatuses();
     getEsimTechnologies();
 });
@@ -220,8 +279,9 @@ onMounted(() => {
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h1 class="m-0">
-                        <span v-if="editMode">Modification</span>
-                        <span v-else>Création</span>
+                        <span v-if="formMode === 'edit'">Modification</span>
+                        <span v-else-if="formMode === 'create'">Création</span>
+                        <span v-else>Détails</span>
                         Esim</h1>
                 </div>
                 <div class="col-sm-6">
@@ -233,8 +293,9 @@ onMounted(() => {
                             <router-link to="/esims">Esims</router-link>
                         </li>
                         <li class="breadcrumb-item active">
-                            <span v-if="editMode">Modification</span>
-                            <span v-else>Création</span>
+                            <span v-if="formMode === 'edit'">Modification</span>
+                            <span v-else-if="formMode === 'create'">Création</span>
+                            <span v-else>Détails</span>
                         </li>
                     </ol>
                 </div>
@@ -249,42 +310,100 @@ onMounted(() => {
                     <div class="card">
                         <div class="card-body">
                             <Form @submit="handleSubmit" v-slot:default="{ errors }">
-                                <div class="row">
+                                <div class="row small">
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="imsi">imsi</label>
-                                            <input v-model="form.imsi" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.imsi }" id="imsi" placeholder="imsi">
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.imsi }}</span>
+                                            <input v-else v-model="form.imsi" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.imsi }" id="imsi" placeholder="imsi">
                                             <span class="invalid-feedback">{{ errors.imsi }}</span>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="iccid">iccid</label>
-                                            <input v-model="form.iccid" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.iccid }" id="iccid" placeholder="iccid">
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.iccid }}</span>
+                                            <input v-else v-model="form.iccid" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.iccid }" id="iccid" placeholder="iccid">
                                             <span class="invalid-feedback">{{ errors.iccid }}</span>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="ac">ac</label>
-                                            <input v-model="form.ac" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.ac }" id="ac" placeholder="ac">
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.ac }}</span>
+                                            <input v-else v-model="form.ac" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.ac }" id="ac" placeholder="ac">
                                             <span class="invalid-feedback">{{ errors.ac }}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="row">
+                                <div class="row small">
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="pin">pin</label>
-                                            <input v-model="form.pin" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.pin }" id="pin" placeholder="pin">
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.pin }}</span>
+                                            <input v-else v-model="form.pin" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.pin }" id="pin" placeholder="pin">
                                             <span class="invalid-feedback">{{ errors.pin }}</span>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
+                                            <label for="puk">puk</label>
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.puk }}</span>
+                                            <input v-else v-model="form.puk" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.puk }" id="puk" placeholder="puk">
+                                            <span class="invalid-feedback">{{ errors.puk }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="eki">eki</label>
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.eki }}</span>
+                                            <input v-else v-model="form.eki" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.eki }" id="eki" placeholder="eki">
+                                            <span class="invalid-feedback">{{ errors.eki }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="pin2">pin2</label>
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.pin2 }}</span>
+                                            <input v-else v-model="form.pin2" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.pin2 }" id="pin2" placeholder="pin2">
+                                            <span class="invalid-feedback">{{ errors.pin2 }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row small">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="puk2">puk2</label>
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.puk2 }}</span>
+                                            <input v-else v-model="form.puk2" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.puk2 }" id="puk2" placeholder="puk2">
+                                            <span class="invalid-feedback">{{ errors.puk2 }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="adm1">adm1</label>
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.adm1 }}</span>
+                                            <input v-else v-model="form.adm1" type="text" class="form-control form-control-sm" name="adm1" :class="{ 'is-invalid': errors.adm1 }" id="adm1" placeholder="adm1">
+                                            <span class="invalid-feedback">{{ errors.adm1 }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="opc">opc</label>
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.opc }}</span>
+                                            <input v-else v-model="form.opc" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.opc }" id="opc" placeholder="opc">
+                                            <span class="invalid-feedback">{{ errors.opc }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row small">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
                                             <label for="statutesim">Statut</label>
-                                            <multiselect
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs" :class="'text-' + (form.statutesim ? form.statutesim.style : '' )">{{ form.statutesim?.libelle }}</span>
+                                            <multiselect v-else
                                                 id="statutesim"
                                                 v-model="form.statutesim"
                                                 value=""
@@ -303,7 +422,8 @@ onMounted(() => {
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="technologie">Technologie</label>
-                                            <multiselect
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.technologieesim?.libelle }}</span>
+                                            <multiselect v-else
                                                 id="technologie"
                                                 v-model="form.technologieesim"
                                                 value=""
@@ -319,58 +439,11 @@ onMounted(() => {
                                             <span class="invalid-feedback">{{ errors.technologieesim }}</span>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="puk">puk</label>
-                                            <input v-model="form.puk" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.puk }" id="puk" placeholder="puk">
-                                            <span class="invalid-feedback">{{ errors.puk }}</span>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="eki">eki</label>
-                                            <input v-model="form.eki" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.eki }" id="eki" placeholder="eki">
-                                            <span class="invalid-feedback">{{ errors.eki }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="pin2">pin2</label>
-                                            <input v-model="form.pin2" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.pin2 }" id="pin2" placeholder="pin2">
-                                            <span class="invalid-feedback">{{ errors.pin2 }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="puk2">puk2</label>
-                                            <input v-model="form.puk2" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.puk2 }" id="puk2" placeholder="puk2">
-                                            <span class="invalid-feedback">{{ errors.puk2 }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="adm1">adm1</label>
-                                            <input v-model="form.adm1" type="text" class="form-control form-control-sm" name="adm1" :class="{ 'is-invalid': errors.adm1 }" id="adm1" placeholder="adm1">
-                                            <span class="invalid-feedback">{{ errors.adm1 }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="opc">opc</label>
-                                            <input v-model="form.opc" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.opc }" id="opc" placeholder="opc">
-                                            <span class="invalid-feedback">{{ errors.opc }}</span>
-                                        </div>
-                                    </div>
-
-                                    <div v-if="editMode && phonenum" class="col-md-3">
+                                    <div v-if="(formMode === 'edit' || formMode === 'show') && phonenum" class="col-md-3">
                                         <div class="form-group">
                                             <label for="opc" class="text text-danger">Téléphone rattaché</label>
-                                            <input v-model="phonenum.numero" type="text" class="form-control form-control-sm" id="phonenum" placeholder="phonenum" readonly>
+                                            <input v-model="phonenum.phone_number" type="text" class="form-control form-control-sm border-0" id="phonenum" placeholder="Numéo Téléphone" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -387,11 +460,14 @@ onMounted(() => {
                             </Form>
                         </div>
 
+                        <div v-if="loading" class="overlay dark">
+                            <i class="fas fa-2x fa-sync-alt fa-spin"></i>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div v-if="editMode" class="row">
+            <div v-if="formMode === 'edit' || formMode === 'show'" class="row">
                 <div class="col-lg-12">
                     <div class="card card-primary card-outline direct-chat direct-chat-primary">
                         <div class="card-header">
@@ -440,12 +516,12 @@ onMounted(() => {
                                     <thead>
                                     <tr>
                                         <th><input type="checkbox" v-model="selectAll" @change="selectAllEsimStates" /></th>
-                                        <th style="width: 10px">#</th>
-                                        <th>Statut</th>
-                                        <th>Utilisateur</th>
-                                        <th>Détails</th>
-                                        <th>Date</th>
-                                        <th>Options</th>
+                                        <th class="text text-sm" style="width: 10px">#</th>
+                                        <th class="text text-sm">Statut</th>
+                                        <th class="text text-sm">Utilisateur</th>
+                                        <th class="text text-sm">Détails</th>
+                                        <th class="text text-sm">Date</th>
+                                        <th class="text text-sm">Options</th>
                                     </tr>
                                     </thead>
                                     <tbody v-if="esimstates.data.length > 0">
@@ -477,6 +553,9 @@ onMounted(() => {
 
                         </div>
 
+                        <div v-if="loadingEsimStates" class="overlay dark">
+                            <i class="fas fa-2x fa-sync-alt fa-spin"></i>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -125,22 +125,22 @@ class EsimController extends Controller
      */
     public function update(UpdateEsimRequest $request, Esim $esim): Esim
     {
-
-        $esim->updateOne($request->imsi,$request->iccid,$request->ac,$request->pin,$request->puk,$request->eki,$request->pin2,$request->puk2,$request->adm1,$request->opc);
-
-
-
+        $esim->updateOne(
+            $request->imsi,
+            $request->iccid,
+            $request->ac,
+            $request->pin,
+            $request->puk,
+            $request->eki,
+            $request->pin2,
+            $request->puk2,
+            $request->adm1,
+            $request->opc,
+            $request->statutesim ? StatutEsim::find($request->statutesim['id']) : null,
+            $request->technologieesim ? TechnologieEsim::find($request->technologieesim['id']) : null
+        );
         return $esim;
     }
-
-    /*public function deleteesim(Request $request, Esim $esim) {
-
-        $rslt = $esim->removeEsim($request->imsi);
-
-        $data = [ "success" => $rslt ];
-
-        return response()->json($data);
-    }*/
 
     /**
      * Remove the specified resource from storage.

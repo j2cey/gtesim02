@@ -5,6 +5,11 @@ namespace App\Http\Requests\Esim;
 use App\Models\Esims\Esim;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * UpdateEsimRequest Class
+ *
+ * @property Esim $esim
+ */
 class UpdateEsimRequest extends EsimRequest
 {
 

@@ -167,13 +167,14 @@ onMounted(() => {
                         <thead>
                         <tr>
                             <th><input type="checkbox" v-model="selectAll" @change="selectAllEsims" /></th>
-                            <th style="width: 10px">#</th>
-                            <th>imsi</th>
-                            <th>iccid</th>
-                            <th>ac</th>
-                            <th>Statut</th>
-                            <th>Date Création</th>
-                            <th>Options</th>
+                            <th class="text text-sm" style="width: 10px">#</th>
+                            <th class="text text-sm text-capitalize">imsi</th>
+                            <th class="text text-sm text-capitalize">iccid</th>
+                            <th class="text text-sm text-capitalize">ac</th>
+                            <th class="text text-sm text-capitalize">Statut</th>
+                            <th class="text text-sm text-capitalize">Création</th>
+                            <th class="text text-sm text-capitalize">Modification</th>
+                            <th class="text text-sm text-capitalize">Options</th>
                         </tr>
                         </thead>
                         <tbody v-if="esims.data.length > 0">
@@ -196,10 +197,11 @@ onMounted(() => {
                         </tbody>
                     </table>
                     <span v-if="esims.total > 0" class="text text-xs text-primary">{{ esims.total }} enregistrement(s)</span>
-
-
                 </div>
 
+                <div v-if="loading" class="overlay dark">
+                    <i class="fas fa-2x fa-sync-alt fa-spin"></i>
+                </div>
             </div>
 
 

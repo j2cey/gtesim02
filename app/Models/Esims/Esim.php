@@ -242,19 +242,16 @@ class Esim extends BaseModel implements Auditable
 
     public function updateOne($imsi,$iccid,$ac,$pin,$puk,$eki = null,$pin2 = null,$puk2 = null, $adm1 = null, $opc = null, StatutEsim $statutesim = null, TechnologieEsim $technologieesim = null)
     {
-        $this->update([
-           'imsi'=> $imsi,
-            'iccid'=> $iccid,
-            'ac'=> $ac,
-            'pin'=> $pin,
-            'puk'=> $puk,
-            'eki'=> $eki,
-            'pin2'=> $pin2,
-            'puk2'=> $puk2,
-            'adm1'=>$adm1,
-            'opc'=> $opc,
-
-        ]);
+        $this->imsi = $imsi;
+        $this->iccid = $iccid;
+        $this->ac = $ac;
+        $this->pin = $pin;
+        $this->puk = $puk;
+        $this->eki = $eki;
+        $this->pin2 = $pin2;
+        $this->puk2 = $puk2;
+        $this->adm1 = $adm1;
+        $this->opc = $opc;
 
         if (! is_null($statutesim)) {
             $this->statutesim()->associate($statutesim);
@@ -262,6 +259,8 @@ class Esim extends BaseModel implements Auditable
         if (! is_null($technologieesim)) {
             $this->statutesim()->associate($technologieesim);
         }
+
+        $this->save();
 
        return $this;
     }

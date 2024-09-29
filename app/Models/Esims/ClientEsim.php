@@ -25,8 +25,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string|null $tags
  * @property string $nom_raison_sociale
  * @property string $prenom
- * @property string $email
- * @property string $numero_telephone
+ * @property string $email_address
+ * @property string $email_address_list
+ * @property string $phone_number
+ * @property string $phone_number_list
  * @property string $pin
  * @property string $puk
  * @property integer|null $esim_id
@@ -78,27 +80,26 @@ class ClientEsim extends BaseModel implements IHasPhoneNums
 
     #region Validation Rules
 
-    public static function defaultRules($numero) {
-        return array_merge(PhoneNum::defaultRules($numero,self::class), [
+    public static function defaultRules() {
+        return [
             'nom_raison_sociale' => ['required'],
-            'email' => ['required','email'],
+        ];
+    }
+    public static function createRules($phone_number) {
+        return array_merge(self::defaultRules(), PhoneNum::createRules($phone_number,self::class), [
+            'email_address' => ['required','email'],
         ]);
     }
-    public static function createRules($numero) {
-        return array_merge(self::defaultRules($numero), PhoneNum::createRules($numero,self::class), [
-
-        ]);
-    }
-    public static function updateRules($model,$numero) {
-        return array_merge(self::defaultRules($numero), PhoneNum::updateRules($model,$numero,self::class), [
+    public static function updateRules($model,$phone_number) {
+        return array_merge(self::defaultRules(), PhoneNum::updateRules($model,$phone_number,self::class), [
 
         ]);
     }
     public static function messagesRules() {
         return array_merge(PhoneNum::messagesRules(), [
             'nom_raison_sociale.required' => 'Nom ou Raison Sociale du client requis',
-            'email.required' => 'Adresse e-mail requise',
-            'email.email' => 'Adresse e-mail non valide',
+            'email_address.required' => 'Adresse e-mail requise',
+            'email_address.email' => 'Adresse e-mail non valide',
         ]);
     }
 
@@ -118,19 +119,19 @@ class ClientEsim extends BaseModel implements IHasPhoneNums
 
     #region Custom Functions
 
-    public static function createNew($nom_raison_sociale, $prenom, $email, $numero_telephone)
+    public static function createNew($nom_raison_sociale, $prenom, $email_address, $phone_number): ClientEsim
     {
         $clientesim = ClientEsim::create([
             'nom_raison_sociale' => strtoupper($nom_raison_sociale),
             'prenom' => ucwords($prenom),
-            'email' => $email,
-            'numero_telephone' => $numero_telephone,
+            'email_address' => $email_address,
+            'phone_number' => $phone_number,
         ]);
 
         return $clientesim;
     }
 
-    public function updateOne($esim_id, $nom_raison_sociale, $prenom, $email, $numero_telephone)
+    public function updateOne($esim_id, $nom_raison_sociale, $prenom, $email_address, $phone_number)
     {
         //$esim = Esim::getFirstFree($esim_id);
 
@@ -139,8 +140,8 @@ class ClientEsim extends BaseModel implements IHasPhoneNums
         $this->update([
             'nom_raison_sociale' => $nom_raison_sociale,
             'prenom' => $prenom,
-            //'email' => $email,
-            //'numero_telephone' => $numero_telephone,
+            //'email_address' => email_address,
+            //'phone_number' => phone_number,
         ]);
 
         //$this->esim()->associate($esim);
@@ -175,8 +176,8 @@ class ClientEsim extends BaseModel implements IHasPhoneNums
                         'filename' => 'qrcode_image.png',
                     ],
                     ['name' => 'nom', 'contents' => $this->nom_raison_sociale . ' ' .$this->prenom],
-                    ['name' => 'email', 'contents' => $this->latestEmailAddress->email,],
-                    ['name' => 'telephone', 'contents' => $phonenum->numero,],
+                    ['name' => 'email', 'contents' => $this->latestEmailAddress->email_address,],
+                    ['name' => 'telephone', 'contents' => $phonenum->phone_number,],
                     ['name' => 'imsi', 'contents' => $phonenum->esim->imsi,],
                     ['name' => 'iccid', 'contents' => $phonenum->esim->iccid,],
                     ['name' => 'pin', 'contents' => $phonenum->esim->pin,],

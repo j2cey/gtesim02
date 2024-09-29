@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Employes;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\Employes\PhoneNum;
+use Illuminate\Http\JsonResponse;
 use App\Jobs\ClientEsimSendMailJob;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Employes\PhoneNumResource;
@@ -43,7 +45,7 @@ class PhoneNumController extends Controller
      */
     public function store(StorePhoneNumRequest $request)
     {
-        return $request->hasphonenum->addNewPhoneNum($request->numero,true);
+        return $request->hasphonenum->addNewPhoneNum($request->phonenum,true);
     }
 
     public function changeesim(UpdatePhoneNumRequest $request, PhoneNum $phonenum)
@@ -80,11 +82,11 @@ class PhoneNumController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param PhoneNum $phonenum
-     * @return void
+     * @return PhoneNum
      */
-    public function edit(PhoneNum $phonenum): void
+    public function edit(PhoneNum $phonenum)
     {
-        //
+        return $phonenum->load(['status','creator','esim']);
     }
 
     /**
@@ -92,25 +94,34 @@ class PhoneNumController extends Controller
      *
      * @param UpdatePhoneNumRequest $request
      * @param PhoneNum $phonenum
-     * @return PhoneNumResource|PhoneNum|void
+     * @return PhoneNum
      */
     public function update(UpdatePhoneNumRequest $request, PhoneNum $phonenum)
     {
         $phonenum->update([
-            'numero' => $request->numero
+            'phonenum' => $request->phonenum,
+            'posi' => $request->posi
         ]);
 
-        return new PhoneNumResource($phonenum);
+        return $phonenum;
+    }
+
+    public function esimrecycle(Request $request, PhoneNum $phonenum)
+    {
+        $phonenum->changeEsim(null);
+
+        return $phonenum->load(['status','creator','esim']);
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param PhoneNum $phonenum
-     * @return Response|null|void
+     * @return JsonResponse|null
      */
-    public function destroy(PhoneNum $phonenum): ?Response
+    public function destroy(PhoneNum $phonenum)
     {
-        //
+        $phonenum->delete();
+        return response()->json(['status' => 'ok'], 200);
     }
 }

@@ -1,7 +1,7 @@
 <script setup>
 import {onMounted, onUnmounted} from 'vue';
 import { useAuthUserStore } from '../stores/AuthUserStore';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useSettingStore } from '../stores/SettingStore';
 import { Can } from "@casl/vue";
 import { useAbility } from "@casl/vue";
@@ -10,6 +10,7 @@ import imgUrl from '../../assets/img/app_logo.png'
 
 const { can, cannot } = useAbility();
 
+const route = useRoute();
 const router = useRouter();
 const authUserStore = useAuthUserStore();
 const settingStore = useSettingStore();
@@ -75,47 +76,26 @@ onUnmounted(() => {
                         </router-link>
                     </li>
 
-                    <li class="nav-item">
+                    <li v-if="can('clientesim-list')" class="nav-item">
                         <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-columns"></i>
+                            <i class="nav-icon fas fa-id-card"></i>
                             <p>
-                                Reports
+                                Clients E-SIM
                                 <i class="fas fa-angle-left right"></i>
-                                <span class="badge badge-info right">6</span>
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="fas fa-circle nav-icon text-success"></i>
-                                    <p>Reports List</p>
-                                </a>
+                                <router-link to="/clientesims" active-class="active" class="nav-link text text-xs">
+                                    <i class="fas fa-list nav-icon text-success"></i>
+                                    <p>Liste</p>
+                                </router-link>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="fas fa-circle nav-icon text-danger"></i>
-                                    <p>
-                                        Treatments
-                                        <span class="badge badge-danger right">6</span>
-                                    </p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>
-                                        Report Parameters
-                                        <i class="fas fa-angle-left right"></i>
-                                    </p>
-                                </a>
-                                <ul class="nav nav-treeview">
-                                    <li class="nav-item">
-                                        <a href="pages/examples/login.html" class="nav-link">
-                                            <i class="far fa-circle nav-icon"></i>
-                                            <p>Report Types</p>
-                                        </a>
-                                    </li>
-                                </ul>
+                                <router-link to="/clientesims/create" active-class="active" :key="route.fullPath" class="nav-link text text-xs">
+                                    <i class="fas fa-plus nav-icon text-danger"></i>
+                                    <p>Nouveau</p>
+                                </router-link>
                             </li>
                         </ul>
                     </li>
@@ -133,7 +113,7 @@ onUnmounted(() => {
 
                     <li v-if="can('esim-list')" class="nav-item">
                         <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-id-card"></i>
+                            <i class="nav-icon fas fa-mobile-alt"></i>
                             <p>
                                 Profiles E-SIM
                                 <i class="fas fa-angle-left right"></i>
@@ -163,57 +143,11 @@ onUnmounted(() => {
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>
-                                        IT Ressource
-                                        <i class="fas fa-angle-left right"></i>
-                                    </p>
-                                </a>
-                                <ul class="nav nav-treeview">
-                                    <li class="nav-item">
-                                        <a href="pages/examples/login.html" class="nav-link">
-                                            <i class="far fa-circle nav-icon"></i>
-                                            <p>Account Access</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="pages/examples/register.html" class="nav-link">
-                                            <i class="far fa-circle nav-icon"></i>
-                                            <p>Servers</p>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>
-                                        IT Parameters
-                                        <i class="fas fa-angle-left right"></i>
-                                    </p>
-                                </a>
-                                <ul class="nav nav-treeview">
-                                    <li class="nav-item">
-                                        <a href="pages/examples/login-v2.html" class="nav-link">
-                                            <i class="far fa-circle nav-icon"></i>
-                                            <p>File MimeTypes</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="pages/examples/register-v2.html" class="nav-link">
-                                            <i class="far fa-circle nav-icon"></i>
-                                            <p>Access Protocoles</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="pages/examples/forgot-password-v2.html" class="nav-link">
-                                            <i class="far fa-circle nav-icon"></i>
-                                            <p>OS Server</p>
-                                        </a>
-                                    </li>
-                                </ul>
+                            <li v-if="can('status-list')" class="nav-item">
+                                <router-link to="/statuses" active-class="active" class="nav-link text text-xs">
+                                    <i class="fas fa-flag nav-icon text-primary"></i>
+                                    <p>Statuts</p>
+                                </router-link>
                             </li>
                         </ul>
                     </li>
@@ -247,7 +181,7 @@ onUnmounted(() => {
 
                     <li class="nav-item">
                         <form class="nav-link">
-                            <a href="#" @click.prevent="logout">
+                            <a href="#" @click.prevent="logout" class="text text-danger">
                                 <i class="nav-icon fas fa-sign-out-alt"></i>
                                 <p>
                                     Logout

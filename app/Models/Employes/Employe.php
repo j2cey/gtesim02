@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string|null $prenom
  * @property string|null $nom_complet
  * @property string|null $adresse
+ * @property string|null $email_address_list
+ * @property string|null $phone_number_list
  * @property string|null $objectguid
  * @property string|null $thumbnailphoto
  * @property integer|null $fonction_employe_id

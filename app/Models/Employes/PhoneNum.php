@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property bool $is_default
  * @property string|null $tags
  * @property integer|null $status_id
- * @property string $numero
+ * @property string $phone_number
  * @property string $hasphonenum_type
  * @property integer $hasphonenum_id
  * @property integer $posi
@@ -42,36 +42,50 @@ class PhoneNum extends BaseModel implements IHasEsim
 
     #region Validation Rules
 
-    public static function defaultRules($numero,$hasphonenum_type) {
+    public static function defaultRules() {
         return [
-            'numero' => [
+            'phone_number' => [
                 'required',
                 'regex:/^([0-9\s\-\+\(\)]*)$/',
                 'min:8',
-                Rule::unique('phone_nums', 'numero')
-                    ->where(function ($query) use($numero,$hasphonenum_type) {
-                        $query->where('numero', $numero) ->where('hasphonenum_type', $hasphonenum_type);
-                    })->ignore($numero),
             ],
         ];
     }
-    public static function createRules($numero,$hasphonenum_type) {
-        return array_merge(self::defaultRules($numero,$hasphonenum_type), [
+
+    public static function createRules($phone_number,$hasphonenum_type) {
+        $default_rules = self::defaultRules();
+        $default_rules['phone_number'][] = Rule::unique('phone_nums', 'phone_number')
+            ->where(function ($query) use ($phone_number, $hasphonenum_type) {
+                $query
+                    ->where('phone_number', $phone_number)
+                    ->where('hasphonenum_type', $hasphonenum_type);
+        })->ignore($phone_number);
+
+        return array_merge($default_rules, [
 
         ]);
     }
-    public static function updateRules($model,$numero,$hasphonenum_type) {
-        return array_merge(self::defaultRules($numero,$hasphonenum_type), [
 
+    public static function updateRules($model,$phone_number,$hasphonenum_type) {
+        $default_rules = self::defaultRules();
+        $default_rules['phone_number'][] = Rule::unique('phone_nums', 'phone_number')
+            ->where(function ($query) use($phone_number,$hasphonenum_type,$model) {
+                $query
+                    ->where('phone_number', $phone_number)
+                    ->where('hasphonenum_type', $hasphonenum_type)
+                ;
+            })->ignore($model);
+
+        return array_merge($default_rules, [
         ]);
     }
 
     public static function messagesRules() {
         return [
-            'numero.required' => 'Numéro de téléphone requis',
-            'numero.regex' => 'Numéro de téléphone non valide',
-            'numero.min' => 'Numéro de téléphone doit avoir 8 digits minimum',
-            'numero.unique' => 'Numéro déjà attribué',
+            'phone_number.required' => 'Numéro de téléphone requis',
+            'phone_number.regex' => 'Numéro de téléphone non valide',
+            'phone_number.min' => 'Numéro de téléphone doit avoir 8 digits minimum',
+            'phone_number.unique' => 'Numéro déjà attribué',
         ];
     }
 
@@ -89,9 +103,9 @@ class PhoneNum extends BaseModel implements IHasEsim
         return $this->morphTo();
     }
 
-    public function creator() {
+    /*public function creator() {
         return $this->belongsTo(User::class, 'created_by');
-    }
+    }*/
 
     #endregion
 

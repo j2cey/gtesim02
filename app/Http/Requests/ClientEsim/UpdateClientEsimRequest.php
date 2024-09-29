@@ -24,6 +24,6 @@ class UpdateClientEsimRequest extends ClientEsimRequest
      */
     public function rules()
     {
-        return ClientEsim::updateRules($this->clientesim,$this->numero_telephone);
+        return ClientEsim::updateRules($this->clientesim,$this->phonenum);
     }
 }

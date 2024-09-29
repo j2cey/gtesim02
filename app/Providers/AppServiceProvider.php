@@ -3,9 +3,12 @@
 namespace App\Providers;
 
 use App\Models\Setting;
+use Illuminate\Support\Facades\Event;
+use App\Events\ClientEsimCreatedEvent;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Validator;
+use App\Listeners\SendClientEsimNotification;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AppServiceProvider extends ServiceProvider
@@ -92,5 +95,10 @@ class AppServiceProvider extends ServiceProvider
             Artisan::call('db:seed');
         });
         */
+
+        Event::listen(
+            ClientEsimCreatedEvent::class,
+            SendClientEsimNotification::class,
+        );
     }
 }

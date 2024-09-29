@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('nom_raison_sociale')->comment('nom_raison_sociale');
             $table->string('prenom')->nullable()->comment('prenom');
             $table->string('email')->comment('email');
-            $table->string('numero_telephone')->comment('numero_telephone');
+            $table->string('numero_telephone')->comment('principal numero telephone');
             $table->string('pin')->nullable()->comment('pin');
             $table->string('puk')->nullable()->comment('puk');
 

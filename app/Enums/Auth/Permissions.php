@@ -44,11 +44,22 @@ abstract class Permissions
         return new PermissionAction("technologieesim");
     }
     public static function ClientEsim() : PermissionAction {
-        $additionalactions = ['show' => 4,'print' => 4,'esim-attach' => 3,'esim-dettach' => 3,'addphone' => 3,'deletephone' => 2,'list-creator' => 2,'list-creator-department' => 2];
+        $additionalactions = [
+            'show' => 4,
+            'previewpdf' => 4,'print' => 4,
+            'esim-attach' => 3,'esim-dettach' => 3,
+            'phonenum-add' => 3,'phonenum-delete' => 2,'phonenum-update' => 2,
+            'emailaddress-add' => 3,'emailaddress-update' => 2,'emailaddress-delete' => 2,
+            'creator-list' => 2,'creator-department-list' => 2
+        ];
         return new PermissionAction("clientesim", null, $additionalactions);
     }
     public static function Esim() : PermissionAction {
-        $additionalactions = ['attach' => 3,'import' => 3,'attributor-list' => 2,'attributor-department-list' => 2,'phonenum-edit' => 2];
+        $additionalactions = [
+            'attach' => 3,'import' => 3,
+            'attributor-list' => 2,'attributor-department-list' => 2,
+            'phonenum-update' => 2,'phonenum-delete' => 2
+        ];
         return new PermissionAction("esim", null, $additionalactions);
     }
     public static function EsimState() : PermissionAction {
@@ -58,6 +69,14 @@ abstract class Permissions
     public static function EsimQrcode() : PermissionAction {
         $additionalactions = null;
         return new PermissionAction("esimqrcode");
+    }
+    public static function PhoneNum() : PermissionAction {
+        $additionalactions = ['esim-recycle' => 2];
+        return new PermissionAction("phonenum", null, $additionalactions);
+    }
+    public static function EmailAddress() : PermissionAction {
+        $additionalactions = null;
+        return new PermissionAction("emailaddress");
     }
     public static function Howto() : PermissionAction {
         $additionalactions = ['update-code' => 1,'edithtml' => 1];

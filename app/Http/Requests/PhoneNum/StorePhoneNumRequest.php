@@ -23,7 +23,7 @@ class StorePhoneNumRequest extends PhoneNumRequest
      */
     public function rules()
     {
-        return PhoneNum::createRules($this->numero,$this->hasphonenum_type);
+        return PhoneNum::createRules($this->phonenum,$this->hasphonenum_type);
     }
 
     /**

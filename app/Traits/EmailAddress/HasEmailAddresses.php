@@ -7,6 +7,7 @@ use App\Models\Employes\EmailAddress;
 
 trait HasEmailAddresses
 {
+    // TODO: Manage EmailAddress Posi
     /**
      * Renvoie les e-mails (Adresseemail) de ce model.
      */
@@ -25,14 +26,14 @@ trait HasEmailAddresses
         return $this->morphOne(EmailAddress::class, 'hasemailaddress')->oldest('id');
     }
 
-    public function addNewEmailAddress($email) : ?EmailAddress
+    public function addNewEmailAddress($email_address) : ?EmailAddress
     {
         // TODO: Valider l'adresse mail
-        if (empty($email)) {
+        if (empty($email_address)) {
             return null;
         }
 
-        $adresseemail = $this->emailaddresses()->where('email', $email)->first();
+        $adresseemail = $this->emailaddresses()->where('email_address', $email_address)->first();
         if ($adresseemail) {
             return $adresseemail;
         }
@@ -40,7 +41,7 @@ trait HasEmailAddresses
         $adresseemail_count = $this->emailaddresses()->count();
 
         $adresseemail = $this->emailaddresses()->create([
-            'email' => $email,
+            'email_address' => $email_address,
             'posi' => $adresseemail_count,
             'status_id' => Status::active()->first()->id,
         ]);
@@ -66,6 +67,21 @@ trait HasEmailAddresses
         $this->emailaddresses()->each( function($email) {
             $email->delete();
         });
+    }
+    public function setEmailAddressList() {
+        $sep = " - ";
+        $email_address_list = "";
+
+        foreach ($this->emailaddresses as $emailaddress) {
+            if ($email_address_list === "") {
+                $email_address_list = $emailaddress->email_address;
+            } else {
+                $email_address_list = $email_address_list . $sep . $emailaddress->email_address;
+            }
+            $this->email_address_list = $email_address_list;
+
+            $this->save();
+        }
     }
 
     /**

@@ -14,7 +14,7 @@ class FetchRequest extends ClientEsimRequest implements ISearchFormRequest
      */
     protected function orderByFields(): array
     {
-        return ['id','nom_raison_sociale'];//return ['nom_raison_sociale', 'email'];
+        return ['id','nom_raison_sociale'];//return ['nom_raison_sociale', 'email_address'];
     }
 
     /**

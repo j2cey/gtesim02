@@ -12,8 +12,8 @@ use Illuminate\Foundation\Http\FormRequest;
  *
  * @property string $nom_raison_sociale
  * @property string $prenom
- * @property string $email
- * @property string $numero_telephone
+ * @property string $email_address
+ * @property string $phone_number
  * @property string $pin
  * @property string $puk
  *
@@ -41,7 +41,7 @@ class ClientEsimRequest extends FormRequest
      */
     public function rules()
     {
-        return ClientEsim::defaultRules();
+        return ClientEsim::defaultRules($this->phone_number);
     }
 
     /**

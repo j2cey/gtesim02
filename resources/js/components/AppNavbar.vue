@@ -41,10 +41,18 @@ onMounted(() => {
                 <a href="#" @click.prevent="saveToggleMenu" class="nav-link" data-widget="pushmenu" role="button"><i class="fas fa-bars"></i></a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="index3.html" class="nav-link">Accueil</a>
+                <router-link to="/" active-class="active" class="nav-link">
+                    <span>
+                        Accueil
+                    </span>
+                </router-link>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="#" class="nav-link">Contact</a>
+                <router-link to="/contact" active-class="active" class="nav-link">
+                    <span>
+                        Contact
+                    </span>
+                </router-link>
             </li>
         </ul>
         <li class="nav-item d-none d-sm-inline-block">

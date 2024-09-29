@@ -195,6 +195,9 @@ onMounted(() => {
                     <span v-if="clientEsims.total > 0" class="text text-xs text-primary">{{ clientEsims.total }} enregistrement(s)</span>
                 </div>
 
+                <div v-if="loading" class="overlay dark">
+                    <i class="fas fa-2x fa-sync-alt fa-spin"></i>
+                </div>
             </div>
 
 

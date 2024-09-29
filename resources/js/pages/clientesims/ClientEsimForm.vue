@@ -12,10 +12,6 @@ import Swal from 'sweetalert2';
 import {useAbility} from "@casl/vue";
 import { formatDate } from '../../helper.js'
 
-
-// TODO: Add PhoneNum to ClientEsim
-// TODO: Add EmailAddress to ClientEsim
-
 const { can, cannot } = useAbility();
 const router = useRouter();
 const route = useRoute();
@@ -255,10 +251,6 @@ const confirmPhonenumEsimRecycle = (phonenum) => {
             return axios.put(`/api/phonenums/${phonenumIdEsimBeingRecycled.value}/esimrecycle`, null)
                 .then(response => {
                     console.log("confirmPhonenumEsimRecycle, preConfirm, response: ", response);
-                    /*
-                    if (!response.ok) {
-                    throw new Error(response.statusText)
-                    }*/
                     return response;
                 })
                 .catch(error => {
@@ -277,7 +269,8 @@ const confirmPhonenumEsimRecycle = (phonenum) => {
                 icon: 'success',
                 timer: 3000
             }).then(() => {
-                router.push({ name: 'phonenums.previewpdf', params: { id: result.value.data.id } });
+                //router.push({ name: 'phonenums.previewpdf', params: { id: result.value.data.id } });
+                window.location = '/clientesims.previewpdf/' + result.value.data.id;
             })
         }
     })
@@ -444,19 +437,19 @@ onMounted(() => {
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
-                        <div class="card-body" v-if="formMode === 'edit' || formMode === 'create'">
+                        <div class="card-body">
                             <Form @submit="handleSubmit" v-slot:default="{ errors }">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="imsi">Nom</label>
+                                            <label for="imsi" class="text text-sm">Nom</label>
                                             <input v-model="form.nom_raison_sociale" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.nom_raison_sociale }" id="nom_raison_sociale" placeholder="Nom" :disabled="formMode === 'show'">
                                             <span class="invalid-feedback">{{ errors.nom_raison_sociale }}</span>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="iccid">Prénom</label>
+                                            <label for="iccid" class="text text-sm">Prénom</label>
                                             <input v-model="form.prenom" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.prenom }" id="prenom" placeholder="Prénom" :disabled="formMode === 'show'">
                                             <span class="invalid-feedback">{{ errors.prenom }}</span>
                                         </div>
@@ -480,13 +473,13 @@ onMounted(() => {
                                     </div>
                                     <div v-if="formMode === 'edit' || formMode === 'show'" class="col-md-3">
                                         <div class="form-group">
-                                            <label for="puk">Statut</label>
+                                            <label for="puk" class="text text-sm">Statut</label>
                                             <input v-if="status" v-model="status.name" type="text" class="form-control form-control-sm" :class="'text-' + status.style" id="status" placeholder="status" readonly>
                                         </div>
                                     </div>
-                                    <div v-if="formMode === 'edit' || formMode === 'show'" class="col-md-3">
+                                    <div v-if="(formMode === 'edit' || formMode === 'show') && can('clientesim-creator-list')" class="col-md-3">
                                         <div class="form-group">
-                                            <label for="puk">Créé Par</label>
+                                            <label for="puk" class="text text-sm">Créé Par</label>
                                             <input v-if="creator" v-model="creator.name" type="text" class="form-control form-control-sm" id="creator" placeholder="creator" readonly>
                                         </div>
                                     </div>
@@ -504,7 +497,7 @@ onMounted(() => {
                             </Form>
                         </div>
 
-                        <div class="card-body" v-else-if="formMode === 'addphone'">
+                        <div class="card-body" v-if="formMode === 'addphone'">
                             <Form @submit="handleSubmit" v-slot:default="{ errors }">
                                 <label>Téléphone: <span class="badge badge-warning">{{ form.phone_number }}</span></label>
                                 <br/>
@@ -648,6 +641,9 @@ onMounted(() => {
 
                         </div>
 
+                        <div v-if="loadingPhonenums" class="overlay dark">
+                            <i class="fas fa-2x fa-sync-alt fa-spin"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -749,6 +745,9 @@ onMounted(() => {
 
                         </div>
 
+                        <div v-if="loadingEmailaddresses" class="overlay dark">
+                            <i class="fas fa-2x fa-sync-alt fa-spin"></i>
+                        </div>
                     </div>
                 </div>
             </div>

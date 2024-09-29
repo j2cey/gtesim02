@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Esim;
 
 use App\Models\Esims\Esim;
+use App\Models\Esims\StatutEsim;
+use App\Models\Esims\TechnologieEsim;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -18,6 +20,9 @@ use Illuminate\Foundation\Http\FormRequest;
  * @property string $puk2
  * @property string $adm1
  * @property string $opc
+ *
+ * @property StatutEsim $statutesim
+ * @property TechnologieEsim $technologieesim
  */
 class EsimRequest extends FormRequest
 {

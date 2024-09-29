@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
+
 /**
  * Class StatusResource
  * @package App\Http\Resources
@@ -21,16 +22,16 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
-
 class StatusResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
      * @param  Request  $request
-     * @return array
+     *
+     * @return array<string, mixed>
      */
-    public function toArray($request)
+    public function toArray(Request $request): array
     {
         return [
             'id' => $this->id,

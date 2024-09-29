@@ -30,6 +30,20 @@ return [
 
     'admin_password' => env('ADMIN_PASSWORD', 'ADMIN_PASSWORD'),
 
+    'ldap_host' => env('LDAP_HOST', 'XXX.XXX.XXX.XXX'),
+    'ldap_port' => env('LDAP_PORT', 'XXX'),
+    'ldap_domain' => env('LDAP_DOMAIN', '@XXX'),
+    'ldap_base_dn' => env('LDAP_BASE_DN', 'XXX'),
+    'ldap_tree' => env('LDAP_TREE', 'XXX'),
+    'ldap_base_user' => env('LDAP_BASE_USER', 'XXX'),
+    'ldap_base_userpwd' => env('LDAP_BASE_USERPWD', 'XXX'),
+
+    'esim_fichier_entete' => env('ESIM_FICHIER_ENTETE', '/var/www/gtesim/public'),
+    'esim_fichier_corps' => env('ESIM_FICHIER_CORPS', '/var/www/gtesim/public'),
+    'esim_fichier_qrcode' => env('ESIM_FICHIER_QRCODE', '/var/www/gtesim/public'),
+
+    'RAW_FOLDER' => env('RAW_FOLDER', '/var/www/gtesim/public'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode

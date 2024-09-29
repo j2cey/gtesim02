@@ -23,7 +23,7 @@ return new class extends Migration
             $table->id();
             $table->baseFields();
 
-            $table->string('email')->comment('l adresse e-mail');
+            $table->string('email_address')->comment('l adresse e-mail');
             $table->integer('posi')->default(0)->comment('position de l adresse e-mail dans la liste d adresses.');
 
             $table->string('hasemailaddress_type')->comment('type du modèle référencé');

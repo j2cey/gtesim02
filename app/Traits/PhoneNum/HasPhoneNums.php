@@ -5,11 +5,20 @@ namespace App\Traits\PhoneNum;
 use App\Models\Status;
 use App\Models\Employes\PhoneNum;
 
+/**
+ * @property PhoneNum $principalPhonenum
+ */
 trait HasPhoneNums
 {
+    // TODO: Manage PhoneNum Posi
     public function phonenums()
     {
         return $this->morphMany(PhoneNum::class, 'hasphonenum');
+    }
+
+    public function principalPhonenum()
+    {
+        return $this->morphOne(PhoneNum::class, 'hasphonenum')->ofMany('posi', 'min');
     }
 
     public function latestPhonenum()
@@ -29,7 +38,7 @@ trait HasPhoneNums
             return null;
         }
 
-        $phonenum = $this->phonenums()->where('numero', $num)->first();
+        $phonenum = $this->phonenums()->where('phone_number', $num)->first();
         if ($phonenum) {
             return $phonenum;
         }
@@ -37,7 +46,7 @@ trait HasPhoneNums
         $phonenum_count = $this->phonenums()->count();
 
         $phonenum = $this->phonenums()->create([
-            'numero' => $num,
+            'phone_number' => $num,
             'posi' => $phonenum_count,
             'status_id' => Status::active()->first()->id,
         ]);
@@ -70,6 +79,30 @@ trait HasPhoneNums
         $this->phonenums()->each( function($phonenum) {
             $phonenum->delete();
         });
+    }
+
+    public function setPrincipalPhoneNum() {
+        $principal_phone_num = $this->principalPhonenum;
+        if ( ! is_null($principal_phone_num) ) {
+            $this->phone_number = $principal_phone_num->phone_number;
+            $this->save();
+        }
+    }
+
+    public function setPhonenumList() {
+        $sep = " - ";
+        $phone_number_list = "";
+
+        foreach ($this->phonenums as $phonenum) {
+            if ($phone_number_list === "") {
+                $phone_number_list = $phonenum->phone_number;
+            } else {
+                $phone_number_list = $phone_number_list . $sep . $phonenum->phone_number;
+            }
+            $this->phone_number_list = $phone_number_list;
+
+            $this->save();
+        }
     }
 
     /**

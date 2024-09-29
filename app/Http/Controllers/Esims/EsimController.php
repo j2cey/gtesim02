@@ -75,7 +75,6 @@ class EsimController extends Controller
      */
     public function store(StoreEsimRequest $request): Esim
     {
-        //dd($request);
         $esim = Esim::createNew(
             $request->imsi,
             $request->iccid,

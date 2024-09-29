@@ -23,7 +23,7 @@ return new class extends Migration
             $table->id();
             $table->baseFields();
 
-            $table->string('numero')->comment('le numéro de téléphone');
+            $table->string('phone_number')->comment('le numéro de téléphone');
             $table->integer('posi')->default(0)->comment('position du numéro de phone dans la liste de numéros.');
 
             $table->string('hasphonenum_type')->comment('type du modèle référencé');

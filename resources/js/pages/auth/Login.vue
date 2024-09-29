@@ -3,6 +3,9 @@ import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthUserStore } from '../../stores/AuthUserStore';
 
+// TODO: Display all login errors if any
+// TODO: Manage 419 Error Csrf token missing
+
 const authUserStore = useAuthUserStore();
 const router = useRouter();
 const form = reactive({
@@ -10,6 +13,7 @@ const form = reactive({
     password: '',
 });
 
+const inputPwdType = ref("password");
 const loading = ref(false);
 const errorMessage = ref('');
 const handleSubmit = () => {
@@ -29,6 +33,12 @@ const handleSubmit = () => {
             loading.value = false;
         });
 };
+
+const toggleShowPassword = () => {
+    if (form.password) {
+        inputPwdType.value = inputPwdType.value === 'password' ? "text" : "password";
+    }
+}
 </script>
 
 <template>
@@ -53,10 +63,11 @@ const handleSubmit = () => {
                         </div>
                     </div>
                     <div class="input-group mb-3">
-                        <input v-model="form.password" type="password" class="form-control" placeholder="Password">
+                        <input v-model="form.password" :type="inputPwdType" class="form-control" placeholder="Password">
                         <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-lock"></span>
+                            <div class="input-group-text" @click="toggleShowPassword">
+                                <span v-if="form.password" class="fas fa-eye"></span>
+                                <span v-else class="fas fa-lock"></span>
                             </div>
                         </div>
                     </div>
@@ -75,7 +86,7 @@ const handleSubmit = () => {
                                 <div v-if="loading" class="spinner-border spinner-border-sm" role="status">
                                     <span class="sr-only">Loading...</span>
                                 </div>
-                                <span v-else>Sign In</span>
+                                <span v-else>Valider</span>
                             </button>
                         </div>
 

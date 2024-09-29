@@ -25,8 +25,8 @@ return new class extends Migration
             $table->string('code', 100)->unique()->comment('status code');
 
             $table->string('style')->default('success')->comment('status style');
-
             $table->boolean('is_default')->default(false)->comment('determine whether is the default one.');
+            $table->string('description', 500)->nullable()->comment('status description');
 
             $table->timestamps();
         });

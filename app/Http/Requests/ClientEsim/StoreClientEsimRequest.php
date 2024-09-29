@@ -3,13 +3,15 @@
 namespace App\Http\Requests\ClientEsim;
 
 use Illuminate\Validation\Rule;
+use App\Enums\Auth\Permissions;
 use App\Models\Esims\ClientEsim;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Class StoreClientEsimRequest
  * @package App\Http\Requests\ClientEsim
  *
- * @property ClientEsim $client_matched_selected
+ * @property ClientEsim $model_selected
  */
 
 class StoreClientEsimRequest extends ClientEsimRequest
@@ -21,7 +23,7 @@ class StoreClientEsimRequest extends ClientEsimRequest
      */
     public function authorize()
     {
-        return true;
+        return Auth::user()->can( Permissions::ClientEsim()->create() );
     }
 
     /**
@@ -31,7 +33,7 @@ class StoreClientEsimRequest extends ClientEsimRequest
      */
     public function rules()
     {
-        return ClientEsim::createRules($this->numero);
+        return ClientEsim::createRules($this->phone_number);
     }
 
     /**
@@ -42,7 +44,7 @@ class StoreClientEsimRequest extends ClientEsimRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'client_matched_selected' => is_null($this->input('client_matched_selected')) ? null : $this->setRelevantClientEsim( ['uuid' => $this->input('client_matched_selected')], 'uuid'),
+            'model_selected' => is_null($this->input('model_selected')) ? null : $this->setRelevantClientEsim( ['uuid' => $this->input('model_selected')], 'uuid'),
         ]);
     }
 }

@@ -2,11 +2,56 @@
 
 namespace App\Http\Resources\Esims;
 
+use App\Models\User;
+use App\Models\Status;
+use App\Models\BaseModel;
 use App\Models\Esims\Esim;
+use Illuminate\Support\Carbon;
+use App\Models\Person\PhoneNum;
+use App\Models\Esims\StatutEsim;
+use App\Models\Esims\EsimQrcode;
+use App\Models\Person\EmailAddress;
 use App\Http\Resources\UserResource;
+use App\Models\Esims\TechnologieEsim;
 use App\Http\Resources\StatusResource;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * Class EsimResource
+ * @package App\Http\Resources\Esims
+ *
+ * @property integer $id
+ * @property string $uuid
+ * @property bool $is_default
+ * @property string|null $tags
+ * @property string $imsi
+ * @property string $iccid
+ * @property string $ac
+ * @property string $pin
+ * @property string $puk
+ * @property string $eki
+ * @property string $pin2
+ * @property string $puk2
+ * @property string $adm1
+ * @property string $opc
+ *
+ * @property StatutEsim|null $statutesim
+ * @property TechnologieEsim|null $technologieesim
+ * @property-read EsimQrcode|null $qrcode
+ *
+ * @property-read PhoneNum $phonenum
+ *
+ * @property User|null $creator
+ * @property User|null $updator
+ * @property User|null $attributor
+ * @property mixed $states
+ *
+ * @property Status $status
+ *
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ */
 class EsimResource extends JsonResource
 {
     /**
@@ -22,27 +67,32 @@ class EsimResource extends JsonResource
             'uuid' => $this->uuid,
 
             'imsi' => $this->imsi,
-            'ac' => $this->ac,
             'iccid' => $this->iccid,
+            'ac' => $this->ac,
             'pin' => $this->pin,
             'puk' => $this->puk,
+            'eki' => $this->eki,
+            'pin2' => $this->pin2,
+            'puk2' => $this->puk2,
+            'adm1' => $this->adm1,
+            'opc' => $this->opc,
 
-            'status' => StatusResource::make($this->status),
-            'statutesim' => StatutEsimResource::make($this->statutesim),
-
-            'phonenum' => $this->phonenum,
+            'statutesim' => $this->statutesim,
             'technologieesim' => $this->technologieesim,
-            'model_type' => Esim::class,
+            'qrcode' => $this->qrcode,
 
-            'attributor' => EsimResource::make($this->attributor),
-            'states' => EsimStateResource::collection($this->states),
+            'attributor' => $this->attributor,
+            'states' => $this->states,
+
+            'status' => $this->status,
+            'modelclass' => Esim::class,
+            'modeltype' => "esims",
+
+            'creator' => $this->creator,
+            'updator' => $this->updator,
 
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-
-            'show_url' => route('esims.show', $this->uuid),
-            'edit_url' => route('esims.edit', $this->uuid),
-            'destroy_url' => route('esims.destroy', $this->uuid),
         ];
     }
 }

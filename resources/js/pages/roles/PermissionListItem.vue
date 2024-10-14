@@ -14,7 +14,7 @@ const props = defineProps({
     role: Object,
     permission: Object,
     index: Number,
-    editMode: Boolean,
+    formMode: String,
     selectAll: Boolean,
     selectedPermissions: Array,
 });
@@ -60,15 +60,16 @@ onMounted(() => {
 
 <template>
     <tr>
-        <td><input type="checkbox" :checked="permissionChecked" @change="toggleSelection" :key="permission.id" :id="'permission_' + permission.id" :ref="'permission_' + permission.id" /></td>
+        <td v-if="props.formMode !== 'show'"><input type="checkbox" :checked="permissionChecked" @change="toggleSelection" :key="permission.id" :id="'permission_' + permission.id" :ref="'permission_' + permission.id" /></td>
         <td class="text text-xs" >{{ index + 1 }}</td>
         <td class="text text-xs" >{{ permission.name }}</td>
         <td class="text text-xs" >{{ permission.guard_name }}</td>
         <td class="text text-xs" >{{ permission.level }}</td>
         <td class="text text-xs" >{{ formatDate(permission.created_at) }}</td>
-        <td>
-            <a :class="props.editMode ? '' : 'disabled'" class="text text-xs" v-if="! permission.is_in_role" href="#" @click.prevent="permissionAssign"><i class="fa fa-link text-success ml-2" :class="props.editMode ? '' : 'text-muted'"></i></a>
-            <a :class="props.editMode ? '' : 'disabled'" disabled="true" class="text text-xs" v-else href="#" @click.prevent="permissionRevoke"><i class="fa fa-ban text-orange ml-2" :class="props.editMode ? '' : 'text-muted'"></i></a>
+        <td class="text text-xs" >{{ formatDate(permission.updated_at) }}</td>
+        <td v-if="props.formMode !== 'show'">
+            <a :class="props.formMode === 'edit' ? '' : 'disabled'" class="text text-xs" v-if="! permission.is_in_role" href="#" @click.prevent="permissionAssign"><i class="fa fa-link text-success ml-2" :class="formMode === 'edit' ? '' : 'text-muted'"></i></a>
+            <a :class="props.formMode === 'edit' ? '' : 'disabled'" disabled="true" class="text text-xs" v-else href="#" @click.prevent="permissionRevoke"><i class="fa fa-unlink text-orange ml-2" :class="formMode === 'edit' ? '' : 'text-muted'"></i></a>
         </td>
     </tr>
 </template>

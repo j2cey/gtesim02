@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public $table_name = 'client_esims';
+    public string $table_name = 'client_esims';
 
     /**
      * Run the migrations.

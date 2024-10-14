@@ -4,8 +4,9 @@ namespace App\Models\Esims;
 
 use App\Models\User;
 use App\Models\BaseModel;
-use App\Models\Employes\PhoneNum;
 use Illuminate\Support\Carbon;
+use App\Contracts\IsBaseModel;
+use App\Models\Person\PhoneNum;
 use Illuminate\Support\Facades\Auth;
 use OwenIt\Auditing\Contracts\Auditable;
 use App\Models\ModelPickers\ModelPicker;
@@ -70,8 +71,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @mixin \Eloquent
  * @property-read \App\Models\Status|null $status
  */
-
-class Esim extends BaseModel implements Auditable
+class Esim extends BaseModel implements IsBaseModel, Auditable
 {
     use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable;
 

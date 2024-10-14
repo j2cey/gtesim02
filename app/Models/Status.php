@@ -127,5 +127,9 @@ class Status extends Model implements Auditable
 
         return $this;
     }
+
+    public static function getByCode(string $code): Status {
+        return Status::where('code', $code)->first();
+    }
     #endregion
 }

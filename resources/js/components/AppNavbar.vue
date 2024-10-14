@@ -1,7 +1,9 @@
 <script setup>
 import {onMounted, ref} from 'vue';
 import { useSettingStore } from '../stores/SettingStore';
+import { useAuthUserStore } from "../stores/AuthUserStore.js";
 
+const authUserStore = useAuthUserStore();
 const settingStore = useSettingStore();
 const availableLanguages = ref([{name: 'Fr', value: "fr"}, {name: 'En', value: "en"}]);
 
@@ -60,7 +62,7 @@ onMounted(() => {
                 <i class="far" :class="settingStore.theme === 'dark' ? 'fa-moon' : 'fa-sun'"></i>
             </a>
         </li>
-        <li class="nav-item d-none d-sm-inline-block">
+        <li v-if="authUserStore.hasRole('admin')" class="nav-item d-none d-sm-inline-block">
             <!-- Locale Selector -->
             <select @change="setLanguage" style="height: 2rem; outline: 2px solid transparent;" class="px-1 rounded border-0">
                 <option v-for="language in availableLanguages" :selected="(settingStore.currlang === language.value)">{{ language.name }}</option>
@@ -69,7 +71,7 @@ onMounted(() => {
 
         <ul class="navbar-nav ml-auto">
 
-            <li class="nav-item">
+            <li v-if="authUserStore.hasRole('admin')" class="nav-item">
                 <a class="nav-link" data-widget="navbar-search" href="#" role="button">
                     <i class="fas fa-search"></i>
                 </a>
@@ -90,7 +92,7 @@ onMounted(() => {
                 </div>
             </li>
 
-            <li class="nav-item dropdown">
+            <li v-if="authUserStore.hasRole('admin')" class="nav-item dropdown">
                 <a class="nav-link" data-toggle="dropdown" href="#">
                     <i class="far fa-comments"></i>
                     <span class="badge badge-danger navbar-badge">3</span>
@@ -148,7 +150,7 @@ onMounted(() => {
                 </div>
             </li>
 
-            <li class="nav-item dropdown">
+            <li v-if="authUserStore.hasRole('admin')" class="nav-item dropdown">
                 <a class="nav-link" data-toggle="dropdown" href="#">
                     <i class="far fa-bell"></i>
                     <span class="badge badge-warning navbar-badge">15</span>
@@ -174,14 +176,14 @@ onMounted(() => {
                     <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
                 </div>
             </li>
-            <li class="nav-item">
+            <li v-if="authUserStore.hasRole('admin')" class="nav-item">
                 <a class="nav-link" data-widget="fullscreen" href="#" role="button">
                     <i class="fas fa-expand-arrows-alt"></i>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
-                    <i class="fas fa-th-large"></i>
+                    <i class="fas fa-book-reader text text-warning"></i>
                 </a>
             </li>
         </ul>

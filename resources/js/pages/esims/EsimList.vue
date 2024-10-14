@@ -114,7 +114,9 @@ onMounted(() => {
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+                        <li class="breadcrumb-item">
+                            <router-link to="/">Accueil</router-link>
+                        </li>
                         <li class="breadcrumb-item active">Esims</li>
                     </ol>
                 </div>
@@ -126,13 +128,13 @@ onMounted(() => {
 
             <div class="d-flex justify-content-between">
                 <div class="d-flex">
-                    <router-link v-if="can('esim-create')" to="esims/create">
+                    <router-link v-if="can('esims-create')" to="esims/create">
                         <button type="button" class="mb-2 btn btn-sm btn-primary">
                             <i class="fa fa-plus-circle mr-1"></i>
                             Nouveau
                         </button>
                     </router-link>
-                    <div v-if="can('esim-delete') && selectedEsims.length > 0">
+                    <div v-if="can('esims-delete') && selectedEsims.length > 0">
                         <button @click="bulkDelete" type="button" class="ml-2 mb-2 btn btn-sm btn-danger">
                             <i class="fa fa-trash mr-1"></i>
                             Supprimer Sélection
@@ -143,7 +145,7 @@ onMounted(() => {
 
                 <div class="d-flex">
                     <div class="input-group mb-3">
-                        <input @keyup.enter="getEsims" type="search" v-model="searchQuery" class="form-control text-xs" placeholder="Recherche text..." />
+                        <input @keyup.enter="getEsims" type="search" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="Recherche text..." />
                         <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
                             <i class="fa fa-times"></i>
                         </button>
@@ -196,7 +198,7 @@ onMounted(() => {
                         </tr>
                         </tbody>
                     </table>
-                    <span v-if="esims.total > 0" class="text text-xs text-primary">{{ esims.total }} enregistrement(s)</span>
+                    <span v-if="esims.meta?.total > 0" class="text text-xs text-primary">{{ esims.meta.total }} enregistrement(s)</span>
                 </div>
 
                 <div v-if="loading" class="overlay dark">

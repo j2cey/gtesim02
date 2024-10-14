@@ -157,7 +157,9 @@ onMounted(() => {
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item">
+                            <router-link to="/">Accueil</router-link>
+                        </li>
                         <li class="breadcrumb-item active">Settings</li>
                     </ol>
                 </div>
@@ -187,7 +189,7 @@ onMounted(() => {
 
                 <div class="d-flex">
                     <div class="input-group mb-3">
-                        <input type="search" v-model="searchQuery" class="form-control text-xs" placeholder="Search text..." />
+                        <input type="search" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="Search text..." />
                         <button v-if="searchQuery" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
                             <i class="fa fa-times"></i>
                         </button>

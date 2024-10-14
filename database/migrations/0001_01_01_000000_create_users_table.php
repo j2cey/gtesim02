@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
 
-            $table->string('image')->nullable()->comment('Avatar de l utilisateur');
+            $table->string('avatar')->nullable()->comment('Avatar de l utilisateur');
             $table->boolean('is_local')->default(false)->comment('indique si le compte est locale');
             $table->boolean('is_ldap')->default(false)->comment('indique si le compte est LDAP');
             $table->string('objectguid')->nullable()->comment('GUID du compte');

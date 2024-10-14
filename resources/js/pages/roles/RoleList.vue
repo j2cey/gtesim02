@@ -8,12 +8,14 @@ import RoleListItem from './RoleListItem.vue';
 import { debounce } from 'lodash';
 import { Bootstrap4Pagination } from 'laravel-vue-pagination';
 
+const loading = ref(false);
 const toastr = useToastr();
 const roles = ref({'data': []});
 const editing = ref(false);
 const form = ref(null);
 const formValues = ref();
 
+const paginationLinksLimit = ref(5);
 const roleIdBeingDeleted = ref(null);
 
 const searchQuery = ref(null);
@@ -29,16 +31,20 @@ const toggleSelection = (role) => {
 };
 
 const getRoles = (page = 1) => {
+    loading.value = true;
     axios.get(`/api/roles?page=${page}`, {
         params: {
             query: searchQuery.value
         }
     })
         .then((response) => {
+            //console.log("getRoles response: ", response);
             roles.value = response.data;
             selectedRoles.value = [];
             selectAll.value = false;
-        })
+        }).finally(() => {
+            loading.value = false;
+    })
 }
 
 const createRoleSchema = yup.object({
@@ -151,7 +157,9 @@ onMounted(() => {
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item">
+                            <router-link to="/">Accueil</router-link>
+                        </li>
                         <li class="breadcrumb-item active">Roles</li>
                     </ol>
                 </div>
@@ -165,13 +173,13 @@ onMounted(() => {
             <div class="d-flex justify-content-between">
                 <div class="d-flex">
                     <router-link to="/roles/create">
-                        <button type="button" class="mb-2 btn btn-primary">
+                        <button type="button" class="mb-2 btn btn-sm btn-primary">
                             <i class="fa fa-plus-circle mr-1"></i>
                             Add New Role
                         </button>
                     </router-link>
                     <div v-if="selectedRoles.length > 0">
-                        <button @click="bulkDelete" type="button" class="ml-2 mb-2 btn btn-danger">
+                        <button @click="bulkDelete" type="button" class="ml-2 mb-2 btn btn-sm btn-danger">
                             <i class="fa fa-trash mr-1"></i>
                             Delete Selected
                         </button>
@@ -179,22 +187,24 @@ onMounted(() => {
                     </div>
                 </div>
                 <div>
-                    <input type="text" v-model="searchQuery" class="form-control" placeholder="Search..." />
+                    <input type="text" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="Search..." />
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-body">
+                    <Bootstrap4Pagination :data="roles" @pagination-change-page="getRoles" :limit="paginationLinksLimit" align="right" />
                     <table class="table table-bordered">
                         <thead>
                         <tr>
-                            <th><input type="checkbox" v-model="selectAll" @change="selectAllRoles" /></th>
+                            <th class="text text-xs"><input type="checkbox" v-model="selectAll" @change="selectAllRoles" /></th>
                             <th style="width: 10px">#</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Registered Date</th>
-                            <th>Permissions</th>
-                            <th>Options</th>
+                            <th class="text text-xs">Name</th>
+                            <th class="text text-xs">Email</th>
+                            <th class="text text-xs">Created</th>
+                            <th class="text text-xs">Updated</th>
+                            <th class="text text-xs">Permissions</th>
+                            <th class="text text-xs">Options</th>
                         </tr>
                         </thead>
                         <tbody v-if="roles.data.length > 0">
@@ -212,9 +222,14 @@ onMounted(() => {
                         </tr>
                         </tbody>
                     </table>
+                    <span v-if="roles.total > 0" class="text text-xs text-primary">{{ roles.total + ' record' + (roles.total > 1 ? 's' : '') }}</span>
+                    <Bootstrap4Pagination :data="roles" @pagination-change-page="getRoles" :limit="paginationLinksLimit" align="right" />
+                </div>
+
+                <div v-if="loading" class="overlay dark">
+                    <i class="fas fa-2x fa-sync-alt fa-spin"></i>
                 </div>
             </div>
-            <Bootstrap4Pagination :data="roles" @pagination-change-page="getRoles" align="right" />
 
         </div>
     </div>

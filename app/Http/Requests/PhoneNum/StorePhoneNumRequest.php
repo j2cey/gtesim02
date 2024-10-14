@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\PhoneNum;
 
-use App\Models\Employes\PhoneNum;
+use App\Models\Person\PhoneNum;
 
 class StorePhoneNumRequest extends PhoneNumRequest
 {

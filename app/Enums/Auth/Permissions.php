@@ -6,13 +6,13 @@ abstract class Permissions
 {
     public static function Status() : PermissionAction {
         $customlevels = ['create' => 1,'update' => 1,'delete' => 1];
-        $additionalactions =  ['model-change' => 1];
-        return new PermissionAction("status", $customlevels, $additionalactions);
+        $additionalactions =  ['change' => 1];
+        return new PermissionAction("statuses", $customlevels, $additionalactions);
     }
     public static function Setting() : PermissionAction {
         $customlevels = ['create' => 1,'update' => 1,'delete' => 1];
         $additionalactions = null;
-        return new PermissionAction("setting", $customlevels, $additionalactions);
+        return new PermissionAction("settings", $customlevels, $additionalactions);
     }
     public static function Profile() : PermissionAction {
         $customlevels = ['create' => 1,'update' => 1,'delete' => 1];
@@ -20,71 +20,90 @@ abstract class Permissions
         return new PermissionAction("profile", $customlevels, $additionalactions);
     }
 
-    public static function User() : PermissionAction {
+    public static function User() : BaseModelAction {
         $customlevels = ['create' => 1,'update' => 1,'delete' => 1];
-        $additionalactions = null;
-        return new PermissionAction("user", $customlevels, $additionalactions);
+        $additionalactions = [
+            'reset-password' => 1,
+        ];
+        return new BaseModelAction("users", $customlevels, $additionalactions);
     }
     public static function Role() : PermissionAction {
         $customlevels = ['create' => 1,'update' => 1,'delete' => 1];
-        $additionalactions = null;
-        return new PermissionAction("role", $customlevels, $additionalactions);
+        $additionalactions = [
+            'assign' => 1,
+            'revoke' => 1,
+        ];
+        return new PermissionAction("roles", $customlevels, $additionalactions);
     }
     public static function Permission() : PermissionAction {
         $customlevels = ['create' => 1,'update' => 1,'delete' => 1];
         $additionalactions = null;
-        return new PermissionAction("permission", $customlevels, $additionalactions);
+        return new PermissionAction("permissions", $customlevels, $additionalactions);
     }
-    public static function StatutEsim() : PermissionAction {
+    public static function StatutEsim() : BaseModelAction {
         $additionalactions = null;
-        return new PermissionAction("statutesim");
+        return new BaseModelAction("statutesims");
     }
-    public static function TechnologieEsim() : PermissionAction {
+    public static function TechnologieEsim() : BaseModelAction {
         $additionalactions = null;
-        return new PermissionAction("technologieesim");
+        return new BaseModelAction("technologieesims");
     }
-    public static function ClientEsim() : PermissionAction {
+    public static function ClientEsim() : BasePersonAction {
         $additionalactions = [
-            'show' => 4,
             'previewpdf' => 4,'print' => 4,
             'esim-attach' => 3,'esim-dettach' => 3,
-            'phonenum-add' => 3,'phonenum-delete' => 2,'phonenum-update' => 2,
-            'emailaddress-add' => 3,'emailaddress-update' => 2,'emailaddress-delete' => 2,
-            'creator-list' => 2,'creator-department-list' => 2
+            'creator-department-list' => 2
         ];
-        return new PermissionAction("clientesim", null, $additionalactions);
+        return new BasePersonAction("clientesims", null, $additionalactions);
     }
-    public static function Esim() : PermissionAction {
+    public static function Esim() : BaseModelAction {
         $additionalactions = [
             'attach' => 3,'import' => 3,
             'attributor-list' => 2,'attributor-department-list' => 2,
             'phonenum-update' => 2,'phonenum-delete' => 2
         ];
-        return new PermissionAction("esim", null, $additionalactions);
+        return new BaseModelAction("esims", null, $additionalactions);
     }
-    public static function EsimState() : PermissionAction {
+    public static function EsimState() : BaseModelAction {
         $additionalactions = null;
-        return new PermissionAction("esimstate");
+        return new BaseModelAction("esimstates");
     }
-    public static function EsimQrcode() : PermissionAction {
+    public static function EsimQrcode() : BaseModelAction {
         $additionalactions = null;
-        return new PermissionAction("esimqrcode");
+        return new BaseModelAction("esimqrcodes");
     }
-    public static function PhoneNum() : PermissionAction {
+    public static function PhoneNum() : BaseModelAction {
         $additionalactions = ['esim-recycle' => 2];
-        return new PermissionAction("phonenum", null, $additionalactions);
+        return new BaseModelAction("phonenums", null, $additionalactions);
     }
-    public static function EmailAddress() : PermissionAction {
+    public static function EmailAddress() : BaseModelAction {
         $additionalactions = null;
-        return new PermissionAction("emailaddress");
+        return new BaseModelAction("emailaddresses");
     }
-    public static function Howto() : PermissionAction {
+    public static function Employe() : BasePersonAction {
+        $additionalactions = [
+            'creator-department-list' => 2
+        ];
+        return new BasePersonAction("employes", null, $additionalactions);
+    }
+    public static function Howto() : BaseModelAction {
         $additionalactions = ['update-code' => 1,'edithtml' => 1];
-        return new PermissionAction("howto", null, $additionalactions);
+        return new BaseModelAction("howtos", null, $additionalactions);
     }
-    public static function HowtoThread() : PermissionAction {
+    public static function HowtoThread() : BaseModelAction {
         $additionalactions = ['update-code' => 1];
-        return new PermissionAction("howtothread", null, $additionalactions);
+        return new BaseModelAction("howtothreads", null, $additionalactions);
+    }
+
+    public static function Creator() : PermissionAction {
+        $customlevels = null;
+        $additionalactions =  null;
+        return new PermissionAction("creators", $customlevels, $additionalactions);
+    }
+    public static function Updator() : PermissionAction {
+        $customlevels = null;
+        $additionalactions =  null;
+        return new PermissionAction("updators", $customlevels, $additionalactions);
     }
 
 }

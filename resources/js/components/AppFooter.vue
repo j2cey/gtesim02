@@ -8,10 +8,10 @@ const settingStore = useSettingStore();
     <footer class="main-footer">
 
         <div class="float-right d-none d-sm-inline">
-            Anything you want
+            v2.0
         </div>
 
-        <strong>Copyright &copy; 2023 <a href="#">{{ settingStore.settings?.app.name }}</a>.</strong> All rights reserved.
+        <strong>Copyright &copy; {{ new Date().getFullYear() }} <a href="#">{{ settingStore.settings?.app.name }}</a>.</strong> All rights reserved.
     </footer>
 </template>
 

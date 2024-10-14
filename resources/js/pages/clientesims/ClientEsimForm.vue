@@ -1,15 +1,14 @@
 <script setup>
 import axios from 'axios';
-import {reactive, onMounted, ref, watch, computed} from 'vue';
+import { reactive, onMounted, ref, watch, computed, watchEffect } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useToastr } from '@/toastr';
 import { Form } from 'vee-validate';
-import { debounce } from "lodash";
-import EsimClientPhonenumListItem from "./EsimClientPhonenumListItem.vue";
-import EsimClientEmailAdressListItem from "./EsimClientEmailAdressListItem.vue";
-import {Bootstrap4Pagination} from "laravel-vue-pagination";
+import PhonenumList from "../phonenums/PhonenumList.vue";
+import EmailAddressList from "../emailaddresses/EmailAddressList.vue";
+import StatusShow from "../statuses/StatusShow.vue";
 import Swal from 'sweetalert2';
-import {useAbility} from "@casl/vue";
+import { useAbility } from "@casl/vue";
 import { formatDate } from '../../helper.js'
 
 const { can, cannot } = useAbility();
@@ -25,14 +24,11 @@ const form = reactive({
     model_selected: null,
 });
 
-const modeltype = ref('clientesim');
+//const modeltype = ref('clientesims');
 const loading = ref(false);
 const formMode = ref('create');
-const phonenums = ref({'data': []});
-const emailaddresses = ref({'data': []});
 const creator = ref({});
 const updator = ref({});
-const status = ref({});
 
 const initForm = () => {
     form.nom_raison_sociale = '';
@@ -165,215 +161,32 @@ const getClientEsim = () => {
 
             clientesim.value = response.data;
         }).then(() => {
-            console.log("execs after getClientEsim")
-            getPhonenums();
-            getEmailaddresses();
+
         }
 
     )
 };
 //</editor-fold>
 
-//<editor-fold desc="PhoneNum">
-const loadingPhonenums = ref(false);
-const selectPhonenumsAll = ref(false);
-const selectedPhonenums = ref([]);
-const togglePhonenumsSelection = (phonenum) => {
-    const index = selectedPhonenums.value.indexOf(phonenum.id);
-    if (index === -1) {
-        selectedPhonenums.value.push(phonenum.id);
-    } else {
-        selectedPhonenums.value.splice(index, 1);
-    }
-};
-const selectAllPhonenums = () => {
-    if (selectPhonenumsAll.value) {
-        selectedPhonenums.value = phonenums.value.data.map(phonenum => phonenum.id);
-    } else {
-        selectedPhonenums.value = [];
-    }
-}
-
-const clearSearchPhonenumQuery = () => {
-    searchPhonenumQuery.value = '';
-    getPhonenums();
-}
-
-const searchPhonenumQuery = ref(null);
-const getPhonenums = (page = 1) => {
-    loadingPhonenums.value = true;
-    axios.get(`/api/clientesims/${clientesimId.value}/phonenumindex?page=${page}`, {
-        params: {
-            query: searchPhonenumQuery.value,
-        }
-    })
-        .then((response) => {
-            console.log("getPhonenums, response: ", response);
-            phonenums.value = response.data;
-        }).finally(() => {
-        loadingPhonenums.value = false;
-    });
-}
-
-const loadingPhoneNumDelete = ref(false);
-const phonenumIdBeingDeleted = ref(null);
-
-const confirmPhonenumDeletion = (phonenum) => {
-    phonenumIdBeingDeleted.value = phonenum.id;
-    $('#deletePhoneNumModal').modal('show');
+//<editor-fold desc="Status">
+const status = ref({});
+const statusChanged = (obj) => {
+    status.value = obj;
 };
 
-const deletePhoneNum = () => {
-    loadingPhoneNumDelete.value = true;
-    axios.delete(`/api/phonenums/${phonenumIdBeingDeleted.value}`)
-        .then(() => {
-            $('#deleteEsimStateModal').modal('hide');
-            toastr.success('Numero Téléphone supprimé avec succès !');
-            phonenums.value.data = phonenums.value.data.filter(phonenum => phonenum.id !== phonenumIdBeingDeleted.value);
-            loadingPhoneNumDelete.value = false;
-        });
-};
-
-const loadingPhoneNumEsimRecycle = ref(false);
-const phonenumIdEsimBeingRecycled = ref(null);
-
-const confirmPhonenumEsimRecycle = (phonenum) => {
-    phonenumIdEsimBeingRecycled.value = phonenum.uuid;
-    //$('#recyclePhoneNumEsimModal').modal('show');
-    Swal.fire({
-        html: '<small>Affecter une nouvelle eSIM au <b>' + phonenum.numero + '</b></small>',
-        icon: 'warning',
-        showCancelButton: true,
-        showLoaderOnConfirm: true,
-        confirmButtonText: 'Valider',
-        cancelButtonText: 'Annuler',
-        preConfirm: () => {
-            return axios.put(`/api/phonenums/${phonenumIdEsimBeingRecycled.value}/esimrecycle`, null)
-                .then(response => {
-                    console.log("confirmPhonenumEsimRecycle, preConfirm, response: ", response);
-                    return response;
-                })
-                .catch(error => {
-                    //console.log("request failed: ", error)
-                    Swal.showValidationMessage(
-                        `Request failed: ${error}`
-                    )
-                })
-        }, allowOutsideClick: () => !Swal.isLoading()
-    }).then((result) => {
-        if (result.value) {
-            console.log("confirmPhonenumEsimRecycle, DONE, response: ", result);
-            setPhoneNumUpdated(result.value.data)
-            Swal.fire({
-                html: '<small>Nouvelle eSIM affectée avec Succes !</small>',
-                icon: 'success',
-                timer: 3000
-            }).then(() => {
-                //router.push({ name: 'phonenums.previewpdf', params: { id: result.value.data.id } });
-                window.location = '/clientesims.previewpdf/' + result.value.data.id;
-            })
-        }
-    })
-};
-
-const setPhoneNumUpdated = (phonenum) => {
-    const index = phonenums.value.data.findIndex(pnum => pnum.id === phonenum.id);
-    phonenums.value.data[index] = phonenum;
-}
-
-const recyclePhoneNumEsim = () => {
-    loadingPhoneNumEsimRecycle.value = true;
-    axios.put(`/api/phonenums/${phonenumIdEsimBeingRecycled.value}/esimrecycle`)
-        .then((response) => {
-            console.log("recyclePhoneNumEsim, response: ", response);
-
-            $('#recyclePhoneNumEsimModal').modal('hide');
-            toastr.success('Esim recyclé avec succès !');
-
-            const index = phonenums.value.findIndex(phonenum => phonenum.id === response.data.id);
-            phonenums.value.data[index] = response.data;
-
-            loadingPhoneNumEsimRecycle.value = false;
-        });
-};
-
-watch(searchPhonenumQuery, debounce(() => {
-    //getPhonenums();
-}, 300));
-//</editor-fold>
-
-//<editor-fold desc="EmailAddress">
-const loadingEmailaddresses = ref(false);
-const selectEmailaddressesAll = ref(false);
-const selectedEmailaddresses = ref([]);
-const toggleEmailaddressesSelection = (emailaddress) => {
-    const index = selectedEmailaddresses.value.indexOf(emailaddress.id);
-    if (index === -1) {
-        selectedEmailaddresses.value.push(emailaddress.id);
-    } else {
-        selectedEmailaddresses.value.splice(index, 1);
-    }
-};
-const selectAllEmailaddresses = () => {
-    if (selectEmailaddressesAll.value) {
-        selectedEmailaddresses.value = emailaddresses.value.data.map(emailaddress => emailaddress.id);
-    } else {
-        selectedEmailaddresses.value = [];
-    }
-}
-
-const clearSearchEmailaddressQuery = () => {
-    searchEmailaddressQuery.value = '';
-    getEmailaddresses();
-}
-
-const searchEmailaddressQuery = ref(null);
-const getEmailaddresses = (page = 1) => {
-    loadingEmailaddresses.value = true;
-    axios.get(`/api/clientesims/${clientesimId.value}/emailaddressindex?page=${page}`, {
-        params: {
-            query: searchEmailaddressQuery.value,
-        }
-    })
-        .then((response) => {
-            console.log("getEmailaddresses, response: ", response);
-            emailaddresses.value = response.data;
-        }).finally(() => {
-        loadingEmailaddresses.value = false;
-    });
-}
-
-const loadingEmailAddressDelete = ref(false);
-const emailaddressIdBeingDeleted = ref(null);
-
-const confirmEmailaddressDeletion = (emailaddress) => {
-    emailaddressIdBeingDeleted.value = emailaddress.id;
-    $('#deleteEmailAddressModal').modal('show');
-};
-
-const deleteEmailAddress = () => {
-    loadingEmailAddressDelete.value = true;
-    axios.delete(`/api/emailaddresses/${emailaddressIdBeingDeleted.value}`)
-        .then(() => {
-            $('#deleteEsimStateModal').modal('hide');
-            toastr.success('Adresse E-Mail supprimé avec succès !');
-            emailaddresses.value.data = emailaddresses.value.data.filter(emailaddress => emailaddress.id !== emailaddressIdBeingDeleted.value);
-            loadingEmailAddressDelete.value = false;
-        });
-};
-
-watch(searchEmailaddressQuery, debounce(() => {
-    //getEmailaddresses();
-}, 300));
+const statusKey = computed(() => {
+    return status.value.uuid;
+});
 //</editor-fold>
 
 const currentPath = ref('/');
-const lastPath = ref('/');
+const lastPath = ref('/clientesims');
 const prevRoutePath = computed(() => {
-    return lastPath ? lastPath.value : '/';
+    return lastPath;// ? lastPath.value : '/clientesims';
 });
 
 watch(route, () => {
+    console.log("watch route from ClientEsim");
     if (route.fullPath !== currentPath.value) {
         initComponent();
     }
@@ -381,7 +194,7 @@ watch(route, () => {
 
 const initComponent = () => {
     initForm();
-    lastPath.value = router.options.history.state.back;
+    lastPath.value = router.options.history.state.back ? router.options.history.state.back : lastPath.value;
     currentPath.value = route.fullPath;
     if (route.name === 'clientesims.edit' || route.name === 'clientesims.show') {
         if (route.name === 'clientesims.edit') {
@@ -416,7 +229,7 @@ onMounted(() => {
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item">
-                            <router-link to="/dashboard">Accueil</router-link>
+                            <router-link to="/">Accueil</router-link>
                         </li>
                         <li class="breadcrumb-item">
                             <router-link to="/clientesims">Clients Esim</router-link>
@@ -473,11 +286,17 @@ onMounted(() => {
                                     </div>
                                     <div v-if="formMode === 'edit' || formMode === 'show'" class="col-md-3">
                                         <div class="form-group">
-                                            <label for="puk" class="text text-sm">Statut</label>
-                                            <input v-if="status" v-model="status.name" type="text" class="form-control form-control-sm" :class="'text-' + status.style" id="status" placeholder="status" readonly>
+                                            <label for="puk" class="text text-sm">Statut</label> <br>
+                                            <StatusShow :key="statusKey" v-if="status"
+                                                        :status="status"
+                                                        @status-changed="statusChanged"
+                                                        :modelclass="clientesim.modelclass"
+                                                        :modeltype="clientesim.modeltype"
+                                                        :modelid="clientesimId"
+                                            ></StatusShow>
                                         </div>
                                     </div>
-                                    <div v-if="(formMode === 'edit' || formMode === 'show') && can('clientesim-creator-list')" class="col-md-3">
+                                    <div v-if="(formMode === 'edit' || formMode === 'show') && can('clientesims-creator-list')" class="col-md-3">
                                         <div class="form-group">
                                             <label for="puk" class="text text-sm">Créé Par</label>
                                             <input v-if="creator" v-model="creator.name" type="text" class="form-control form-control-sm" id="creator" placeholder="creator" readonly>
@@ -488,10 +307,12 @@ onMounted(() => {
                                 <div class="btn-group">
                                     <button v-if="formMode === 'edit' || formMode === 'create'" type="submit" class="btn btn-sm btn-primary m-2" :disabled="loading">
                                         <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                         Valider
+                                        <i class="fa fa-save mr-1"></i> Valider
                                     </button>
                                     <router-link :to="prevRoutePath">
-                                        <button type="submit" class="btn btn-sm btn-default m-2">Retour</button>
+                                        <button type="submit" class="btn btn-sm btn-default m-2">
+                                            <i class="fa fa-backward mr-1"></i> Retour
+                                        </button>
                                     </router-link>
                                 </div>
                             </Form>
@@ -530,7 +351,7 @@ onMounted(() => {
                                 <div class="btn-group">
                                     <button v-if="formMode === 'addphone'" type="submit" class="btn btn-sm btn-primary m-2" :disabled="loading">
                                         <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        Valider
+                                        <i class="fa fa-save mr-1"></i> Valider
                                     </button>
                                     <button type="button" @click="cancelAddphone" class="btn btn-sm btn-default m-2">Annuler</button>
                                 </div>
@@ -541,297 +362,19 @@ onMounted(() => {
                 </div>
             </div>
 
-            <div v-if="formMode === 'edit' || formMode === 'show'" class="row">
-                <div class="col-lg-12">
-                    <div class="card card-warning card-outline direct-chat direct-chat-primary">
-                        <div class="card-header">
-                            <h5 class="card-title">Numéro(s) Téléphone</h5>
-                            <div class="card-tools">
-                                <span data-toggle="tooltip" title="3 New Messages" class="badge badge-success"></span>
+            <PhonenumList v-if="(formMode === 'edit' || formMode === 'show')"
+                          :modeltype="clientesim.modeltype"
+                          :modelid="clientesimId"
+            ></PhonenumList>
 
-                                <div class="btn-group">
+            <EmailAddressList v-if="(formMode === 'edit' || formMode === 'show')"
+                          :modeltype="clientesim.modeltype"
+                          :modelid="clientesimId"
+            ></EmailAddressList>
 
-                                </div>
-
-                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="container-fluid">
-                                <div class="d-flex justify-content-between pt-3">
-                                    <div class="d-flex">
-                                        <router-link v-if="can('clientesim-phonenum-add')" :to="{
-                                            name: 'phonenums.create',
-                                            params: {
-                                                modeltype: modeltype,
-                                                modelid: clientesimId
-                                            }
-                                        }">
-                                            <button type="button" class="mb-2 btn btn-sm btn-warning btn-xs">
-                                                <i class="fa fa-plus-circle mr-1"></i>
-                                                Nouveau
-                                            </button>
-                                        </router-link>
-
-                                        <div v-if="selectedPhonenums.length > 0">
-                                            <span class="ml-2"> {{ selectedPhonenums.length }} Numéro(s) sélectionnés(s)</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex">
-                                        <div class="input-group mb-3">
-                                            <input @keyup.enter="getPhonenums" type="search" v-model="searchPhonenumQuery" class="form-control text-xs" placeholder="Recherche text..." />
-                                            <button v-if="searchPhonenumQuery && !loadingPhonenums" @click="clearSearchPhonenumQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
-                                                <i class="fa fa-times"></i>
-                                            </button>
-                                            <div class="input-group-append">
-                                                <button class="btn btn-sm btn-default" @click="getPhonenums">
-                                                    <div v-if="loadingPhonenums" class="spinner-border spinner-border-sm" role="status">
-                                                        <span class="sr-only">Loading...</span>
-                                                    </div>
-                                                    <span v-else><i class="fa fa-search"></i></span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                                <Bootstrap4Pagination :data="phonenums" @pagination-change-page="getPhonenums" size="small" align="right" :limit="3" />
-                                <table class="table table-bordered">
-                                    <thead>
-                                    <tr>
-                                        <th><input type="checkbox" v-model="selectPhonenumsAll" @change="selectAllPhonenums" /></th>
-                                        <th style="width: 10px">#</th>
-                                        <th class="text text-sm">Numéro</th>
-                                        <th class="text text-sm">IMSI</th>
-                                        <th class="text text-sm">ICCID</th>
-                                        <th class="text text-sm">Créé Par</th>
-                                        <th class="text text-sm">Création</th>
-                                        <th class="text text-sm">Modification</th>
-                                        <th class="text text-sm">Options</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody v-if="phonenums.data.length > 0">
-                                    <EsimClientPhonenumListItem v-for="(phonenum, index) in phonenums.data"
-                                                        key="esimstate.id"
-                                                        :phonenum=phonenum
-                                                        :clientesim=clientesim
-                                                        @confirm-phonenum-deletion="confirmPhonenumDeletion"
-                                                        @confirm-phonenum-esim-recycle="confirmPhonenumEsimRecycle"
-                                                        :selectedPhonenums="selectedPhonenums"
-                                                        :index=index
-                                                        @toggle-selection="togglePhonenumsSelection"
-                                                        :selectAll="selectPhonenumsAll"
-                                    />
-                                    </tbody>
-                                    <tbody v-else>
-                                    <tr>
-                                        <td colspan="9" class="text-center">
-                                            <span v-if="loadingPhonenums" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                            <span>{{ loadingPhonenums ? ' Chargement en cours...' : ' Aucun résultat trouvé...' }}</span>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-
-                        </div>
-
-                        <div v-if="loadingPhonenums" class="overlay dark">
-                            <i class="fas fa-2x fa-sync-alt fa-spin"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div v-if="formMode === 'edit' || formMode === 'show'" class="row">
-                <div class="col-lg-12">
-                    <div class="card card-success card-outline direct-chat direct-chat-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">Adresse(s) E-Mail</h3>
-                            <div class="card-tools">
-                                <span data-toggle="tooltip" title="3 New Messages" class="badge badge-success"></span>
-
-                                <div class="btn-group">
-
-                                </div>
-
-                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="container-fluid">
-                                <div class="d-flex justify-content-between pt-3">
-                                    <div class="d-flex">
-                                        <router-link v-if="can('clientesim-emailaddress-add')" :to="{
-                                            name: 'emailaddresses.create',
-                                            params: {
-                                                modeltype: modeltype,
-                                                modelid: clientesimId
-                                            }
-                                        }">
-                                            <button type="button" class="mb-2 btn btn-sm btn-success btn-xs">
-                                                <i class="fa fa-plus-circle mr-1"></i>
-                                                Nouveau
-                                            </button>
-                                        </router-link>
-
-                                        <div v-if="selectedEmailaddresses.length > 0">
-                                            <span class="ml-2"> {{ selectedEmailaddresses.length }} E-Mail(s) sélectionnés(s)</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex">
-                                        <div class="input-group mb-3">
-                                            <input @keyup.enter="getEmailaddresses" type="search" v-model="searchEmailaddressQuery" class="form-control text-xs" placeholder="Recherche text..." />
-                                            <button v-if="searchEmailaddressQuery && !loadingEmailaddresses" @click="clearSearchEmailaddressQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
-                                                <i class="fa fa-times"></i>
-                                            </button>
-                                            <div class="input-group-append">
-                                                <button class="btn btn-sm btn-default" @click="getEmailaddresses">
-                                                    <div v-if="loadingEmailaddresses" class="spinner-border spinner-border-sm" role="status">
-                                                        <span class="sr-only">Loading...</span>
-                                                    </div>
-                                                    <span v-else><i class="fa fa-search"></i></span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                                <Bootstrap4Pagination :data="emailaddresses" @pagination-change-page="getEmailaddresses" size="small" align="right" :limit="3" />
-                                <table class="table table-bordered">
-                                    <thead>
-                                    <tr>
-                                        <th><input type="checkbox" v-model="selectEmailaddressesAll" @change="selectAllEmailaddresses" /></th>
-                                        <th style="width: 10px">#</th>
-                                        <th class="text text-sm">Email</th>
-                                        <th class="text text-sm">Créé Par</th>
-                                        <th class="text text-sm">Création</th>
-                                        <th class="text text-sm">Modification</th>
-                                        <th class="text text-sm">Options</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody v-if="emailaddresses.data.length > 0">
-                                    <EsimClientEmailAdressListItem v-for="(emailaddress, index) in emailaddresses.data"
-                                                                   key="emailaddress.id"
-                                                                   :emailaddress=emailaddress
-                                                                   :clientesim=clientesim
-                                                                   @confirm-emailaddress-deletion="confirmEmailaddressDeletion"
-                                                                   :selectedEmailaddresses="selectedEmailaddresses"
-                                                                   :index=index
-                                                                   @toggle-selection="toggleEmailaddressesSelection"
-                                                                   :selectAll="selectEmailaddressesAll"
-                                    />
-                                    </tbody>
-                                    <tbody v-else>
-                                    <tr>
-                                        <td colspan="9" class="text-center">
-                                            <span v-if="loadingEmailaddresses" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                            <span>{{ loadingEmailaddresses ? ' Chargement en cours...' : 'Aucun résultat trouvé...' }}</span>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-
-                        </div>
-
-                        <div v-if="loadingEmailaddresses" class="overlay dark">
-                            <i class="fas fa-2x fa-sync-alt fa-spin"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
-    <div class="modal fade" id="deletePhoneNumModal" data-backdrop="static" tabindex="-1" type="dialog"
-         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog" type="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">
-                        <span>Suppression Numéro Téléphone</span>
-                    </h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <h5>Etes-vous sûr de vouloir supprimer ce Numéro ?</h5>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-xs btn-secondary" data-dismiss="modal">Annuler</button>
-                    <button @click.prevent="deletePhoneNum" type="button" class="btn btn-xs btn-danger" :disabled="loadingPhoneNumDelete">
-                        <span v-if="loadingPhoneNumDelete" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        Supprimer
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="deleteEmailAddressModal" data-backdrop="static" tabindex="-1" type="dialog"
-         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog" type="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">
-                        <span>Suppression Adresse E-Mail</span>
-                    </h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <h5>Etes-vous sûr de vouloir supprimer cet E-Mail ?</h5>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-xs btn-secondary" data-dismiss="modal">Annuler</button>
-                    <button @click.prevent="deleteEmailAddress" type="button" class="btn btn-xs btn-danger" :disabled="loadingEmailAddressDelete">
-                        <span v-if="loadingEmailAddressDelete" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                         Supprimer
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="recyclePhoneNumEsimModal" data-backdrop="static" tabindex="-1" type="dialog"
-         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog" type="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel">
-                        <span>Recyclage Numéro</span>
-                    </h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <h5 class="text text-center">Recycler la Esim de ce Numero ?</h5>
-                    <p class="text text-center text-xs text-danger">une nouvelle Esim sera affectée</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-xs btn-secondary" data-dismiss="modal">Annuler</button>
-                    <button @click.prevent="recyclePhoneNumEsim" type="button" class="btn btn-xs btn-danger" :disabled="loadingPhoneNumEsimRecycle">
-                        <span v-if="loadingPhoneNumEsimRecycle" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                         Recycler
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 </template>
 
 <style>

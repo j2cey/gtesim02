@@ -4,6 +4,7 @@ import { useToastr } from '../../toastr.js';
 import axios from 'axios';
 import { Can } from "@casl/vue";
 import { useAbility } from "@casl/vue";
+import {formatDate} from "@/helper.js";
 
 const { can, cannot } = useAbility();
 
@@ -38,15 +39,23 @@ onMounted(() => {
     <tr>
         <td><input type="checkbox" :checked="selectAll" @change="toggleSelection" :key="user.id" /></td>
         <td class="text text-xs" >{{ index + 1 }}</td>
-        <td class="text text-xs" >{{ user.name }}</td>
+        <td class="text text-xs" >
+            <router-link v-if="can('users-show')" :to="`/users/${user.uuid}/show`">
+                {{ user.name }}
+            </router-link>
+            <span v-else>{{ user.name }}</span>
+        </td>
         <td class="text text-xs" >{{ user.email }}</td>
-        <td class="text text-xs" >{{ user.formatted_created_at }}</td>
+        <td class="text text-xs" ><small>{{ formatDate(user.created_at) }}</small></td>
+        <td class="text text-xs" ><small>{{ formatDate(user.updated_at) }}</small></td>
         <td class="text text-xs" >
             <span v-for="role in user.roles" class="badge text-muted">{{ role.name }}</span>
         </td>
         <td>
-            <a class="text text-xs" v-if="can('user-update')" href="#" @click.prevent="$emit('editUser', user)"><i class="fa fa-edit"></i></a>
-            <a class="text text-xs" v-if="can('user-delete')" href="#" @click.prevent="$emit('confirmUserDeletion', user)"><i class="fa fa-trash text-danger ml-2"></i></a>
+            <router-link v-if="can('users-update')" :to="`/users/${user.uuid}/edit`">
+                <i class="fa fa-edit mr-2 text text-xs font-weight-light"></i>
+            </router-link>
+            <a class="text text-xs" v-if="can('users-delete')" href="#" @click.prevent="$emit('confirmUserDeletion', user)"><i class="fa fa-trash-alt text-danger ml-2 font-weight-light"></i></a>
         </td>
     </tr>
 </template>

@@ -15,7 +15,7 @@ class PermissionController extends Controller
     {
         return [
             'auth',
-            new Middleware('permission:permission-list', only: ['index']),
+            new Middleware('permission:permissions-list', only: ['index']),
         ];
     }
 

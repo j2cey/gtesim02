@@ -3,7 +3,7 @@
 namespace App\Http\Requests\ClientEsim;
 
 use App\Models\Esims\ClientEsim;
-use App\Models\Employes\EmailAddress;
+use App\Models\Person\EmailAddress;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
 

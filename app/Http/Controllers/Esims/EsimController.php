@@ -22,6 +22,7 @@ use App\Http\Resources\Esims\EsimResource;
 use App\Http\Requests\Esim\UpdateEsimRequest;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class EsimController extends Controller
 {
@@ -39,7 +40,7 @@ class EsimController extends Controller
     /**
      * Display products page.
      *
-     * @return LengthAwarePaginator
+     * @return AnonymousResourceCollection
      */
     public function index()
     {
@@ -56,7 +57,7 @@ class EsimController extends Controller
             ->latest()
             ->paginate(50);
 
-        return $esims;
+        return EsimResource::collection( $esims );
     }
 
     /**
@@ -71,9 +72,9 @@ class EsimController extends Controller
 
     /**
      * @param StoreEsimRequest $request
-     * @return Esim
+     * @return EsimResource
      */
-    public function store(StoreEsimRequest $request): Esim
+    public function store(StoreEsimRequest $request)
     {
         $esim = Esim::createNew(
             $request->imsi,
@@ -90,7 +91,7 @@ class EsimController extends Controller
             $request->technologieesim ? TechnologieEsim::find($request->technologieesim['id']) : null
         );
 
-        return $esim;
+        return New EsimResource( $esim );
     }
 
     /**
@@ -110,10 +111,10 @@ class EsimController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param Esim $esim
-     * @return Esim
+     * @return EsimResource
      */
     public function edit(Esim $esim) {
-        return $esim->load(['statutesim', 'technologieesim', 'phonenum', 'states']);
+        return New EsimResource( $esim->load(['statutesim', 'technologieesim', 'phonenum', 'states']) );
     }
 
     /**

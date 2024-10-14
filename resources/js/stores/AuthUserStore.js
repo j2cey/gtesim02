@@ -20,8 +20,8 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
                 user.value = response.data;
                 userroles.value = response.data.roles.map(role => role.name.toLowerCase());
 
-                console.log('STORE user.value: ', user.value);
-                console.log('STORE userroles.value: ', userroles.value);
+                //console.log('STORE user.value: ', user.value);
+                //console.log('STORE userroles.value: ', userroles.value);
             });
     };
 
@@ -34,8 +34,9 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
     const getAbilities = async() => {
         axios.get('/api/abilities').then(response => {
 
-            console.log('STORE response: ', response);
-            console.log('STORE response.data.roles: ', response.data.roles);
+            //console.log('STORE response: ', response);
+            //console.log('STORE response.data.roles: ', response.data.roles);
+            //console.log('STORE response.data.permissions: ', response.data.permissions);
 
             permissions.value = response.data.permissions;
             userroles.value = response.data.roles.map(role => role.toLowerCase());
@@ -51,5 +52,18 @@ export const useAuthUserStore = defineStore('AuthUserStore', () => {
         });
     };
 
-    return { user, getAuthUser, getAbilities };
+    const isAdmin = () => {
+
+    };
+
+    const hasRole = (role) => {
+        let found;
+        found = userroles.value.find((item) => item === role);
+
+        //console.log("hasRole role: ", role, ", item_found: ", found);
+
+        return (role === found);
+    };
+
+    return { user, getAuthUser, getAbilities, isAdmin, hasRole };
 });

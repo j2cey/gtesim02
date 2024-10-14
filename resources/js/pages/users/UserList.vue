@@ -7,12 +7,17 @@ import { useToastr } from '../../toastr.js';
 import UserListItem from './UserListItem.vue';
 import { debounce } from 'lodash';
 import { Bootstrap4Pagination } from 'laravel-vue-pagination';
+import {useAbility} from "@casl/vue";
 
+const { can, cannot } = useAbility();
+
+const loading = ref(false);
 const toastr = useToastr();
 const users = ref({'data': []});
 const editing = ref(false);
 const form = ref(null);
 const formValues = ref();
+const paginationLinksLimit = ref(5);
 
 const userIdBeingDeleted = ref(null);
 
@@ -30,6 +35,7 @@ const toggleSelection = (user) => {
 };
 
 const getUsers = (page = 1) => {
+    loading.value = true;
     axios.get(`/api/users?page=${page}`, {
         params: {
             query: searchQuery.value
@@ -40,6 +46,9 @@ const getUsers = (page = 1) => {
             users.value = response.data;
             selectedUsers.value = [];
             selectAll.value = false;
+        })
+        .finally(() => {
+            loading.value = false;
         })
 }
 
@@ -161,7 +170,7 @@ const clearSearchQuery = () => {
 }
 
 watch(searchQuery, debounce(() => {
-    getUsers();
+    //getUsers();
 }, 300));
 
 onMounted(() => {
@@ -178,7 +187,9 @@ onMounted(() => {
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item">
+                            <router-link to="/">Accueil</router-link>
+                        </li>
                         <li class="breadcrumb-item active">Users</li>
                     </ol>
                 </div>
@@ -191,27 +202,34 @@ onMounted(() => {
 
             <div class="d-flex justify-content-between">
                 <div class="d-flex">
-                    <button @click="addUser" type="button" class="mb-2 btn btn-primary">
-                        <i class="fa fa-plus-circle mr-1"></i>
-                        Add New User
-                    </button>
+                    <router-link v-if="can('users-create')" to="users/create">
+                        <button type="button" class="mb-2 btn btn-sm btn-primary">
+                            <i class="fa fa-plus-circle mr-1"></i>
+                            New User
+                        </button>
+                    </router-link>
                     <div v-if="selectedUsers.length > 0">
-                        <button @click="bulkDelete" type="button" class="ml-2 mb-2 btn btn-danger">
+                        <button v-if="can('users-delete') && selectedUsers.length > 0" @click="bulkDelete" type="button" class="ml-2 mb-2 btn btn-sm btn-danger">
                             <i class="fa fa-trash mr-1"></i>
                             Delete Selected
                         </button>
-                        <span class="ml-2">Selected {{ selectedUsers.length }} users</span>
+                        <span v-if="selectedUsers.length > 0" class="ml-2 text-muted"> {{ selectedUsers.length }} user(s) selected</span>
                     </div>
                 </div>
 
                 <div class="d-flex">
                     <div class="input-group mb-3">
-                        <input type="search" v-model="searchQuery" class="form-control text-xs" placeholder="Search text..." />
-                        <button v-if="searchQuery" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+                        <input @keyup.enter="getUsers" type="search" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="Recherche text..." />
+                        <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
                             <i class="fa fa-times"></i>
                         </button>
                         <div class="input-group-append">
-                            <button class="btn btn-sm btn-default"><i class="fa fa-search"></i></button>
+                            <button class="btn btn-sm btn-default" @click="getUsers">
+                                <div v-if="loading" class="spinner-border spinner-border-sm" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <span v-else><i class="fa fa-search"></i></span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -219,16 +237,18 @@ onMounted(() => {
 
             <div class="card">
                 <div class="card-body">
+                    <Bootstrap4Pagination :data="users" @pagination-change-page="getUsers" size="small" :limit="paginationLinksLimit" align="right" />
                     <table class="table table-bordered">
                         <thead>
                         <tr>
                             <th><input type="checkbox" v-model="selectAll" @change="selectAllUsers" /></th>
                             <th style="width: 10px">#</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Registered Date</th>
-                            <th>Roles</th>
-                            <th>Options</th>
+                            <th class="text text-xs">Name</th>
+                            <th class="text text-xs">Email</th>
+                            <th class="text text-xs">Created at</th>
+                            <th class="text text-xs">Updated at</th>
+                            <th class="text text-xs">Roles</th>
+                            <th class="text text-xs">Options</th>
                         </tr>
                         </thead>
                         <tbody v-if="users.data.length > 0">
@@ -242,13 +262,21 @@ onMounted(() => {
                         </tbody>
                         <tbody v-else>
                         <tr>
-                            <td colspan="6" class="text-center">No results found...</td>
+                            <td colspan="7" class="text-center">
+                                <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span>{{ loading ? ' Loading...' : 'No results found...' }}</span>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
+                    <span v-if="users.meta?.total > 0" class="text text-xs text-primary">{{ users.meta.total + ' record' + (users.meta.total > 1 ? 's' : '') }}</span>
+                    <Bootstrap4Pagination :data="users" @pagination-change-page="getUsers" size="small" :limit="paginationLinksLimit" align="right" />
+                </div>
+
+                <div v-if="loading" class="overlay dark">
+                    <i class="fas fa-2x fa-sync-alt fa-spin"></i>
                 </div>
             </div>
-            <Bootstrap4Pagination :data="users" @pagination-change-page="getUsers" align="right" />
 
         </div>
     </div>
@@ -294,7 +322,7 @@ onMounted(() => {
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="submit" class="btn btn-primary"><i class="fa fa-save mr-1"></i> Save</button>
                     </div>
                 </Form>
             </div>

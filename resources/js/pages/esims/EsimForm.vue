@@ -9,6 +9,7 @@ import StateListItem from "./StateListItem.vue";
 import {Bootstrap4Pagination} from "laravel-vue-pagination";
 import Multiselect from 'vue-multiselect';
 import Swal from "sweetalert2";
+import StatusShow from "@/pages/statuses/StatusShow.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -144,6 +145,7 @@ const getEsim = () => {
             form.technologieesim = response.data.technologieesim;
 
             phonenum.value = response.data.phonenum;
+            status.value = response.data.status;
 
             esim.value = response.data;
         }).then(() => {
@@ -232,12 +234,23 @@ const getEsimStates = (page = 1) => {
     });
 }
 
+//<editor-fold desc="Status">
+const status = ref({});
+const statusChanged = (obj) => {
+    status.value = obj;
+};
+
+const statusKey = computed(() => {
+    return status.value.uuid;
+});
+//</editor-fold>
+
 watch(searchEsimStateQuery, debounce(() => {
     //getEsimStates();
 }, 300));
 
 const currentPath = ref('/');
-const lastPath = ref('/');
+const lastPath = ref('/esims');
 const prevRoutePath = computed(() => {
     return lastPath ? lastPath.value : '/';
 });
@@ -250,7 +263,7 @@ watch(route, () => {
 
 const initComponent = () => {
     initForm();
-    lastPath.value = router.options.history.state.back;
+    lastPath.value = router.options.history.state.back ? router.options.history.state.back : lastPath.value;
     currentPath.value = route.fullPath;
     if (route.name === 'esims.edit' || route.name === 'esims.show') {
         if (route.name === 'esims.edit') {
@@ -287,7 +300,7 @@ onMounted(() => {
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item">
-                            <router-link to="/dashboard">Accueil</router-link>
+                            <router-link to="/">Accueil</router-link>
                         </li>
                         <li class="breadcrumb-item">
                             <router-link to="/esims">Esims</router-link>
@@ -401,7 +414,7 @@ onMounted(() => {
                                 <div class="row small">
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="statutesim">Statut</label>
+                                            <label for="statutesim">Etat</label>
                                             <span v-if="formMode === 'show'" class="form-control border-0 text-xs" :class="'text-' + (form.statutesim ? form.statutesim.style : '' )">{{ form.statutesim?.libelle }}</span>
                                             <multiselect v-else
                                                 id="statutesim"
@@ -446,15 +459,30 @@ onMounted(() => {
                                             <input v-model="phonenum.phone_number" type="text" class="form-control form-control-sm border-0" id="phonenum" placeholder="Numéo Téléphone" readonly>
                                         </div>
                                     </div>
+
+                                    <div v-if="formMode === 'edit' || formMode === 'show'" class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="puk"><span class="text text-xs">Statut</span></label> <br>
+                                            <StatusShow :key="statusKey" v-if="status"
+                                                        :status="status"
+                                                        @status-changed="statusChanged"
+                                                        :modelclass="esim.modelclass"
+                                                        :modeltype="esim.modeltype"
+                                                        :modelid="esimid"
+                                            ></StatusShow>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="btn-group">
                                     <button type="submit" class="btn btn-sm btn-primary m-2" :disabled="loadingEsim">
                                         <span v-if="loadingEsim" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        Valider
+                                        <i class="fa fa-save mr-1"></i> Valider
                                     </button>
-                                    <router-link to="/esims">
-                                        <button type="submit" class="btn btn-sm btn-default m-2">Retour</button>
+                                    <router-link :to="prevRoutePath">
+                                        <button type="submit" class="btn btn-sm btn-default m-2">
+                                            <i class="fa fa-backward mr-1"></i> Retour
+                                        </button>
                                     </router-link>
                                 </div>
                             </Form>
@@ -469,7 +497,7 @@ onMounted(() => {
 
             <div v-if="formMode === 'edit' || formMode === 'show'" class="row">
                 <div class="col-lg-12">
-                    <div class="card card-primary card-outline direct-chat direct-chat-primary">
+                    <div class="card card-primary card-outline direct-chat direct-chat-primary collapsed-card">
                         <div class="card-header">
                             <h3 class="card-title">Historique</h3>
                             <div class="card-tools">
@@ -480,7 +508,7 @@ onMounted(() => {
                                 </div>
 
                                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                    <i class="fas fa-minus"></i>
+                                    <i class="fas fa-plus"></i>
                                 </button>
                             </div>
                         </div>
@@ -496,7 +524,7 @@ onMounted(() => {
 
                                     <div class="d-flex">
                                         <div class="input-group mb-3">
-                                            <input @keyup.enter="getEsimStates" type="search" v-model="searchEsimStateQuery" class="form-control text-xs" placeholder="Recherche text..." />
+                                            <input @keyup.enter="getEsimStates" type="search" v-model="searchEsimStateQuery" class="form-control text-xs form-control-sm" placeholder="Recherche text..." />
                                             <button v-if="searchEsimStateQuery && !loadingEsimStates" @click="clearSearchEsimStateQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
                                                 <i class="fa fa-times"></i>
                                             </button>

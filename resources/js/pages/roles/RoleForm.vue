@@ -5,9 +5,12 @@ import { useRouter, useRoute } from 'vue-router';
 import { useToastr } from '@/toastr';
 import { Form } from 'vee-validate';
 import {debounce} from "lodash";
-import PermissionListItem from "@/pages/roles/PermissionListItem.vue";
+import PermissionListItem from "../roles/PermissionListItem.vue";
 import {Bootstrap4Pagination} from "laravel-vue-pagination";
 
+
+const loadingPermissions = ref(false);
+const paginationLinksLimit = ref(5);
 const router = useRouter();
 const route = useRoute();
 const toastr = useToastr();
@@ -17,14 +20,20 @@ const form = reactive({
     created_at: '',
 });
 
-const editMode = ref(false);
+const formMode = ref('create');
 const rolepermissions = ref({});
 const affectedpermissions = ref({});
 
+const initForm = () => {
+    form.name = '';
+    form.guard_name = 'web';
+    form.created_at = '';
+}
+
 const handleSubmit = (values, actions) => {
-    if (editMode.value) {
+    if (formMode.value === 'edit') {
         updateRole(values, actions);
-    } else {
+    } else if (formMode.value === 'create') {
         createRole(values, actions);
     }
 };
@@ -35,7 +44,7 @@ const createRole = (values, actions) => {
             // router.push('/roles');
             role.value = response.data;
             roleid.value = response.data.id;
-            editMode.value = true;
+            formMode.value = 'edit';
             toastr.success('Role created successfully!');
         })
         .catch((error) => {
@@ -83,6 +92,7 @@ const getPermissionsByStatus = (status) => {
     getPermissions();
 }
 const getPermissions = (page = 1) => {
+    loadingPermissions.value = true;
     axios.get(`/api/permissions?page=${page}`, {
         params: {
             query: searchQuery.value,
@@ -97,7 +107,9 @@ const getPermissions = (page = 1) => {
             selectedPermissions.value = [];
             selectAllPermissions.value = false;
             selectAll.value = false;
-        })
+        }).finally(() => {
+            loadingPermissions.value = false;
+    })
 }
 
 const selectAll = ref(false);
@@ -209,12 +221,37 @@ watch(searchQuery, debounce(() => {
     getPermissions();
 }, 300));
 
-onMounted(() => {
-    if (route.name === 'roles.edit') {
-        roleid.value = route.params.id;
-        editMode.value = true;
-        getRole();
+const currentPath = ref('/');
+const lastPath = ref('/roles');
+const prevRoutePath = computed(() => {
+    return lastPath;// ? lastPath.value : '/clientesims';
+});
+
+watch(route, () => {
+    if (route.fullPath !== currentPath.value) {
+        initComponent();
     }
+});
+
+const initComponent = () => {
+    initForm();
+    lastPath.value = router.options.history.state.back ? router.options.history.state.back : lastPath.value;
+    currentPath.value = route.fullPath;
+    if (route.name === 'roles.edit' || route.name === 'roles.show') {
+        if (route.name === 'roles.edit') {
+            formMode.value = 'edit';
+        } else {
+            formMode.value = 'show';
+        }
+        roleid.value = route.params.id;
+        getRole();
+    } else {
+        formMode.value = 'create';
+    }
+};
+
+onMounted(() => {
+    initComponent();
     getPermissions();
     // getPermissionsCount();
 });
@@ -226,21 +263,23 @@ onMounted(() => {
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h1 class="m-0">
-                        <span v-if="editMode">Edit</span>
-                        <span v-else>Create</span>
-                        Role</h1>
+                        <span v-if="formMode === 'edit'">Role Modification</span>
+                        <span v-else-if="formMode === 'create'">Create Role</span>
+                        <span v-else>Role Details</span>
+                    </h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item">
-                            <router-link to="/dashboard">Home</router-link>
+                            <router-link to="/">Accueil</router-link>
                         </li>
                         <li class="breadcrumb-item">
                             <router-link to="/roles">Roles</router-link>
                         </li>
                         <li class="breadcrumb-item active">
-                            <span v-if="editMode">Edit</span>
-                            <span v-else>Create</span>
+                            <span v-if="formMode === 'edit'">Modification</span>
+                            <span v-else-if="formMode === 'create'">Creation</span>
+                            <span v-else>Details</span>
                         </li>
                     </ol>
                 </div>
@@ -259,22 +298,24 @@ onMounted(() => {
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="title">Name</label>
-                                            <input v-model="form.name" type="text" class="form-control" :class="{ 'is-invalid': errors.name }" id="name" placeholder="Enter Name">
+                                            <input v-model="form.name" type="text" class="form-control" :class="{ 'is-invalid': errors.name }" id="name" placeholder="Enter Name" :disabled="formMode === 'show'">
                                             <span class="invalid-feedback">{{ errors.name }}</span>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="title">Guard Name</label>
-                                            <input v-model="form.guard_name" type="text" class="form-control" :class="{ 'is-invalid': errors.guard_name }" id="guard_name" placeholder="Enter Guard Name">
+                                            <input v-model="form.guard_name" type="text" class="form-control" :class="{ 'is-invalid': errors.guard_name }" id="guard_name" placeholder="Enter Guard Name" :disabled="formMode === 'show'">
                                             <span class="invalid-feedback">{{ errors.guard_name }}</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="btn-group">
-                                    <button type="submit" class="btn btn-sm btn-primary m-2">Submit</button>
+                                    <button v-if="formMode === 'create' || formMode === 'edit'" type="submit" class="btn btn-sm btn-primary m-2">Submit</button>
                                     <router-link to="/roles">
-                                        <button type="submit" class="btn btn-sm btn-default m-2">Back</button>
+                                        <button type="submit" class="btn btn-sm btn-default m-2">
+                                            <i class="fa fa-backward mr-1"></i> Back
+                                        </button>
                                     </router-link>
                                 </div>
                             </Form>
@@ -284,7 +325,7 @@ onMounted(() => {
                 </div>
             </div>
 
-            <div v-if="editMode" class="row">
+            <div v-if="formMode === 'edit' || formMode === 'show'" class="row">
                 <div class="col-lg-12">
                     <div class="card card-primary card-outline direct-chat direct-chat-primary">
                         <div class="card-header">
@@ -298,12 +339,12 @@ onMounted(() => {
                                         <span class="badge badge-pill badge-info">{{ permissionscount }}</span>
                                     </button>
 
-                                    <button :disabled="!editMode" @click="getPermissionsByStatus('in_role')" type="button" class="btn btn-xs btn-outline-success" :class="permStatus === 'in_role' ? 'active' : ''">
+                                    <button @click="getPermissionsByStatus('in_role')" type="button" class="btn btn-xs btn-outline-success" :class="permStatus === 'in_role' ? 'active' : ''">
                                         <span class="mr-1">In Role</span>
                                         <span class="badge badge-pill badge-info">{{ rolepermissions.length ? rolepermissions.length : 0 }}</span>
                                     </button>
 
-                                    <button :disabled="!editMode" @click="getPermissionsByStatus('out_role')" type="button" class="btn btn-xs btn-outline-warning" :class="permStatus === 'out_role' ? 'active' : ''">
+                                    <button @click="getPermissionsByStatus('out_role')" type="button" class="btn btn-xs btn-outline-warning" :class="permStatus === 'out_role' ? 'active' : ''">
                                         <span class="mr-1">Out Role</span>
                                         <span class="badge badge-pill badge-info">{{ outRolePermissionsCount }}</span>
                                     </button>
@@ -320,11 +361,11 @@ onMounted(() => {
                                 <div class="d-flex justify-content-between pt-3">
                                     <div class="d-flex">
                                         <div v-if="selectedPermissions.length > 0">
-                                            <button :disabled="permStatus === 'in_role'" @click="bulkAssign" type="button" class="ml-2 mb-2 btn btn-success">
+                                            <button :disabled="permStatus === 'in_role'" @click="bulkAssign" type="button" class="ml-2 mb-2 btn btn-sm btn-success">
                                                 <i class="fa fa-link mr-1"></i>
                                                 Give Selected
                                             </button>
-                                            <button :disabled="permStatus === 'out_role'" @click="bulkRevoke" type="button" class="ml-2 mb-2 btn btn-warning">
+                                            <button :disabled="permStatus === 'out_role'" @click="bulkRevoke" type="button" class="ml-2 mb-2 btn btn-sm btn-warning">
                                                 <i class="fa fa-ban mr-1"></i>
                                                 Revoke Selected
                                             </button>
@@ -334,7 +375,7 @@ onMounted(() => {
 
                                     <div class="d-flex">
                                         <div class="input-group mb-3">
-                                            <input type="search" v-model="searchQuery" class="form-control text-xs" placeholder="Search text..." />
+                                            <input type="search" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="Search text..." />
                                             <button v-if="searchQuery" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
                                                 <i class="fa fa-times"></i>
                                             </button>
@@ -348,19 +389,20 @@ onMounted(() => {
                                 <table class="table table-bordered">
                                     <thead>
                                     <tr>
-                                        <th><input type="checkbox" v-model="selectAll" @change="selectAllPermissions" /></th>
-                                        <th style="width: 10px">#</th>
-                                        <th>Name</th>
-                                        <th>Guard Name</th>
-                                        <th>Level</th>
-                                        <th>Registered Date</th>
-                                        <th>Options</th>
+                                        <th v-if="formMode !== 'show'"><input type="checkbox" v-model="selectAll" @change="selectAllPermissions" /></th>
+                                        <th class="text text-xs" style="width: 10px">#</th>
+                                        <th class="text text-xs">Name</th>
+                                        <th class="text text-xs">Guard Name</th>
+                                        <th class="text text-xs">Level</th>
+                                        <th class="text text-xs">Created</th>
+                                        <th class="text text-xs">Updated</th>
+                                        <th v-if="formMode !== 'show'" class="text text-xs">Options</th>
                                     </tr>
                                     </thead>
                                     <tbody v-if="permissions.data.length > 0">
                                     <PermissionListItem v-for="(permission, index) in permissions.data"
                                                         key="permission.id"
-                                                        :editMode=editMode
+                                                        :formMode=formMode
                                                         :role=role
                                                         :permission=permission
                                                         :index=index
@@ -376,13 +418,16 @@ onMounted(() => {
                                     </tr>
                                     </tbody>
                                 </table>
-                                <Bootstrap4Pagination :data="permissions" @pagination-change-page="getPermissions" align="right" />
+                                <Bootstrap4Pagination :data="permissions" @pagination-change-page="getPermissions"size="small" :limit="paginationLinksLimit" align="right" />
                             </div>
                         </div>
                         <div class="card-footer">
 
                         </div>
 
+                        <div v-if="loadingPermissions" class="overlay dark">
+                            <i class="fas fa-2x fa-sync-alt fa-spin"></i>
+                        </div>
                     </div>
                 </div>
             </div>

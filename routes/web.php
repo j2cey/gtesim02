@@ -14,11 +14,11 @@ use App\Http\Controllers\Auth\PermissionController;
 use App\Http\Controllers\Esims\StatutEsimController;
 use App\Http\Controllers\Esims\ClientEsimController;
 use App\Http\Controllers\Employes\EmployeController;
-use App\Http\Controllers\Employes\PhoneNumController;
+use App\Http\Controllers\Persons\PhoneNumController;
 use App\Http\Controllers\Admin\DashboardStatController;
 use App\Http\Controllers\Employes\DepartementController;
+use App\Http\Controllers\Persons\EmailAddressController;
 use App\Http\Controllers\Esims\TechnologieEsimController;
-use App\Http\Controllers\Employes\EmailAddressController;
 use App\Http\Controllers\Employes\FonctionEmployeController;
 use App\Http\Controllers\Employes\TypeDepartementController;
 
@@ -71,7 +71,7 @@ Route::middleware('auth')->group(function () {
     Route::get('permissions', PermissionController::class);
     Route::get('/api/permissions/', [PermissionController::class, 'index']);
     Route::get('/api/permissions/count/', [PermissionController::class, 'count']);
-    Route::get('roles', RoleController::class);
+    //Route::get('roles', RoleController::class);
     Route::get('/api/roles/', [RoleController::class, 'index']);
     Route::post('/api/roles/', [RoleController::class, 'store']);
     Route::get('/api/roles/{role}/edit', [RoleController::class, 'edit']);
@@ -87,17 +87,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/users/', [UserController::class, 'index'])->name('users.');
     Route::post('/api/users/', [UserController::class, 'store'])->name('users.store');
     Route::put('/api/users/{user}', [UserController::class, 'update'])->name('users.update');
-    Route::patch('/api/users/{user}/edit', [UserController::class, 'edit']);
+    Route::put('/api/users/{user}/resetpwd', [UserController::class, 'resetpwd'])->name('users.resetpwd');
+    Route::get('/api/users/{user}/edit', [UserController::class, 'edit']);
     Route::patch('/api/users/{user}/change-role', [UserController::class, 'changeRole']);
-    Route::delete('/api/users/{user}', [UserController::class, 'destory'])->name('users.destory');
+    Route::delete('/api/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::delete('/api/users', [UserController::class, 'bulkDelete']);
+    Route::patch('/api/users/{user}/assign-roles', [UserController::class, 'assignRoles']);
+    Route::patch('/api/users/{user}/revoke-roles', [UserController::class, 'revokeRoles']);
     #endregion
 
     #region Status
-    Route::get('/api/statuses', [StatusController::class, 'index'])->name('statuses.');
+    Route::get('/api/statuses', [StatusController::class, 'index'])->name('statuses.index');
+    Route::get('/api/statuses/codes', [StatusController::class, 'fetchCodes'])->name('statuses.codes');
     Route::get('/api/statuses/{status}/edit', [StatusController::class, 'edit'])->name('statuses.edit');
     Route::post('/api/statuses/', [StatusController::class, 'store'])->name('statuses.store');
     Route::put('/api/statuses/{status}', [StatusController::class, 'update'])->name('statuses.update');
+    Route::get('/api/statuses/change', [StatusController::class, 'statuschange'])->name('statuses.change');
     #endregion
 
     #region SETTINGS
@@ -140,11 +145,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/clientesims/{clientesim}/show', [ClientEsimController::class, 'show'])->name('clientesims.show');
     Route::get('/api/clientesims/{clientesim}/phonenumindex', [ClientEsimController::class, 'phonenumindex']);
     Route::get('/api/clientesims/{clientesim}/emailaddressindex', [ClientEsimController::class, 'emailaddressindex']);
-    Route::post('/api/clientesim/phonenums/add', [ClientEsimController::class, 'addphone'])->name('clientesimphonenums.add');
-    Route::put('/api/clientesim/{clientesim}/phonenums/add', [ClientEsimController::class, 'phonenumadd'])->name('clientesims.phonenumadd');
-    Route::put('/api/clientesim/{clientesim}/phonenums/{phonenum}', [ClientEsimController::class, 'phonenumupdate'])->name('clientesimphonenums.update');
-    Route::put('/api/clientesim/{clientesim}/emailaddresses/add', [ClientEsimController::class, 'emailaddressadd'])->name('clientesims.emailaddressadd');
-    Route::put('/api/clientesim/{clientesim}/emailaddresses/{emailaddress}', [ClientEsimController::class, 'emailaddressupdate'])->name('clientesimemailaddresses.update');
+    Route::post('/api/clientesims/phonenums/add', [ClientEsimController::class, 'addphone'])->name('clientesimphonenums.add');
+    Route::put('/api/clientesims/{clientesim}/phonenums/add', [ClientEsimController::class, 'phonenumadd'])->name('clientesims.phonenumadd');
+    Route::put('/api/clientesims/{clientesim}/phonenums/{phonenum}', [ClientEsimController::class, 'phonenumupdate'])->name('clientesimphonenums.update');
+    Route::put('/api/clientesims/{clientesim}/emailaddresses/add', [ClientEsimController::class, 'emailaddressadd'])->name('clientesims.emailaddressadd');
+    Route::put('/api/clientesims/{clientesim}/emailaddresses/{emailaddress}', [ClientEsimController::class, 'emailaddressupdate'])->name('clientesimemailaddresses.update');
+
+    Route::get('/api/clientesims/{clientesim}/statuschange', [ClientEsimController::class, 'statuschange'])->name('clientesims.statuschange');
     #endregion
 
     #region PhoneNum
@@ -158,7 +165,7 @@ Route::middleware('auth')->group(function () {
     #endregion
 
     #region EmailAddress
-    Route::get('/api/emailaddresses', [EmailAddressController::class, 'index'])->name('emailaddresses.');
+    Route::get('/api/emailaddresses', [EmailAddressController::class, 'index'])->name('emailaddresses.index');
     Route::get('/api/emailaddresses/{emailaddress}/edit', [EmailAddressController::class, 'edit'])->name('emailaddresses.edit');
     Route::get('/api/emailaddresses/{emailaddress}/show', [EmailAddressController::class, 'show'])->name('emailaddresses.show');
     Route::post('/api/emailaddresses/', [EmailAddressController::class, 'store'])->name('emailaddresses.store');
@@ -166,7 +173,8 @@ Route::middleware('auth')->group(function () {
     #endregion
 
     #region FonctionEmploye
-    Route::get('/api/fonctionemployes', [FonctionEmployeController::class, 'index'])->name('fonctionemployes.');
+    Route::get('/api/fonctionemployes', [FonctionEmployeController::class, 'index'])->name('fonctionemployes.index');
+    Route::get('/api/fonctionemployes/all', [FonctionEmployeController::class, 'fetchall'])->name('fonctionemployes.fetchall');
     Route::get('/api/fonctionemployes/{fonctionemploye}/edit', [FonctionEmployeController::class, 'edit'])->name('fonctionemployes.edit');
     Route::get('/api/fonctionemployes/{fonctionemploye}/show', [FonctionEmployeController::class, 'show'])->name('fonctionemployes.show');
     Route::post('/api/fonctionemployes/', [FonctionEmployeController::class, 'store'])->name('fonctionemployes.store');
@@ -180,17 +188,21 @@ Route::middleware('auth')->group(function () {
     #endregion
 
     #region Departement
-    Route::get('/api/departements', [DepartementController::class, 'index'])->name('departements.');
+    Route::get('/api/departements', [DepartementController::class, 'index'])->name('departements.index');
+    Route::get('/api/departements/all', [DepartementController::class, 'fetchall'])->name('departements.fetchall');
     Route::get('/api/departements/{departement}/edit', [TypeDepartementController::class, 'edit'])->name('departements.edit');
     Route::get('/api/departements/{departement}/show', [TypeDepartementController::class, 'show'])->name('departements.show');
     Route::post('/api/departements/', [TypeDepartementController::class, 'store'])->name('departements.store');
     #endregion
 
     #region Employe
-    Route::get('/api/employes', [EmployeController::class, 'index'])->name('employes.');
+    Route::get('/api/employes', [EmployeController::class, 'index'])->name('employes.index');
+    Route::get('/api/employes/{employe}/phonenumindex', [EmployeController::class, 'phonenumindex'])->name('employes.phonenumindex');
+    Route::get('/api/employes/{employe}/emailaddressindex', [EmployeController::class, 'emailaddressindex'])->name('employes.emailaddressindex');
     Route::get('/api/employes/{employe}/edit', [EmployeController::class, 'edit'])->name('employes.edit');
     Route::get('/api/employes/{employe}/show', [EmployeController::class, 'show'])->name('employes.show');
-    Route::post('/api/employes/', [EmployeController::class, 'store'])->name('employes.store');
+    Route::post('/api/employes/{user?}', [EmployeController::class, 'store'])->name('employes.store');
+    Route::put('/api/employes/{employe}', [EmployeController::class, 'update'])->name('employes.update');
     #endregion
 
 });

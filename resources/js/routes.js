@@ -1,6 +1,9 @@
 import Dashboard from "./components/Dashboard.vue";
 import Contact from "./pages/app/Contact.vue";
+
 import UserList from "./pages/users/UserList.vue";
+import UserForm from "./pages/users/UserForm.vue";
+
 import RoleList from "./pages/roles/RoleList.vue";
 import RoleForm from "./pages/roles/RoleForm.vue";
 import SettingList from "./pages/settings/SettingList.vue";
@@ -17,9 +20,15 @@ import EsimForm from "./pages/esims/EsimForm.vue";
 import ClientEsimList from "./pages/clientesims/ClientEsimList.vue";
 import ClientEsimForm from "./pages/clientesims/ClientEsimForm.vue";
 
+import PhoneNumAll from "./pages/phonenums/PhoneNumAll.vue";
 import PhoneNumForm from "./pages/phonenums/PhoneNumForm.vue";
 import PhoneNumPdf from "./pages/phonenums/PhoneNumPdf.vue";
+import EmailAddressAll from "./pages/emailaddresses/EmailAddressAll.vue";
 import EmailAddressForm from "./pages/emailaddresses/EmailAddressForm.vue";
+
+import EmployeeList from "./pages/employees/EmployeeList.vue";
+import EmployeeForm from "./pages/employees/EmployeeForm.vue";
+import Error404 from "./pages/errors/Error404.vue";
 
 export default [
     {
@@ -43,9 +52,24 @@ export default [
         component: Dashboard,
     },
     {
+        path: '/users/create',
+        name: 'users.create',
+        component: UserForm,
+    },
+    {
         path: '/users',
         name: 'users',
         component: UserList,
+    },
+    {
+        path: '/users/:id/edit',
+        name: 'users.edit',
+        component: UserForm,
+    },
+    {
+        path: '/users/:id/show',
+        name: 'users.show',
+        component: UserForm,
     },
     {
         path: '/roles',
@@ -60,6 +84,11 @@ export default [
     {
         path: '/roles/:id/edit',
         name: 'roles.edit',
+        component: RoleForm,
+    },
+    {
+        path: '/roles/:id/show',
+        name: 'roles.show',
         component: RoleForm,
     },
     {
@@ -119,13 +148,23 @@ export default [
         component: ClientEsimForm,
     },
     {
-        path: '/phonenums/:modeltype/:modelid?/create',
+        path: '/phonenums',
+        name: 'phonenums.index',
+        component: PhoneNumAll,
+    },
+    {
+        path: '/phonenums/:modeltype?/:modelid?/create',
         name: 'phonenums.create',
         component: PhoneNumForm,
     },
     {
-        path: '/phonenums/:id/:modeltype/:modelid/edit',
+        path: '/phonenums/:id/:modeltype?/:modelid?/edit',
         name: 'phonenums.edit',
+        component: PhoneNumForm,
+    },
+    {
+        path: '/phonenums/:id/:modeltype?/:modelid?/show',
+        name: 'phonenums.show',
         component: PhoneNumForm,
     },
     {
@@ -134,19 +173,44 @@ export default [
         component: PhoneNumPdf,
     },
     {
-        path: '/emailaddresses/:modeltype/:modelid?/create',
+        path: '/emailaddresses',
+        name: 'emailaddresses.index',
+        component: EmailAddressAll,
+    },
+    {
+        path: '/emailaddresses/:modeltype?/:modelid?/create',
         name: 'emailaddresses.create',
         component: EmailAddressForm,
     },
     {
-        path: '/emailaddresses/:id/:modeltype/:modelid/edit',
+        path: '/emailaddresses/:id/:modeltype?/:modelid?/edit',
         name: 'emailaddresses.edit',
         component: EmailAddressForm,
     },
     {
-        path: '/users',
-        name: 'users',
-        component: UserList,
+        path: '/emailaddresses/:id/:modeltype?/:modelid?/show',
+        name: 'emailaddresses.show',
+        component: EmailAddressForm,
+    },
+    {
+        path: '/employees',
+        name: 'employees',
+        component: EmployeeList,
+    },
+    {
+        path: '/employees/create/:userid?',
+        name: 'employees.create',
+        component: EmployeeForm,
+    },
+    {
+        path: '/employees/:id/edit',
+        name: 'employees.edit',
+        component: EmployeeForm,
+    },
+    {
+        path: '/employees/:id/show',
+        name: 'employees.show',
+        component: EmployeeForm,
     },
     {
         path: '/statuses',
@@ -162,5 +226,10 @@ export default [
         path: '/statuses/:id/edit',
         name: 'statuses.edit',
         component: StatusForm,
+    },
+    {
+        path: '/:notFound',
+        name: 'error.404',
+        component: Error404,
     },
 ]

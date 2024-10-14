@@ -17,6 +17,11 @@ class DepartementController extends Controller
         //
     }
 
+    public function fetchall()
+    {
+        return Departement::all();
+    }
+
     /**
      * Show the form for creating a new resource.
      */

@@ -3,6 +3,7 @@
 namespace App\Models\Employes;
 
 use App\Models\BaseModel;
+use App\Contracts\IsBaseModel;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -44,7 +45,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property-read \App\Models\Status|null $status
  */
 
-class FonctionEmploye extends BaseModel implements Auditable
+class FonctionEmploye extends BaseModel implements IsBaseModel, Auditable
 {
     use HasFactory, \OwenIt\Auditing\Auditable;
 

@@ -5,6 +5,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useToastr } from '@/toastr';
 import { Form } from 'vee-validate';
 import Swal from "sweetalert2";
+import StatusShow from "@/pages/statuses/StatusShow.vue";
 
 // TODO: Manage EmailAddress Posi
 // TODO: Add a Cancel button to reset the form
@@ -18,20 +19,20 @@ const form = reactive({
 });
 
 const loading = ref(false);
-const editMode = ref(false);
+const formMode = ref('create');
 const emailaddress = ref({});
 const emailaddressId = ref(null);
 const creator = ref({});
 
-const lastPath = ref('/');
+const lastPath = ref('/emailaddresses');
 
 const modeltype = ref('');
 const modelid = ref('');
 
 const handleSubmit = (values, actions) => {
-    if (editMode.value) {
+    if (formMode.value === 'edit') {
         updateEmailAddress(values, actions);
-    } else {
+    } else if (formMode.value === 'create') {
         createEmailAddress(values, actions);
     }
 };
@@ -44,7 +45,7 @@ const createEmailAddress = (values, actions) => {
 
             emailaddress.value = response.data;
             emailaddressId.value = response.data.id;
-            editMode.value = true;
+            formMode.value = 'edit';
 
             Swal.fire({
                 html: '<small>E-Mail créée avec succès !</small>',
@@ -90,6 +91,7 @@ const getEmailAddress = () => {
             form.posi = response.data.posi;
 
             creator.value = response.data.creator;
+            status.value = response.data.status;
 
             emailaddress.value = response.data;
         }).then(() => {
@@ -99,19 +101,36 @@ const getEmailAddress = () => {
     )
 };
 
+//<editor-fold desc="Status">
+const status = ref({});
+const statusChanged = (obj) => {
+    status.value = obj;
+};
+
+const statusKey = computed(() => {
+    return status.value.uuid;
+});
+//</editor-fold>
+
 const prevRoutePath = computed(() => {
     return lastPath ? lastPath.value : '/';
 });
 
 onMounted(() => {
-    lastPath.value = router.options.history.state.back;
+    lastPath.value = router.options.history.state.back ? router.options.history.state.back : lastPath.value;
     modeltype.value = route.params.modeltype;
     modelid.value = route.params.modelid;
-    console.log('EmailAddressForm onMounted, route.params: ', route.params);
-    if (route.name === 'emailaddresses.edit') {
+
+    if (route.name === 'emailaddresses.edit' || route.name === 'emailaddresses.show') {
+        if (route.name === 'emailaddresses.edit') {
+            formMode.value = 'edit';
+        } else {
+            formMode.value = 'show';
+        }
         emailaddressId.value = route.params.id;
-        editMode.value = true;
         getEmailAddress();
+    } else {
+        formMode.value = 'create';
     }
 });
 </script>
@@ -122,8 +141,9 @@ onMounted(() => {
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h1 class="m-0">
-                        <span v-if="editMode">Modification</span>
-                        <span v-else>Création</span>
+                        <span v-if="formMode === 'edit'">Modification</span>
+                        <span v-else-if="formMode === 'create'">Création</span>
+                        <span v-else>Détails</span>
                         E-Mail</h1>
                 </div>
                 <div class="col-sm-6">
@@ -132,11 +152,12 @@ onMounted(() => {
                             <router-link to="/">Accueil</router-link>
                         </li>
                         <li class="breadcrumb-item">
-                            <router-link to="/">E-Mails</router-link>
+                            <router-link to="/emailaddresses">E-Mails</router-link>
                         </li>
                         <li class="breadcrumb-item active">
-                            <span v-if="editMode">Modification</span>
-                            <span v-else>Création</span>
+                            <span v-if="formMode === 'edit'">Modification</span>
+                            <span v-else-if="formMode === 'create'">Création</span>
+                            <span v-else>Détails</span>
                         </li>
                     </ol>
                 </div>
@@ -159,23 +180,44 @@ onMounted(() => {
                                             <span class="invalid-feedback">{{ errors.email_address }}</span>
                                         </div>
                                     </div>
-                                    <div class="col-md-3" v-if="editMode">
+                                    <div class="col-md-3" v-if="formMode === 'edit'">
                                         <div class="form-group">
                                             <label for="iccid">Position</label>
                                             <input v-model="form.posi" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.posi }" id="posi" placeholder="Position">
                                             <span class="invalid-feedback">{{ errors.posi }}</span>
                                         </div>
                                     </div>
-
+                                    <div v-if="formMode === 'edit' || formMode === 'show'" class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="puk"><span class="text text-xs">Statut</span></label> <br>
+                                            <StatusShow :key="statusKey" v-if="status"
+                                                        :status="status"
+                                                        @status-changed="statusChanged"
+                                                        :modelclass="emailaddress.modelclass"
+                                                        :modeltype="emailaddress.modeltype"
+                                                        :modelid="emailaddressId"
+                                            ></StatusShow>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-if="formMode === 'edit' || formMode === 'show'" class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="puk"><span class="text text-xs">Titulaire</span></label>
+                                            <span class="form-control border-0 text-xs">{{ emailaddress.hasemailaddress?.intitule }}</span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="btn-group">
                                     <button type="submit" class="btn btn-sm btn-primary m-2">
                                         <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        Valider
+                                        <i class="fa fa-save mr-1"></i> Valider
                                     </button>
                                     <router-link :to="prevRoutePath">
-                                        <button type="submit" class="btn btn-sm btn-default m-2">Retour</button>
+                                        <button type="submit" class="btn btn-sm btn-default m-2">
+                                            <i class="fa fa-backward mr-1"></i> Retour
+                                        </button>
                                     </router-link>
                                 </div>
                             </Form>

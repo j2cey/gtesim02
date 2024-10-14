@@ -40,10 +40,10 @@ onMounted(() => {
         <td class="text text-xs" >{{ formatDate(status.created_at) }}</td>
         <td class="text text-xs" >{{ formatDate(status.updated_at) }}</td>
         <td>
-            <router-link v-if="can('status-update')" :to="`/statuses/${status.id}/edit`">
-                <i class="fa fa-edit mr-2 text text-xs"></i>
+            <router-link v-if="can('statuses-update')" :to="`/statuses/${status.id}/edit`">
+                <i class="fa fa-edit mr-2 text text-xs font-weight-light"></i>
             </router-link>
-            <a class="text text-xs" v-if="can('status-delete')" href="#" @click.prevent="$emit('confirmStatusDeletion', status)"><i class="fa fa-trash text-danger ml-2"></i></a>
+            <a class="text text-xs" v-if="can('statuses-delete')" href="#" @click.prevent="$emit('confirmStatusDeletion', status)"><i class="fa fa-trash-alt text-danger ml-2 font-weight-light"></i></a>
         </td>
     </tr>
 </template>

@@ -6,12 +6,14 @@ use App\Models\User;
 use GuzzleHttp\Client;
 use App\Models\BaseModel;
 use Illuminate\Support\Carbon;
-use App\Models\Employes\PhoneNum;
+use App\Contracts\IsBaseModel;
+use App\Models\Person\PhoneNum;
 use App\Traits\PhoneNum\HasPhoneNums;
-use App\Contracts\Employes\IHasPhoneNums;
+use App\Contracts\Persons\IHasPhoneNums;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Contracts\Persons\IHasEmailAddresses;
 use App\Traits\EmailAddress\HasEmailAddresses;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -39,12 +41,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property int|null $updated_by user updator reference
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read int|null $audits_count
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Employes\EmailAddress[] $emailaddresses
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Person\EmailAddress[] $emailaddresses
  * @property-read int|null $emailaddresses_count
  * @property-read \App\Models\Esims\Esim|null $esim
- * @property-read \App\Models\Employes\EmailAddress|null $latestEmailAddress
+ * @property-read \App\Models\Person\EmailAddress|null $latestEmailAddress
  * @property-read PhoneNum|null $latestPhonenum
- * @property-read \App\Models\Employes\EmailAddress|null $oldestEmailAddress
+ * @property-read \App\Models\Person\EmailAddress|null $oldestEmailAddress
  * @property-read PhoneNum|null $oldestPhonenum
  * @property-read \Illuminate\Database\Eloquent\Collection|PhoneNum[] $phonenums
  * @property-read int|null $phonenums_count
@@ -72,7 +74,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property-read \App\Models\Status|null $status
  */
 
-class ClientEsim extends BaseModel implements IHasPhoneNums
+class ClientEsim extends BaseModel implements IsBaseModel, IHasPhoneNums, IHasEmailAddresses
 {
     use HasPhoneNums, HasEmailAddresses, SoftDeletes, HasFactory, \OwenIt\Auditing\Auditable;
 
@@ -204,4 +206,8 @@ class ClientEsim extends BaseModel implements IHasPhoneNums
     }
 
     #endregion
+    public function getIntituleAttribute()
+    {
+        return $this->nom_raison_sociale . " " . $this->prenom;
+    }
 }

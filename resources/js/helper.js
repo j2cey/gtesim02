@@ -7,6 +7,7 @@ export function formatDate(value) {
     }
 }
 
+// TODO: Formalize logging vue messages
 const logRaw = (msg, logtype) => {
     axios.post(`/api/logs/`, {
         msg: msg,

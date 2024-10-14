@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\ClientEsim;
 
+use App\Models\Person\PhoneNum;
 use App\Models\Esims\ClientEsim;
-use App\Models\Employes\PhoneNum;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**

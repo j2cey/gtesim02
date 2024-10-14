@@ -2,14 +2,15 @@
 
 namespace App\Http\Resources\Esims;
 
+use App\Models\User;
+use App\Models\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use App\Models\Person\PhoneNum;
 use App\Models\Esims\ClientEsim;
-use App\Http\Resources\UserResource;
-use App\Http\Resources\StatusResource;
+use App\Models\Person\EmailAddress;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\Employes\PhoneNumResource;
-use App\Http\Resources\Employes\EmailAddressResource;
 
 /**
  * Class ClientEsimResource
@@ -23,12 +24,24 @@ use App\Http\Resources\Employes\EmailAddressResource;
  *
  * @property string $nom_raison_sociale
  * @property string $prenom
- * @property string $email
- * @property string $phonenum
+ * @property string $email_address
+ * @property string $email_address_list
+ * @property string $phone_number
+ * @property string $phone_number_list
  * @property string $pin
  * @property string $puk
  *
- * @property integer|null $esim_id
+ * @property-read Collection|PhoneNum[] $phonenums
+ * @property-read PhoneNum|null $latestPhonenum
+ * @property-read PhoneNum|null $oldestPhonenum
+ *
+ * @property-read Collection|EmailAddress[] $emailaddresses
+ * @property-read EmailAddress|null $latestEmailAddress
+ * @property-read EmailAddress|null $oldestEmailAddress
+ *
+ * @property Status $status
+ * @property User $creator
+ * @property User $updator
  *
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -48,29 +61,30 @@ class ClientEsimResource extends JsonResource
 
             'nom_raison_sociale' => $this->nom_raison_sociale,
             'prenom' => $this->prenom,
-            'email' => $this->email,
-            'phonenum' => $this->phonenum,
             'pin' => $this->pin,
             'puk' => $this->puk,
 
-            'latestPhonenum' => PhoneNumResource::make($this->latestPhonenum),
-            'oldestPhonenum' => PhoneNumResource::make($this->oldestPhonenum),
-            'phonenums' => PhoneNumResource::collection($this->phonenums),
+            'phonenums' => $this->phonenums,
+            'phone_number' => $this->phone_number,
+            'phone_number_list' => $this->phone_number_list,
+            'latestPhonenum' => $this->latestPhonenum,
+            'oldestPhonenum' => $this->oldestPhonenum,
 
-            'latestEmailAddress' => EmailAddressResource::make($this->latestEmailAddress),
-            'oldestEmailAddress' => EmailAddressResource::make($this->oldestEmailAddress),
-            'emailaddresses' => EmailAddressResource::collection($this->emailaddresses),
+            'emailaddresses' => $this->emailaddresses,
+            'email_address' => $this->email_address,
+            'email_address_list' => $this->email_address_list,
+            'latestEmailAddress' => $this->latestEmailAddress,
+            'oldestEmailAddress' => $this->oldestEmailAddress,
 
-            'creator' => UserResource::make($this->creator),
-            'esim_id' => $this->esim_id,
-            'model_type' => ClientEsim::class,
+            'modelclass' => ClientEsim::class,
+            'modeltype' => "clientesims",
 
-            'status' => StatusResource::make($this->status),
+            'creator' => $this->creator,
+            'updator' => $this->updator,
+
+            'status' => $this->status,
             'created_at' => $this->created_at,
-
-            'show_url' => route('clientesims.show', $this->uuid),
-            'edit_url' => route('clientesims.edit', $this->uuid),
-            'destroy_url' => route('clientesims.destroy', $this->uuid),
+            'updated_at' => $this->updated_at,
         ];
     }
 }

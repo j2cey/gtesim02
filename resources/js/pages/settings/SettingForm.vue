@@ -175,7 +175,7 @@ onMounted(() => {
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item">
-                            <router-link to="/dashboard">Home</router-link>
+                            <router-link to="/">Accueil</router-link>
                         </li>
                         <li class="breadcrumb-item">
                             <router-link to="/settings">Settings</router-link>
@@ -230,7 +230,9 @@ onMounted(() => {
                                 <div class="btn-group">
                                     <button type="submit" class="btn btn-sm btn-primary m-2">Submit</button>
                                     <router-link to="/settings">
-                                        <button type="submit" class="btn btn-sm btn-default m-2">Back</button>
+                                        <button type="submit" class="btn btn-sm btn-default m-2">
+                                            <i class="fa fa-backward mr-1"></i> Back
+                                        </button>
                                     </router-link>
                                 </div>
                             </Form>
@@ -264,7 +266,7 @@ onMounted(() => {
                                     <div class="d-flex">
 
                                         <div class="input-group mb-3">
-                                            <input type="search" v-model="searchQuery" class="form-control text-xs" placeholder="Search text..." />
+                                            <input type="search" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="Search text..." />
                                             <button v-if="searchQuery" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
                                                 <i class="fa fa-times"></i>
                                             </button>

@@ -4,6 +4,7 @@ namespace App\Models\Employes;
 
 use App\Models\BaseModel;
 use Illuminate\Support\Carbon;
+use App\Contracts\IsBaseModel;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -58,7 +59,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property-read \App\Models\Status|null $status
  */
 
-class Departement extends BaseModel implements Auditable
+class Departement extends BaseModel implements IsBaseModel, Auditable
 {
     use HasFactory, \OwenIt\Auditing\Auditable;
 

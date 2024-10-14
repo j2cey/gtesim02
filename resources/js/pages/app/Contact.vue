@@ -5,7 +5,6 @@ import { useRouter } from 'vue-router';
 import { useSettingStore } from '../../stores/SettingStore';
 import { Can } from "@casl/vue";
 import { useAbility } from "@casl/vue";
-import imgUrl from '../../../assets/img/app_logo.png'
 
 // TODO: Envoyer le message de contact
 
@@ -37,7 +36,9 @@ onUnmounted(() => {
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+                        <li class="breadcrumb-item">
+                            <router-link to="/">Accueil</router-link>
+                        </li>
                         <li class="breadcrumb-item active">Contact</li>
                     </ol>
                 </div>

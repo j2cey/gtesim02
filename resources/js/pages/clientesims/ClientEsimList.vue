@@ -7,7 +7,7 @@ import { useToastr } from '../../toastr.js';
 import ClientEsimListItem from './ClientEsimListItem.vue';
 import { debounce } from 'lodash';
 import { Bootstrap4Pagination } from 'laravel-vue-pagination';
-import {useAbility} from "@casl/vue";
+import { useAbility } from "@casl/vue";
 
 
 const { can, cannot } = useAbility();
@@ -35,6 +35,7 @@ const toggleSelection = (clientEsim) => {
 
 const getClientEsims = (page = 1) => {
     loading.value = true;
+    console.log("getClientEsims launched, page: ", page);
     axios.get(`/api/clientesims?page=${page}`, {
         params: {
             query: searchQuery.value
@@ -106,11 +107,13 @@ onMounted(() => {
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Liste de E-sims</h1>
+                    <h1 class="m-0">Liste des Clients E-SIM</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+                        <li class="breadcrumb-item">
+                            <router-link to="/">Accueil</router-link>
+                        </li>
                         <li class="breadcrumb-item active">Clients Esim</li>
                     </ol>
                 </div>
@@ -122,13 +125,13 @@ onMounted(() => {
 
             <div class="d-flex justify-content-between">
                 <div class="d-flex">
-                    <router-link v-if="can('clientesim-create')" to="clientesims/create">
+                    <router-link v-if="can('clientesims-create')" to="clientesims/create">
                         <button type="button" class="mb-2 btn btn-sm btn-primary">
                             <i class="fa fa-plus-circle mr-1"></i>
                             Nouveau
                         </button>
                     </router-link>
-                    <div v-if="can('clientesim-delete') && selectedClientEsims.length > 0">
+                    <div v-if="can('clientesims-delete') && selectedClientEsims.length > 0">
                         <button @click="bulkDelete" type="button" class="ml-2 mb-2 btn btn-sm btn-danger">
                             <i class="fa fa-trash mr-1"></i>
                             Supprimer Sélection
@@ -139,7 +142,7 @@ onMounted(() => {
 
                 <div class="d-flex">
                     <div class="input-group mb-3">
-                        <input @keyup.enter="getClientEsims" type="search" v-model="searchQuery" class="form-control text-xs" placeholder="Recherche text..." />
+                        <input @keyup.enter="getClientEsims" type="search" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="Recherche text..." />
                         <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
                             <i class="fa fa-times"></i>
                         </button>
@@ -164,14 +167,14 @@ onMounted(() => {
                         <tr>
                             <th><input type="checkbox" v-model="selectAll" @change="selectAllClientEsims" /></th>
                             <th style="width: 10px">#</th>
-                            <th class="text text-sm">Nom</th>
-                            <th class="text text-sm">Prénom</th>
-                            <th class="text text-sm">Telephone(s)</th>
-                            <th class="text text-sm">E-Mail(s)</th>
-                            <th v-if="can('clientesim-creator-list')" class="text text-sm">Utilisateur</th>
-                            <th class="text text-sm">Création</th>
-                            <th class="text text-sm">Modification</th>
-                            <th class="text text-sm">Options</th>
+                            <th class="text text-xs">Nom</th>
+                            <th class="text text-xs">Prénom</th>
+                            <th class="text text-xs">Telephone(s)</th>
+                            <th class="text text-xs">EMail(s)</th>
+                            <th v-if="can('clientesims-creator-list')" class="text text-xs">Utilisateur</th>
+                            <th class="text text-xs">Création</th>
+                            <th class="text text-xs">Modification</th>
+                            <th class="text text-xs">Options</th>
                         </tr>
                         </thead>
                         <tbody v-if="clientEsims.data.length > 0">
@@ -192,7 +195,7 @@ onMounted(() => {
                         </tr>
                         </tbody>
                     </table>
-                    <span v-if="clientEsims.total > 0" class="text text-xs text-primary">{{ clientEsims.total }} enregistrement(s)</span>
+                    <span v-if="clientEsims.meta?.total > 0" class="text text-xs text-primary">{{ clientEsims.meta.total }} enregistrement(s)</span>
                 </div>
 
                 <div v-if="loading" class="overlay dark">

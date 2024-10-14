@@ -4,8 +4,8 @@ import {reactive, onMounted, ref, watch, computed} from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useToastr } from '@/toastr';
 import { Form } from 'vee-validate';
-import {debounce} from "lodash";
 import Swal from "sweetalert2";
+import StatusShow from "../statuses/StatusShow.vue";
 
 // TODO: Manage PhoneNum Posi
 // TODO: Add a Cancel button to reset the form
@@ -20,7 +20,7 @@ const form = reactive({
 });
 
 const loading = ref(false);
-const editMode = ref(false);
+const formMode = ref('create');
 const phonenum = ref({});
 const phonenumId = ref(null);
 const creator = ref({});
@@ -31,9 +31,9 @@ const modeltype = ref('');
 const modelid = ref('');
 
 const handleSubmit = (values, actions) => {
-    if (editMode.value) {
+    if (formMode.value === 'edit') {
         updatePhoneNum(values, actions);
-    } else {
+    } else if (formMode.value === 'create') {
         createPhoneNum(values, actions);
     }
 };
@@ -44,7 +44,7 @@ const createPhoneNum = (values, actions) => {
         .then((response) => {
             console.log("createPhoneNum, response: ", response);
             // router.push('/phonenum');
-            editMode.value = true;
+            formMode.value = 'edit';
 
             if (modeltype.value === 'clientesim') {
                 Swal.fire({
@@ -90,6 +90,7 @@ const getPhoneNum = () => {
             creator.value = response.data.creator;
 
             phonenum.value = response.data;
+            status.value = response.data.status;
         }).then(() => {
 
         }
@@ -97,22 +98,37 @@ const getPhoneNum = () => {
     )
 };
 
+//<editor-fold desc="Status">
+const status = ref({});
+const statusChanged = (obj) => {
+    status.value = obj;
+};
+
+const statusKey = computed(() => {
+    return status.value.uuid;
+});
+//</editor-fold>
+
 const prevRoutePath = computed(() => {
     return lastPath ? lastPath.value : '/';
 });
 
 onMounted(() => {
-    lastPath.value = router.options.history.state.back;
+    lastPath.value = router.options.history.state.back ? router.options.history.state.back : lastPath.value;
     modeltype.value = route.params.modeltype;
     modelid.value = route.params.modelid;
     form.model_selected = route.params.modelid;
 
-    console.log('PhoneNumForm onMounted, route.params: ', route.params);
-
-    if (route.name === 'phonenums.edit') {
+    if (route.name === 'phonenums.edit' || route.name === 'phonenums.show') {
+        if (route.name === 'phonenums.edit') {
+            formMode.value = 'edit';
+        } else {
+            formMode.value = 'show';
+        }
         phonenumId.value = route.params.id;
-        editMode.value = true;
         getPhoneNum();
+    } else {
+        formMode.value = 'create';
     }
 });
 </script>
@@ -123,8 +139,9 @@ onMounted(() => {
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h1 class="m-0">
-                        <span v-if="editMode">Modification</span>
-                        <span v-else>Création</span>
+                        <span v-if="formMode === 'edit'">Modification</span>
+                        <span v-else-if="formMode === 'create'">Création</span>
+                        <span v-else>Détails</span>
                         Numéro Téléphone</h1>
                 </div>
                 <div class="col-sm-6">
@@ -133,11 +150,12 @@ onMounted(() => {
                             <router-link to="/">Accueil</router-link>
                         </li>
                         <li class="breadcrumb-item">
-                            <router-link to="/">Numéros Téléphone</router-link>
+                            <router-link to="/phonenums">Numéros Téléphone</router-link>
                         </li>
                         <li class="breadcrumb-item active">
-                            <span v-if="editMode">Modification</span>
-                            <span v-else>Création</span>
+                            <span v-if="formMode === 'edit'">Modification</span>
+                            <span v-else-if="formMode === 'create'">Création</span>
+                            <span v-else>Détails</span>
                         </li>
                     </ol>
                 </div>
@@ -155,28 +173,49 @@ onMounted(() => {
                                 <div class="row">
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="imsi">Numéro</label>
+                                            <label for="imsi"><span class="text text-xs">Numéro</span></label>
                                             <input v-model="form.phone_number" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.phone_number }" id="phone_number" placeholder="Numéro">
                                             <span class="invalid-feedback">{{ errors.phone_number }}</span>
                                         </div>
                                     </div>
-                                    <div class="col-md-3" v-if="editMode">
+                                    <div class="col-md-3" v-if="formMode === 'edit'">
                                         <div class="form-group">
-                                            <label for="iccid">Position</label>
+                                            <label for="iccid"><span class="text text-xs">Position</span></label>
                                             <input v-model="form.posi" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.posi }" id="posi" placeholder="Position">
                                             <span class="invalid-feedback">{{ errors.posi }}</span>
                                         </div>
                                     </div>
-
+                                    <div v-if="formMode === 'edit' || formMode === 'show'" class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="puk"><span class="text text-xs">Statut</span></label> <br>
+                                            <StatusShow :key="statusKey" v-if="status"
+                                                        :status="status"
+                                                        @status-changed="statusChanged"
+                                                        :modelclass="phonenum.modelclass"
+                                                        :modeltype="phonenum.modeltype"
+                                                        :modelid="phonenumId"
+                                            ></StatusShow>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-if="formMode === 'edit' || formMode === 'show'" class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="puk"><span class="text text-xs">Titulaire</span></label>
+                                            <span class="form-control border-0 text-xs">{{ phonenum.hasphonenum?.intitule }}</span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="btn-group">
                                     <button type="submit" class="btn btn-sm btn-primary m-2">
                                         <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        Valider
+                                        <i class="fa fa-save mr-1"></i> Valider
                                     </button>
                                     <router-link :to="prevRoutePath">
-                                        <button type="submit" class="btn btn-sm btn-default m-2">Retour</button>
+                                        <button type="submit" class="btn btn-sm btn-default m-2">
+                                            <i class="fa fa-backward mr-1"></i> Retour
+                                        </button>
                                     </router-link>
                                 </div>
                             </Form>

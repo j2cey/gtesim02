@@ -17,10 +17,10 @@ class RoleController extends Controller implements HasMiddleware
     {
         return [
             'auth',
-            new Middleware('permission:role-list', only: ['index']),
-            new Middleware('permission:role-create', only: ['store']),
-            new Middleware('permission:role-update', only: ['update','assignPermissions','revokePermissions']),
-            new Middleware('permission:role-destory', only: ['destory','bulkDelete']),
+            new Middleware('permission:roles-list', only: ['index']),
+            new Middleware('permission:roles-create', only: ['store']),
+            new Middleware('permission:roles-update', only: ['update','assignPermissions','revokePermissions']),
+            new Middleware('permission:roles-destory', only: ['destory','bulkDelete']),
         ];
     }
     /**
@@ -34,17 +34,47 @@ class RoleController extends Controller implements HasMiddleware
     }
 
     public function index()
-{
-    $roles = Role::query()
-        ->when(request('query'), function ($query, $searchQuery) {
-            $query->where('name', 'like', "%{$searchQuery}%");
-        })
-        ->with('permissions')
-        ->latest()
-        ->paginate(5);
+    {
+        $user = is_null( request('userid') ) ? null : User::where( (New User)->getRouteKeyName(), request('userid') )->first();
 
-    return $roles;
-}
+        if ( request('rolestatus') === "out_user" ) {
+            $user_roles_ids = $user->roles()->pluck('id')->unique();
+            $roles = Role::query()
+                ->when(request('query'), function ($query, $searchQuery) {
+                    $query->where('name', 'like', "%{$searchQuery}%");
+                })
+                ->whereNotIn('id', $user_roles_ids)
+                ->with('permissions')
+                ->latest()
+                ->paginate(5);
+        } elseif ( request('rolestatus') === "in_user" ) {
+            $roles = $user->roles()
+                ->when(request('query'), function ($query, $searchQuery) {
+                    $query->where('name', 'like', "%{$searchQuery}%");
+                })
+                ->with('permissions')
+                ->latest()
+                ->paginate(5);
+        } else {
+            $roles = Role::query()
+                ->when(request('query'), function ($query, $searchQuery) {
+                    $query->where('name', 'like', "%{$searchQuery}%");
+                })
+                ->with('permissions')
+                ->latest()
+                ->paginate(5);
+        }
+
+        if ( $user) {
+            foreach ($roles as $role) {
+                if ($user->hasRole($role->name)) {
+                    $role->is_in_user = true;
+                }
+            }
+        }
+
+        return $roles;
+    }
 
     public function store() {
         request()->validate([

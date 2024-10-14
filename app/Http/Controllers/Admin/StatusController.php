@@ -6,6 +6,7 @@ use App\Models\Status;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Status\StoreStatusRequest;
 use App\Http\Requests\Status\UpdateStatusRequest;
+use App\Http\Requests\Status\StatusChangeRequest;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class StatusController extends Controller
@@ -29,6 +30,10 @@ class StatusController extends Controller
 
         return $statuses;
 
+    }
+
+    public function fetchCodes() {
+        return Status::all()->pluck('code');
     }
 
     /**
@@ -75,6 +80,12 @@ class StatusController extends Controller
     public function update(UpdateStatusRequest $request, Status $status)
     {
         return $status->updateOne($request->code,$request->name,$request->style, $request->description);
+    }
+
+    public function statuschange(StatusChangeRequest $request) {
+        $request->model->setStatus( $request->status, true );
+
+        return $request->status;
     }
 
     /**

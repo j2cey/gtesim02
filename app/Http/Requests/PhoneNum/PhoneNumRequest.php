@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\PhoneNum;
 
-use App\Models\Employes\PhoneNum;
-use App\Contracts\Employes\IHasPhoneNums;
+use App\Models\Person\PhoneNum;
 use App\Traits\Request\RequestTraits;
+use App\Contracts\Persons\IHasPhoneNums;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**

@@ -3,10 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
+use App\Models\Status;
 use Illuminate\Http\Request;
+use App\Enums\Auth\Permissions;
+use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use \Illuminate\Auth\Middleware\Authorize;
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use Illuminate\Routing\Controllers\Middleware;
+use App\Http\Requests\User\ResetPasswordRequest;
 use Illuminate\Routing\Controllers\HasMiddleware;
 
 class UserController extends Controller implements HasMiddleware
@@ -15,10 +22,10 @@ class UserController extends Controller implements HasMiddleware
     {
         return [
             'auth',
-            new Middleware('permission:user-list', only: ['index']),
-            new Middleware('permission:user-create', only: ['store']),
-            new Middleware('permission:user-update', only: ['update','changeRole']),
-            new Middleware('permission:user-destory', only: ['destory','bulkDelete']),
+            new Middleware('permission:users-list', only: ['index']),
+            new Middleware('permission:users-create', only: ['store']),
+            new Middleware('permission:users-update', only: ['update','changeRole']),
+            new Middleware('permission:users-destory', only: ['destory','bulkDelete']),
         ];
     }
 
@@ -29,40 +36,51 @@ class UserController extends Controller implements HasMiddleware
                 $query->where('name', 'like', "%{$searchQuery}%");
             })
             ->with('roles')
+            ->with(['ldapAccount','employe'])
             ->skip(10)->take(300)
             ->latest()
             ->paginate(50);
 
-        return $users;
+        return UserResource::collection( $users );
     }
 
-    public function store() {
-        request()->validate([
-            'name' => 'required',
-            'email' => 'required|unique:users,email',
-            'password' => 'required|min:8',
+    public function store(StoreUserRequest $request) {
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'login' => $request->login,
+            'is_local' => $request->is_local,
+            'is_ldap' => $request->is_ldap,
         ]);
 
-        return User::create([
-            'name' => request('name'),
-            'email' => request('email'),
-            'password' => bcrypt( request('password') ),
-        ]);
+        $user->setPassword(request('password'));
+
+        return New UserResource( $user );
     }
 
-    public function update(User $user)
+    public function edit(User $user)
     {
-        request()->validate([
-            'name' => 'required',
-            'email' => 'required|unique:users,email,'.$user->id,
-            'password' => 'sometimes|min:8',
+        return New UserResource( $user->load(['roles','ldapAccount','employe']) );
+    }
+
+    public function update(UpdateUserRequest $request, User $user)
+    {
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'login' => $request->login,
+            'is_local' => $request->is_local,
+            'is_ldap' => $request->is_ldap,
         ]);
 
-        $user->update([
-            'name' => request('name'),
-            'email' => request('email'),
-            'password' => request('password') ? bcrypt(request('password')) : $user->password,
-        ]);
+        $user->load(['roles','status']);
+
+        return new UserResource($user);
+    }
+    public function resetpwd(ResetPasswordRequest $request, User $user)
+    {
+        $user->setPassword($request->newpwd);
 
         return $user;
     }
@@ -76,7 +94,36 @@ class UserController extends Controller implements HasMiddleware
         return response()->json(['success' => true]);
     }
 
-    public function destory(User $user)
+    public function assignRoles(User $user)
+    {
+        $roles = Role::whereIn('id', request('rolesids'))
+            ->whereNotIn('id', $user->roles()->pluck('id'))
+            ->get();
+        $nb = count($roles);
+        $user->assignRole($roles->pluck('name'));
+
+        foreach ($roles as $role) {
+            $role->is_in_role = true;
+        }
+
+        return response()->json(['success' => true, 'roles' => $roles,'message' => $nb === 0 ? 'NO role to assign' : $nb . ' Role(s) assign to User successfully!']);
+    }
+
+    public function revokeRoles(User $user)
+    {
+        $roles = Role::whereIn('id', request('rolesids'))
+            ->whereIn('id', $user->roles()->pluck('id'))
+            ->get();
+        $nb = 0;
+        foreach ($roles as $role) {
+            $user->removeRole($role->name);
+            $nb++;
+        }
+
+        return response()->json(['success' => true, 'roles' => $roles,'message' => $nb === 0 ? 'NO role to revoke' : $nb . ' Role(s) remove from User successfully!']);
+    }
+
+    public function destroy(User $user)
     {
         $user->delete();
 

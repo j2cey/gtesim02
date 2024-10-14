@@ -19,6 +19,13 @@ const form = reactive({
 const editMode = ref(false);
 const loading = ref(false);
 
+const initForm = () => {
+    form.code = '';
+    form.name = '';
+    form.style = '';
+    form.description = '';
+}
+
 const handleSubmit = (values, actions) => {
     if (editMode.value) {
         updateStatus(values, actions);
@@ -78,12 +85,31 @@ const getStatus = () => {
     )
 };
 
-onMounted(() => {
+const currentPath = ref('/');
+const lastPath = ref('/statuses');
+const prevRoutePath = computed(() => {
+    return lastPath ? lastPath.value : '/';
+});
+
+watch(route, () => {
+    if (route.fullPath !== currentPath.value) {
+        initComponent();
+    }
+});
+
+const initComponent = () => {
+    initForm();
+    lastPath.value = router.options.history.state.back ? router.options.history.state.back : lastPath.value;
+    currentPath.value = route.fullPath;
     if (route.name === 'statuses.edit') {
         statusid.value = route.params.id;
         editMode.value = true;
         getStatus();
     }
+};
+
+onMounted(() => {
+    initComponent();
 });
 </script>
 
@@ -100,7 +126,7 @@ onMounted(() => {
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item">
-                            <router-link to="/dashboard">Accueil</router-link>
+                            <router-link to="/">Accueil</router-link>
                         </li>
                         <li class="breadcrumb-item">
                             <router-link to="/statuses">Statuts</router-link>
@@ -140,7 +166,7 @@ onMounted(() => {
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="ac">Style</label>
-                                            <input v-model="form.style" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.style }" id="ac" placeholder="Style">
+                                            <input v-model="form.style" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.style }" id="style" placeholder="Style">
                                             <span class="invalid-feedback">{{ errors.style }}</span>
                                         </div>
                                     </div>
@@ -150,7 +176,7 @@ onMounted(() => {
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="pin">Description</label>
-                                            <input v-model="form.description" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.description }" id="pin" placeholder="Description">
+                                            <input v-model="form.description" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.description }" id="description" placeholder="Description">
                                             <span class="invalid-feedback">{{ errors.description }}</span>
                                         </div>
                                     </div>
@@ -159,10 +185,12 @@ onMounted(() => {
                                 <div class="btn-group">
                                     <button type="submit" class="btn btn-sm btn-primary m-2">
                                         <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        Valider
+                                        <i class="fa fa-save mr-1"></i> Valider
                                     </button>
-                                    <router-link to="/statuses">
-                                        <button type="submit" class="btn btn-sm btn-default m-2">Retour</button>
+                                    <router-link :to="prevRoutePath">
+                                        <button type="submit" class="btn btn-sm btn-default m-2">
+                                            <i class="fa fa-backward mr-1"></i> Retour
+                                        </button>
                                     </router-link>
                                 </div>
                             </Form>

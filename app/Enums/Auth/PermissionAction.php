@@ -4,6 +4,7 @@ namespace App\Enums\Auth;
 
 /**
  * @method list()
+ * @method show()
  * @method create()
  * @method update()
  * @method delete()
@@ -13,6 +14,7 @@ class PermissionAction
 
     private array $_actions = [
         'list' => 4,
+        'show' => 4,
         'create' => 3,
         'update' => 1,
         'delete' => 1,

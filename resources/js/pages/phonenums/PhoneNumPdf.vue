@@ -28,7 +28,7 @@ const showPreviewPDF = (id) => {
 };
 
 onMounted(() => {
-    lastPath.value = router.options.history.state.back;
+    lastPath.value = router.options.history.state.back ? router.options.history.state.back : lastPath.value;
     phonenumId.value = route.params.id;
     showPreviewPDF(route.params.id);
 });

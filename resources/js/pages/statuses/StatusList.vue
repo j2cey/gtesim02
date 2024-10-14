@@ -110,7 +110,9 @@ onMounted(() => {
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+                        <li class="breadcrumb-item">
+                            <router-link to="/">Accueil</router-link>
+                        </li>
                         <li class="breadcrumb-item active">Statuts</li>
                     </ol>
                 </div>
@@ -122,13 +124,13 @@ onMounted(() => {
 
             <div class="d-flex justify-content-between">
                 <div class="d-flex">
-                    <router-link v-if="can('status-create')" to="statuses/create">
+                    <router-link v-if="can('statuses-create')" to="statuses/create">
                         <button type="button" class="mb-2 btn btn-sm btn-primary">
                             <i class="fa fa-plus-circle mr-1"></i>
                             Nouveau
                         </button>
                     </router-link>
-                    <div v-if="can('status-delete') && selectedStatuses.length > 0">
+                    <div v-if="can('statuses-delete') && selectedStatuses.length > 0">
                         <button @click="bulkDelete" type="button" class="ml-2 mb-2 btn btn-sm btn-danger">
                             <i class="fa fa-trash mr-1"></i>
                             Supprimer Sélection
@@ -139,7 +141,7 @@ onMounted(() => {
 
                 <div class="d-flex">
                     <div class="input-group mb-3">
-                        <input @keyup.enter="getStatuses" type="search" v-model="searchQuery" class="form-control text-xs" placeholder="Recherche text..." />
+                        <input @keyup.enter="getStatuses" type="search" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="Recherche text..." />
                         <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
                             <i class="fa fa-times"></i>
                         </button>
@@ -192,7 +194,7 @@ onMounted(() => {
                         </tr>
                         </tbody>
                     </table>
-                    <span v-if="statuses.total > 0" class="text text-xs text-primary">{{ statuses.total }} enregistrement(s)</span>
+                    <span v-if="statuses.meta?.total > 0" class="text text-xs text-primary">{{ statuses.meta.total }} enregistrement(s)</span>
 
                 </div>
 

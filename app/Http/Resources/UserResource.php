@@ -3,10 +3,14 @@
 namespace App\Http\Resources;
 
 use App\Models\User;
+use App\Models\Status;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use App\Models\Person\PhoneNum;
+use App\Models\Employes\Employe;
+use Spatie\Permission\Models\Role;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\Employes\EmployeResource;
-use App\Http\Resources\Employes\PhoneNumResource;
 
 /**
  * Class UserResource
@@ -19,6 +23,17 @@ use App\Http\Resources\Employes\PhoneNumResource;
  * @property string $email
  * @property boolean $is_local
  * @property boolean $is_ldap
+ *
+ * @property Employe $employe
+ * @property-read Collection|Role[] $roles
+ * @property-read Collection|PhoneNum[] $phonesesimcreated
+ *
+ * @property Status $status
+ * @property User $creator
+ * @property User $updator
+ *
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class UserResource extends JsonResource
 {
@@ -40,18 +55,20 @@ class UserResource extends JsonResource
             'is_local' => $this->is_local,
             'is_ldap' => $this->is_ldap,
 
-            'employe' => EmployeResource::make($this->employe),
-
-            'status' => StatusResource::make($this->status),
-            'created_at' => $this->created_at,
+            'employe' => $this->employe,
 
             'roles' => $this->roles,
-            'phonesesimcreated' => PhoneNumResource::collection($this->phonesesimcreated),
+            'phonesesimcreated' => $this->phonesesimcreated,
 
-            'model_type' => User::class,
+            'modelclass' => User::class,
+            'modeltype' => "users",
 
-            'edit_url' => route('users.edit', $this->uuid),
-            'destroy_url' => route('users.destroy', $this->uuid),
+            'creator' => $this->creator,
+            'updator' => $this->updator,
+
+            'status' => $this->status,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

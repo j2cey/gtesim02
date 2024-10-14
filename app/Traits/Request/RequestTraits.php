@@ -75,10 +75,10 @@ trait RequestTraits
         if (is_null($value) || $value === "null") {
             $value = null;
         }
-        if ($value === "true") {
+        if ($value === "true" || $value === true) {
             $value = true;
         }
-        if ($value === "false") {
+        if ($value === "false" || $value === false) {
             $value = false;
         }
         return (int)$value;

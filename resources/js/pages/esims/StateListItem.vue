@@ -41,7 +41,7 @@ onMounted(() => {
         <td class="text text-xs" >{{ esimstate.details }}</td>
         <td class="text text-xs" ><small>{{ formatDate(esimstate.created_at) }}</small></td>
         <td>
-            <a class="text text-xs" v-if="can('esimstate-delete')" href="#" @click.prevent="$emit('confirmEsimStateDeletion', esimstate)"><i class="fa fa-trash text-danger ml-2"></i></a>
+            <a class="text text-xs" v-if="can('esimstates-delete')" href="#" @click.prevent="$emit('confirmEsimStateDeletion', esimstate)"><i class="fa fa-trash text-danger ml-2"></i></a>
         </td>
     </tr>
 </template>

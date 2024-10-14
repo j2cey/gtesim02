@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
-use App\Models\Employes\PhoneNum;
+use App\Models\Person\PhoneNum;
 use Illuminate\Queue\SerializesModels;
 use App\Events\ClientEsimCreatedEvent;
 use Illuminate\Queue\InteractsWithQueue;

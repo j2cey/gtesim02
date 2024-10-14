@@ -32,7 +32,7 @@ onMounted(() => {
         <td><input type="checkbox" :checked="selectAll" @change="toggleSelection" :key="esim.id" /></td>
         <td class="text text-xs" >{{ index + 1 }}</td>
         <td class="text text-xs" >
-            <router-link v-if="can('esim-list')" :to="`/esims/${esim.uuid}/show`">
+            <router-link v-if="can('esims-list')" :to="`/esims/${esim.uuid}/show`">
                 {{ esim.imsi }}
             </router-link>
             <span v-else>{{ esim.imsi }}</span>
@@ -45,10 +45,10 @@ onMounted(() => {
         <td class="text text-xs small"><small>{{ formatDate(esim.created_at) }}</small></td>
         <td class="text text-xs small"><small>{{ formatDate(esim.updated_at) }}</small></td>
         <td>
-            <router-link v-if="can('esim-update')" :to="`/esims/${esim.uuid}/edit`">
-                <i class="fa fa-edit mr-2 text text-xs"></i>
+            <router-link v-if="can('esims-update')" :to="`/esims/${esim.uuid}/edit`">
+                <i class="fa fa-edit mr-2 text text-xs font-weight-light"></i>
             </router-link>
-            <a class="text text-xs" v-if="can('esim-delete')" href="#" @click.prevent="$emit('confirmEsimDeletion', esim)"><i class="fa fa-trash text-danger ml-2"></i></a>
+            <a class="text text-xs" v-if="can('esims-delete')" href="#" @click.prevent="$emit('confirmEsimDeletion', esim)"><i class="fa fa-trash-alt text-danger ml-2 font-weight-light"></i></a>
         </td>
     </tr>
 </template>

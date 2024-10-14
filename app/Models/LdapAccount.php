@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Support\Carbon;
 use App\Traits\Base\BaseTrait;
+use Illuminate\Support\Facades\Storage;
 use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -74,7 +76,12 @@ class LdapAccount extends Authenticatable implements Auditable
 {
     use HasFactory, \OwenIt\Auditing\Auditable, BaseTrait;
 
+    public static string $OK_FIELD = "OK.";
     protected $guarded = [];
+
+    protected $appends = [
+        //'cnresult',
+    ];
 
     #region Custom Functions
 
@@ -101,6 +108,13 @@ class LdapAccount extends Authenticatable implements Auditable
     {
         return $this->samaccountname;
     }
+
+    /*public function cnResult(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value === self::$OK_FIELD,
+        );
+    }*/
 
     #endregion
 }

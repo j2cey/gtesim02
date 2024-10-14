@@ -3,27 +3,29 @@
 namespace App\Http\Controllers\Esims;
 
 use PDF;
-use Illuminate\View\View;
+use App\Models\Status;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use App\Models\Person\PhoneNum;
 use App\Models\Esims\ClientEsim;
-use App\Models\Employes\PhoneNum;
-use Illuminate\Support\Collection;
 use App\Jobs\ClientEsimSendMailJob;
+use App\Models\Person\EmailAddress;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
-use App\Models\Employes\EmailAddress;
 use Illuminate\Contracts\View\Factory;
 use App\Traits\PhoneNum\ModelPhoneNums;
+use App\Http\Resources\Persons\PhoneNumResource;
+use App\Http\Requests\Status\StatusChangeRequest;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use App\Http\Requests\ClientEsim\FetchRequest;
 use App\Http\Resources\Esims\ClientEsimResource;
 use Illuminate\Contracts\Foundation\Application;
 use App\Traits\EmailAddress\ModelEmailAddresses;
+use App\Http\Resources\Persons\EmailAddressResource;
 use App\Http\Requests\ClientEsim\StoreClientEsimRequest;
 use App\Http\Requests\ClientEsim\UpdateClientEsimRequest;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use App\Http\Requests\ClientEsim\AddPhoneClientEsimRequest;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use App\Http\Requests\ClientEsim\StoreClientEsimPhonenumRequest;
 use App\Http\Requests\ClientEsim\UpdateClientEsimPhoneNumRequest;
 use App\Http\Requests\ClientEsim\AddEmailAddressClientEsimRequest;
@@ -82,7 +84,7 @@ class ClientEsimController extends Controller
     /**
      * Display products page.
      *
-     * @return LengthAwarePaginator
+     * @return AnonymousResourceCollection
      */
     public function index()
     {
@@ -99,38 +101,35 @@ class ClientEsimController extends Controller
             ->latest()
             ->paginate(50);
 
-        return $clientesims;
+        return ClientEsimResource::collection($clientesims);
     }
 
     /**
      * Display a listing of the resource.
      *
-     * @return LengthAwarePaginator
+     * @return AnonymousResourceCollection
      */
     public function phonenumindex(ClientEsim $clientesim)
     {
-        $phonenums = $this->modelPhoneNumQuery(ClientEsim::class, $clientesim->id, request('query'))
-            ->with("esim")
-            ->with("creator")
+        $phonenums = $this->modelPhoneNumQuery(request('query'),ClientEsim::class, $clientesim->id)
             ->latest()
             ->paginate(5);
 
-        return $phonenums;
+        return PhoneNumResource::collection( $phonenums );
     }
 
     /**
      * Display a listing of the resource.
      *
-     * @return LengthAwarePaginator
+     * @return AnonymousResourceCollection
      */
     public function emailaddressindex(ClientEsim $clientesim)
     {
-        $emailaddresses = $this->modelEmailAddressQuery(ClientEsim::class, $clientesim->id, request('query'))
-            ->with("creator")
+        $emailaddresses = $this->modelEmailAddressQuery(request('query'),ClientEsim::class, $clientesim->id)
             ->latest()
             ->paginate(5);
 
-        return $emailaddresses;
+        return EmailAddressResource::collection( $emailaddresses );
     }
 
     /**
@@ -262,11 +261,11 @@ class ClientEsimController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  ClientEsim  $clientesim
-     * @return ClientEsim
+     * @return ClientEsimResource
      */
     public function edit(ClientEsim $clientesim)
     {
-        return $clientesim->load(['status','creator']);
+        return new ClientEsimResource($clientesim->load(['status','creator']));
     }
 
     /**
@@ -308,6 +307,12 @@ class ClientEsimController extends Controller
         $clientesim->setEmailAddressList();
 
         return $emailaddress;
+    }
+    public function statuschange(StatusChangeRequest $request, ClientEsim $clientesim)
+    {
+        $clientesim->changeStatus($request->status);
+
+        return $clientesim->status;
     }
 
     public function deletephone(Request $request, ClientEsim $clientesim) {

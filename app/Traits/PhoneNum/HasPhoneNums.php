@@ -3,7 +3,7 @@
 namespace App\Traits\PhoneNum;
 
 use App\Models\Status;
-use App\Models\Employes\PhoneNum;
+use App\Models\Person\PhoneNum;
 
 /**
  * @property PhoneNum $principalPhonenum
@@ -111,6 +111,7 @@ trait HasPhoneNums
     protected function initializeHasPhoneNums()
     {
         $this->with = array_unique(array_merge($this->with, ['phonenums','latestPhonenum','oldestPhonenum']));
+        $this->appends = array_unique(array_merge($this->appends, ['intitule']));
     }
 
     public static function bootHasPhoneNums()

@@ -3,7 +3,7 @@
 namespace App\Traits\EmailAddress;
 
 use App\Models\Status;
-use App\Models\Employes\EmailAddress;
+use App\Models\Person\EmailAddress;
 
 trait HasEmailAddresses
 {
@@ -90,6 +90,7 @@ trait HasEmailAddresses
     protected function initializeHasEmailAddresses()
     {
         $this->with = array_unique(array_merge($this->with, ['emailaddresses','latestEmailAddress','oldestEmailAddress']));
+        $this->appends = array_unique(array_merge($this->appends, ['intitule']));
     }
 
     public static function bootHasEmailAddresses()

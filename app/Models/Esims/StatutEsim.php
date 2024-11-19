@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string $libelle
  * @property string $code
  * @property string $description
+ * @property string $style
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property int|null $status_id status reference
@@ -30,7 +31,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder|StatutEsim newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|StatutEsim newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|StatutEsim query()
- * @method static \Illuminate\Database\Eloquent\Builder|StatutEsim whereCode($value)
  * @method static \Illuminate\Database\Eloquent\Builder|StatutEsim whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|StatutEsim whereCreatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|StatutEsim whereDescription($value)
@@ -44,6 +44,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder|StatutEsim whereUuid($value)
  * @mixin \Eloquent
  * @property-read \App\Models\Status|null $status
+ *
+ * @method static StatutEsim whereCode($code)
  */
 
 class StatutEsim extends BaseModel implements Auditable
@@ -104,15 +106,43 @@ class StatutEsim extends BaseModel implements Auditable
 
     #region Custom Functions
 
-    public static function createNew($libelle, $code, $description)
+    public static function createNew(string $libelle, string $code, string $description = null, string $style = null): StatutEsim
     {
-        $statutesim = StatutEsim::create([
+        $data = [
             'libelle' => $libelle,
             'code' => $code,
-            'description' => $description,
-        ]);
+        ];
+        if ( ! is_null($description) ) $data['description'] = $description;
+        if ( ! is_null($style) ) $data['style'] = $style;
 
-        return $statutesim;
+        return StatutEsim::create($data);
+    }
+
+    public function updateOne(string $libelle, string $code, string $description = null, string $style = null): static
+    {
+        $this->libelle = $libelle;
+        $this->code = $code;
+        if ( ! is_null($description) ) {
+            $this->description = $description;
+        }
+        if ( ! is_null($style) ) {
+            $this->style = $style;
+        }
+
+        $this->save();
+
+        return $this;
+    }
+
+    public static function updateOrNew(string $libelle, string $code, string $description = null, string $style = null): StatutEsim
+    {
+        $statutesim = StatutEsim::whereCode($code)->first();
+
+        if ($statutesim) {
+            return $statutesim->updateOne($libelle, $code, $description, $style);
+        } else {
+            return StatutEsim::createNew($libelle, $code, $description, $style);
+        }
     }
 
     #endregion

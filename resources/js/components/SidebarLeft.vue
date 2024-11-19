@@ -7,6 +7,7 @@ import { Can } from "@casl/vue";
 import { useAbility } from "@casl/vue";
 import imgUrl from '../../assets/img/Logo_Fond_Bleu.png'
 
+// TODO: Build Sidebar with Accordion style
 
 const { can, cannot, is } = useAbility();
 
@@ -20,9 +21,10 @@ const logout = () => {
     loadingLogout.value = true;
     axios.post('/logout')
         .then((response) => {
-            // window.location.href = '/login';
+            console.log("logout, response: ", response);
             authUserStore.user.name = '';
             router.push('/login');
+            //window.location.href = '/login';
         }).finally(() => {
             loadingLogout.value = false;
     });
@@ -83,7 +85,7 @@ onUnmounted(() => {
 
                     <li v-if="can('clientesims-list')" class="nav-item">
                         <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-id-card"></i>
+                            <i class="nav-icon fa fa-address-book font-weight-lighter"></i>
                             <p class="text font-weight-lighter">
                                 Clients E-SIM
                                 <i class="fas fa-angle-left right"></i>
@@ -105,7 +107,7 @@ onUnmounted(() => {
                         </ul>
                     </li>
 
-                    <li class="nav-item">
+                    <li v-if="can('phonenums-list') || can('emailaddresses-list')" class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fa fa-universal-access"></i>
                             <p class="text font-weight-lighter">
@@ -157,7 +159,7 @@ onUnmounted(() => {
 
                     <li v-if="can('employes-list')" class="nav-item">
                         <a href="#" class="nav-link">
-                            <i class="nav-icon fa fa-universal-access"></i>
+                            <i class="nav-icon fa fa-id-card"></i>
                             <p class="text font-weight-lighter">
                                 Employés
                                 <i class="fas fa-angle-left right"></i>
@@ -197,22 +199,40 @@ onUnmounted(() => {
                         </ul>
                     </li>
 
-                    <li class="nav-item">
-                        <router-link v-if="can('users-list')" to="/users" active-class="active" class="nav-link">
-                            <i class="nav-icon fas fa-users"></i>
+                    <li v-if="can('users-list') || can('ldapusers-list') || can('roles-list')" class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fa fa-key"></i>
                             <p class="text font-weight-lighter">
-                                Users
+                                Authorization
+                                <i class="fas fa-angle-left right"></i>
                             </p>
-                        </router-link>
-                    </li>
-
-                    <li class="nav-item">
-                        <router-link v-if="can('roles-list')" to="/roles" active-class="active" class="nav-link">
-                            <i class="nav-icon fas fa-id-badge"></i>
-                            <p class="text font-weight-lighter">
-                                Roles
-                            </p>
-                        </router-link>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <router-link v-if="can('ldapusers-list')" to="/ldapusers" active-class="active" class="nav-link">
+                                    <i class="nav-icon fa fa-university text-xs text-primary"></i>
+                                    <p class="text text-xs font-weight-lighter">
+                                        LDAP Users
+                                    </p>
+                                </router-link>
+                            </li>
+                            <li class="nav-item">
+                                <router-link v-if="can('users-list')" to="/users" active-class="active" class="nav-link">
+                                    <i class="nav-icon fas fa-id-badge text-xs text-warning"></i>
+                                    <p class="text text-xs font-weight-lighter">
+                                        Users
+                                    </p>
+                                </router-link>
+                            </li>
+                            <li class="nav-item">
+                                <router-link v-if="can('roles-list')" to="/roles" active-class="active" class="nav-link">
+                                    <i class="nav-icon fas fa-gavel text-danger"></i>
+                                    <p class="text text-xs font-weight-lighter">
+                                        Roles
+                                    </p>
+                                </router-link>
+                            </li>
+                        </ul>
                     </li>
 
                     <li v-if="can('settings-list')" class="nav-item">
@@ -230,7 +250,7 @@ onUnmounted(() => {
                                 <div v-if="loadingLogout" class="spinner-border spinner-border-sm" role="status">
                                     <span class="sr-only">Loading...</span>
                                 </div>
-                                <span v-else><i class="nav-icon fas fa-sign-out-alt"></i></span>
+                                <span v-else><i class="nav-icon fa fa-power-off"></i></span>
                                 <p class="text font-weight-light">
                                     Logout
                                 </p>

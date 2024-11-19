@@ -90,7 +90,7 @@ class RoleController extends Controller implements HasMiddleware
 
     public function edit(Role $role)
     {
-        return $role->load(['permissions','users']);
+        return $role->load(['permissions']);
     }
 
     public function update(Role $role)

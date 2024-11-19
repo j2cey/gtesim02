@@ -4,7 +4,7 @@ import { useToastr } from '../../toastr.js';
 import axios from 'axios';
 import { Can } from "@casl/vue";
 import { useAbility } from "@casl/vue";
-import { formatDate } from '../../helper.js'
+import { formatDate } from '../../services/helper.js'
 
 const { can, cannot } = useAbility();
 
@@ -44,6 +44,7 @@ onMounted(() => {
         </td>
         <td class="text text-xs small"><small>{{ formatDate(esim.created_at) }}</small></td>
         <td class="text text-xs small"><small>{{ formatDate(esim.updated_at) }}</small></td>
+        <td class="text text-xs small"><small>{{ formatDate(esim.attributed_at) }}</small></td>
         <td>
             <router-link v-if="can('esims-update')" :to="`/esims/${esim.uuid}/edit`">
                 <i class="fa fa-edit mr-2 text text-xs font-weight-light"></i>

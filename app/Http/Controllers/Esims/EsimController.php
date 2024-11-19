@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Esims;
 
 use Exception;
+use App\Models\User;
 use Illuminate\View\View;
 use App\Models\Esims\Esim;
 
@@ -20,6 +21,7 @@ use App\Models\Esims\EsimHeadFile;
 use App\Models\Esims\EsimBodyFile;
 use App\Http\Resources\Esims\EsimResource;
 use App\Http\Requests\Esim\UpdateEsimRequest;
+use Symfony\Component\HttpKernel\HttpCache\Esi;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -58,6 +60,27 @@ class EsimController extends Controller
             ->paginate(50);
 
         return EsimResource::collection( $esims );
+    }
+
+    public function esimsattributed(User $user)
+    {
+        $esims = Esim::query()->where('attributed_by', $user->id)
+            ->where(function ($query) {
+                $query->when(request('query'), function ($query, $searchQuery) {
+                    $query->where('imsi', 'like', "%{$searchQuery}%")
+                        ->orWhere('iccid', 'like', "%{$searchQuery}%")
+                        ->orWhereHas('statutesim', function ($query) use ($searchQuery) {
+                            $query->where( 'code', 'like', '%'.$searchQuery.'%' );
+                        })
+                    ;
+                });
+            })
+            ->with("statutesim")
+            ->latest()
+            ->paginate(50);
+
+        return EsimResource::collection( $esims );
+        //return ['user' => $user,'esims' => EsimResource::collection( $esims )];
     }
 
     /**
@@ -115,6 +138,18 @@ class EsimController extends Controller
      */
     public function edit(Esim $esim) {
         return New EsimResource( $esim->load(['statutesim', 'technologieesim', 'phonenum', 'states']) );
+    }
+
+    public function pickup($esimid = null) {
+        $esim = Esim::getByUuid($esimid);
+        $new_esim = Esim::pickupFirstFree($esim);
+
+        return New EsimResource( $new_esim->load(['statutesim', 'technologieesim', 'phonenum', 'states', 'lateststate']) );
+    }
+
+    public function release(Esim $esim) {
+        $esim->setStatutFree();
+        return response()->json(['status' => 'ok'], 200);
     }
 
     /**

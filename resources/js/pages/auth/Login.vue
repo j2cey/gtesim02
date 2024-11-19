@@ -22,12 +22,14 @@ const handleSubmit = () => {
     axios.post('/login', form)
         .then(() => {
             // authUserStore.getAbilities();
-            router.push('/');
+            //router.push('/');
             // authUserStore.getAuthUser();
-            //window.location.href="/dashboard";
+            window.location.href="/";
         })
         .catch((error) => {
-            errorMessage.value = error.response.data.message;
+            if (error.response.status === 422) {
+                errorMessage.value = error.response.data.message;
+            }
         })
         .finally(() => {
             loading.value = false;
@@ -60,7 +62,7 @@ const hidePassword = () => {
                 </div>
                 <form @submit.prevent="handleSubmit">
                     <div class="input-group mb-3">
-                        <input v-model="form.email" type="email" class="form-control" placeholder="E-mail">
+                        <input v-model="form.email" type="text" class="form-control" placeholder="E-mail">
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-envelope"></span>

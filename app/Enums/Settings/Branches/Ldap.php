@@ -4,6 +4,12 @@ namespace App\Enums\Settings\Branches;
 
 use App\Enums\Settings\SettingNode;
 
+/**
+ * Class Ldap. Raw Date settings
+ * @package App\Enums\Settings\Branches
+ *
+ * @method liste_sigles()
+ */
 class Ldap extends SettingNode
 {
     public function __construct()

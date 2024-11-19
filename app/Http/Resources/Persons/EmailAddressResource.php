@@ -50,7 +50,7 @@ class EmailAddressResource extends JsonResource
             'uuid' => $this->uuid,
 
             'email_address' => $this->email_address,
-            'posi' => $this->posi,
+            'posi' => $this->posi + 1,
             'hasemailaddress_type' => $this->hasemailaddress_type,
             'hasemailaddress_id' => $this->hasemailaddress_id,
 

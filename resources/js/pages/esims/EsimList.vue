@@ -1,6 +1,6 @@
 <script setup>
 import axios from 'axios';
-import {ref, onMounted, reactive, watch} from "vue";
+import {ref, onMounted, reactive, watch, computed} from "vue";
 import {Form, Field, useResetForm } from 'vee-validate';
 import * as yup from 'yup';
 import { useToastr } from '../../toastr.js';
@@ -8,11 +8,16 @@ import EsimListItem from './EsimListItem.vue';
 import { debounce } from 'lodash';
 import { Bootstrap4Pagination } from 'laravel-vue-pagination';
 import {useAbility} from "@casl/vue";
+import { useRoute, useRouter } from "vue-router";
 
+const router = useRouter();
+const route = useRoute();
 
 const { can, cannot } = useAbility();
 
 const loading = ref(false);
+const userid = ref(null);
+const user = ref(null);
 const toastr = useToastr();
 const esims = ref({'data': []});
 const editing = ref(false);
@@ -33,6 +38,14 @@ const toggleSelection = (esim) => {
     }
 };
 
+const searchEsims = (page = 1) => {
+    if (user.value) {
+        getEsimsAttributed(page);
+    } else {
+        getEsims(page);
+    }
+}
+
 const getEsims = (page = 1) => {
     loading.value = true;
     axios.get(`/api/esims?page=${page}`, {
@@ -42,13 +55,41 @@ const getEsims = (page = 1) => {
     })
         .then((response) => {
             console.log("getEsims, response: ", response);
+
             esims.value = response.data;
+
             selectedEsims.value = [];
             selectAll.value = false;
         }).finally(() => {
             loading.value = false;
     });
 }
+const getEsimsAttributed = (page = 1) => {
+    loading.value = true;
+    axios.get(`/api/esims/${userid.value}/attributed?page=${page}`, {
+        params: {
+            query: searchQuery.value
+        }
+    })
+        .then((response) => {
+            console.log("getEsimsAttributed, response: ", response);
+
+            esims.value = response.data;
+
+            selectedEsims.value = [];
+            selectAll.value = false;
+        }).finally(() => {
+            loading.value = false;
+    });
+}
+
+const getUser = () => {
+    axios.get(`/api/users/${userid.value}/edit`)
+        .then((response) => {
+            console.log("getUser, response: ", response);
+            user.value = response.data;
+        })
+};
 
 const confirmEsimDeletion = (esim) => {
     esimIdBeingDeleted.value = esim.uuid;
@@ -93,15 +134,40 @@ const selectAllEsims = () => {
 
 const clearSearchQuery = () => {
     searchQuery.value = '';
-    getEsims();
+    searchEsims();
 }
 
 watch(searchQuery, debounce(() => {
-    //getEsims();
+    //searchEsims();
 }, 300));
 
+const currentPath = ref('/');
+const lastPath = ref('/esims');
+const prevRoutePath = computed(() => {
+    return lastPath;// ? lastPath.value : '/clientesims';
+});
+
+watch(route, () => {
+    console.log("watch route from EsimList");
+    if (route.fullPath !== currentPath.value) {
+        initComponent();
+    }
+});
+
+const initComponent = () => {
+    lastPath.value = router.options.history.state.back ? router.options.history.state.back : lastPath.value;
+    currentPath.value = route.fullPath;
+    if (route.params.userid) {
+        userid.value = route.params.userid;
+        getUser();
+        getEsimsAttributed();
+    } else {
+        getEsims();
+    }
+};
+
 onMounted(() => {
-    getEsims();
+    initComponent();
 });
 </script>
 
@@ -111,13 +177,17 @@ onMounted(() => {
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h1 class="m-0">Liste de E-sims</h1>
+                    <span v-show="user" class="text text-sm mr-1"> <span class="text text-muted"> Attribués Par </span><span class="text text-bold text-indigo">{{ user?.name }}</span></span>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item">
                             <router-link to="/">Accueil</router-link>
                         </li>
-                        <li class="breadcrumb-item active">Esims</li>
+                        <li class="breadcrumb-item active">
+                            Esims
+                            <span v-show="user" class="text text-sm mr-1"> <span class="text text-muted"> Attribués Par </span><span class="text text-xs ">{{ user?.name }}</span></span>
+                        </li>
                     </ol>
                 </div>
             </div>
@@ -128,8 +198,14 @@ onMounted(() => {
 
             <div class="d-flex justify-content-between">
                 <div class="d-flex">
-                    <router-link v-if="can('esims-create')" to="esims/create">
-                        <button type="button" class="mb-2 btn btn-sm btn-primary">
+                    <router-link :to="prevRoutePath">
+                        <button type="button" class="mb-2 btn btn-sm btn-default">
+                            <i class="fa fa-backward mr-1"></i> Retour
+                        </button>
+                    </router-link>
+
+                    <router-link v-if="can('esims-create') && !user" to="esims/create">
+                        <button type="button" class="ml-2 mb-2 btn btn-sm btn-primary">
                             <i class="fa fa-plus-circle mr-1"></i>
                             Nouveau
                         </button>
@@ -145,12 +221,12 @@ onMounted(() => {
 
                 <div class="d-flex">
                     <div class="input-group mb-3">
-                        <input @keyup.enter="getEsims" type="search" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="Recherche text..." />
-                        <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+                        <input @keyup.enter="searchEsims" type="search" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="Recherche text..." />
+                        <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn btn-sm bg-transparent" style="margin-left: -30px; z-index: 100;">
                             <i class="fa fa-times"></i>
                         </button>
                         <div class="input-group-append">
-                            <button class="btn btn-sm btn-default" @click="getEsims">
+                            <button class="btn btn-sm btn-default" @click="searchEsims">
                                 <div v-if="loading" class="spinner-border spinner-border-sm" role="status">
                                     <span class="sr-only">Loading...</span>
                                 </div>
@@ -164,7 +240,7 @@ onMounted(() => {
 
             <div class="card">
                 <div class="card-body">
-                    <Bootstrap4Pagination :data="esims" @pagination-change-page="getEsims" size="small" :limit="paginationLinksLimit" align="right" />
+                    <Bootstrap4Pagination :data="esims" @pagination-change-page="searchEsims" size="small" :limit="paginationLinksLimit" align="right" />
                     <table class="table table-bordered ">
                         <thead>
                         <tr>
@@ -173,9 +249,10 @@ onMounted(() => {
                             <th class="text text-sm text-capitalize">imsi</th>
                             <th class="text text-sm text-capitalize">iccid</th>
                             <th class="text text-sm text-capitalize">ac</th>
-                            <th class="text text-sm text-capitalize">Statut</th>
+                            <th class="text text-sm text-capitalize">Etat</th>
                             <th class="text text-sm text-capitalize">Création</th>
                             <th class="text text-sm text-capitalize">Modification</th>
+                            <th class="text text-sm text-capitalize">Attribution</th>
                             <th class="text text-sm text-capitalize">Options</th>
                         </tr>
                         </thead>
@@ -189,7 +266,7 @@ onMounted(() => {
                         </tbody>
                         <tbody v-else>
                         <tr>
-                            <td colspan="8" class="text-center">
+                            <td colspan="9" class="text-center">
                                 <div v-if="loading" class="spinner-border spinner-border-sm" role="status">
                                     <span class="sr-only">Chargement en cours...</span>
                                 </div>

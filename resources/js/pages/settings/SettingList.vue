@@ -61,8 +61,9 @@ const updateSetting = (values, { setErrors }) => {
             $('#settingFormModal').modal('hide');
             toastr.success('Setting updated successfully!');
         }).catch((error) => {
-        console.log("updateSetting-error: ", error);
-        setErrors(error.response.data.errors);
+            if (error.response.status === 422) {
+                setErrors(error.response.data.errors);
+            }
     });
 }
 
@@ -190,7 +191,7 @@ onMounted(() => {
                 <div class="d-flex">
                     <div class="input-group mb-3">
                         <input type="search" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="Search text..." />
-                        <button v-if="searchQuery" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+                        <button v-if="searchQuery" @click="clearSearchQuery" type="button" class="btn btn-sm bg-transparent" style="margin-left: -30px; z-index: 100;">
                             <i class="fa fa-times"></i>
                         </button>
                         <div class="input-group-append">

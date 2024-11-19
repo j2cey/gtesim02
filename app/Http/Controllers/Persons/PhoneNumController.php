@@ -9,6 +9,7 @@ use App\Jobs\ClientEsimSendMailJob;
 use App\Http\Controllers\Controller;
 use App\Traits\PhoneNum\ModelPhoneNums;
 use App\Http\Resources\Persons\PhoneNumResource;
+use App\Http\Requests\PhoneNum\RecycleEsimRequest;
 use App\Http\Requests\PhoneNum\StorePhoneNumRequest;
 use App\Http\Requests\PhoneNum\UpdatePhoneNumRequest;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -102,23 +103,20 @@ class PhoneNumController extends Controller
      *
      * @param UpdatePhoneNumRequest $request
      * @param PhoneNum $phonenum
-     * @return PhoneNum
+     * @return PhoneNumResource
      */
     public function update(UpdatePhoneNumRequest $request, PhoneNum $phonenum)
     {
-        $phonenum->update([
-            'phonenum' => $request->phonenum,
-            'posi' => $request->posi
-        ]);
+        $phonenum->updateOne($request->phone_number,$request->posi);
 
-        return $phonenum;
+        return New PhoneNumResource( $phonenum->load(['status','creator','esim']) );
     }
 
-    public function esimrecycle(Request $request, PhoneNum $phonenum)
+    public function esimrecycle(RecycleEsimRequest $request, PhoneNum $phonenum)
     {
-        $phonenum->changeEsim(null);
+        $phonenum->changeEsim($request->esim_id);
 
-        return $phonenum->load(['status','creator','esim']);
+        return New PhoneNumResource( $phonenum->load(['status','creator','esim']) );
     }
 
     /**

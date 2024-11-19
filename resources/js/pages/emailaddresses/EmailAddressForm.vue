@@ -19,6 +19,7 @@ const form = reactive({
 });
 
 const loading = ref(false);
+const errorMessage = ref({});
 const formMode = ref('create');
 const emailaddress = ref({});
 const emailaddressId = ref(null);
@@ -30,6 +31,7 @@ const modeltype = ref('');
 const modelid = ref('');
 
 const handleSubmit = (values, actions) => {
+    errorMessage.value = {};
     if (formMode.value === 'edit') {
         updateEmailAddress(values, actions);
     } else if (formMode.value === 'create') {
@@ -56,7 +58,10 @@ const createEmailAddress = (values, actions) => {
             });
         })
         .catch((error) => {
-            actions.setErrors(error.response?.data.errors);
+            if (error.response.status === 422) {
+                actions?.setErrors(error.response?.data.errors);
+                errorMessage.value = error.response?.data.errors;
+            }
         })
         .finally(() => {
             loading.value = false;
@@ -65,7 +70,8 @@ const createEmailAddress = (values, actions) => {
 
 const updateEmailAddress = (values, actions) => {
     loading.value = true;
-    axios.put(`/api/${modeltype.value}/${modelid.value}/emailaddresses/${emailaddressId.value}`, form)
+    form.posi -= 1;
+    axios.put(`/api/emailaddresses/${emailaddressId.value}`, form)
         .then((response) => {
             Swal.fire({
                 html: '<small>E-Mail modifié avec succès !</small>',
@@ -76,7 +82,10 @@ const updateEmailAddress = (values, actions) => {
             });
         })
         .catch((error) => {
-            actions.setErrors(error.response.data.errors);
+            if (error.response.status === 422) {
+                actions.setErrors(error.response.data.errors);
+                errorMessage.value = error.response?.data.errors;
+            }
         })
         .finally(() => {
             loading.value = false;
@@ -111,6 +120,14 @@ const statusKey = computed(() => {
     return status.value.uuid;
 });
 //</editor-fold>
+
+const posimax = computed(() => {
+    if ( emailaddress.value && emailaddress.value.hasemailaddress ) {
+        return emailaddress.value.hasemailaddress.emailaddress_maxposi;
+    } else {
+        return 1;
+    }
+});
 
 const prevRoutePath = computed(() => {
     return lastPath ? lastPath.value : '/';
@@ -176,14 +193,14 @@ onMounted(() => {
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="imsi">Adresse Mail</label>
-                                            <input v-model="form.email_address" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.email_address }" id="email_address" placeholder="Adresse Mail">
+                                            <input v-model="form.email_address" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errorMessage?.email_address }" id="email_address" placeholder="Adresse Mail">
                                             <span class="invalid-feedback">{{ errors.email_address }}</span>
                                         </div>
                                     </div>
                                     <div class="col-md-3" v-if="formMode === 'edit'">
                                         <div class="form-group">
                                             <label for="iccid">Position</label>
-                                            <input v-model="form.posi" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.posi }" id="posi" placeholder="Position">
+                                            <input type="number" v-model="form.posi" min="1" :max="posimax" onkeydown="return false" class="form-control form-control-sm" :class="{ 'is-invalid': errorMessage?.posi }" id="posi" placeholder="Position">
                                             <span class="invalid-feedback">{{ errors.posi }}</span>
                                         </div>
                                     </div>
@@ -212,7 +229,8 @@ onMounted(() => {
                                 <div class="btn-group">
                                     <button type="submit" class="btn btn-sm btn-primary m-2">
                                         <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        <i class="fa fa-save mr-1"></i> Valider
+                                        <i v-else class="fa fa-save mr-1"></i>
+                                        Valider
                                     </button>
                                     <router-link :to="prevRoutePath">
                                         <button type="submit" class="btn btn-sm btn-default m-2">

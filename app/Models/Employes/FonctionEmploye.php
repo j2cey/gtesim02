@@ -3,6 +3,7 @@
 namespace App\Models\Employes;
 
 use App\Models\BaseModel;
+use Illuminate\Support\Str;
 use App\Contracts\IsBaseModel;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -41,6 +42,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder|FonctionEmploye whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FonctionEmploye whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FonctionEmploye whereUuid($value)
+ * @method static FonctionEmploye create(array $fonctionemploye_values)
  * @mixin \Eloquent
  * @property-read \App\Models\Status|null $status
  */
@@ -74,6 +76,20 @@ class FonctionEmploye extends BaseModel implements IsBaseModel, Auditable
     }
     public static function validationMessages() {
         return [];
+    }
+
+    #endregion
+
+    #region BOOT
+
+    public static function boot(){
+        parent::boot();
+
+        // when creation
+        self::saving(function($model){
+            // set slug
+            $model->slug = Str::slug($model->intitule);
+        });
     }
 
     #endregion

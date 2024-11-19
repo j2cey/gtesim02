@@ -4,8 +4,13 @@ import AppNavbar from './components/AppNavbar.vue';
 import SidebarLeft from './components/SidebarLeft.vue';
 import SidebarRight from './components/SidebarRight.vue';
 import AppFooter from './components/AppFooter.vue';
-import {useAuthUserStore} from "./stores/AuthUserStore.js";
+import { useAuthUserStore } from "./stores/AuthUserStore.js";
 import { useSettingStore } from './stores/SettingStore';
+import { useRoute } from "vue-router";
+
+// TODO: add page loader -> https://blog.alexseifert.com/2023/05/10/vue-js-route-level-code-splitting-with-a-page-loader/
+
+const route = useRoute();
 
 const authUserStore = useAuthUserStore();
 const settingStore = useSettingStore();
@@ -20,13 +25,13 @@ const currentThemeMode = computed(() => {
         <AppNavbar />
         <SidebarLeft />
         <div class="content-wrapper">
-            <router-view></router-view>
+            <router-view :key="route.fullPath"></router-view>
         </div>
         <SidebarRight />
         <AppFooter />
     </div>
     <div v-else class="login-page" :class="currentThemeMode">
-        <router-view></router-view>
+        <router-view :key="route.fullPath"></router-view>
     </div>
 </template>
 

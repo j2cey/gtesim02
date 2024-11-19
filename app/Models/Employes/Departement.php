@@ -55,6 +55,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder|Departement whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Departement whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Departement whereUuid($value)
+ * @method static Departement create(array $array)
  * @mixin \Eloquent
  * @property-read \App\Models\Status|null $status
  */

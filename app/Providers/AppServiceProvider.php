@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\Setting;
+use App\Events\LdapUserSaved;
+use App\Listeners\FormatLdapUser;
 use Illuminate\Support\Facades\Event;
 use App\Events\ClientEsimCreatedEvent;
 use Illuminate\Support\ServiceProvider;
@@ -99,6 +101,10 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(
             ClientEsimCreatedEvent::class,
             SendClientEsimNotification::class,
+        );
+        Event::listen(
+            LdapUserSaved::class,
+            FormatLdapUser::class,
         );
     }
 }

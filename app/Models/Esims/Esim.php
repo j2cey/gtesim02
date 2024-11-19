@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use OwenIt\Auditing\Contracts\Auditable;
 use App\Models\ModelPickers\ModelPicker;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
@@ -35,9 +36,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property integer|null $technologie_esim_id
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property Carbon $attributed_at
  * @property int|null $status_id status reference
  * @property int|null $created_by user creator reference
  * @property int|null $updated_by user updator reference
+ *
  * @property-read \Illuminate\Database\Eloquent\Collection|\OwenIt\Auditing\Models\Audit[] $audits
  * @property-read int|null $audits_count
  * @property-read \App\Models\Esims\EsimQrcode|null $qrcode
@@ -70,6 +73,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @method static \Illuminate\Database\Eloquent\Builder|Esim whereUuid($value)
  * @mixin \Eloquent
  * @property-read \App\Models\Status|null $status
+ *
+ * @property EsimState|null $lateststate latest esim state
  */
 class Esim extends BaseModel implements IsBaseModel, Auditable
 {
@@ -146,6 +151,11 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
         return $this->hasMany(EsimState::class, 'esim_id');
     }
 
+    public function lateststate(): HasOne
+    {
+        return $this->states()->one()->ofMany('id', 'max');
+    }
+
     #endregion
 
     #region Custom Functions
@@ -198,7 +208,19 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
         }
     }
 
-    public static function getFirstFree($esim_id = -1) {
+    public function revertPreLastPickupStatus(): void
+    {
+        $lateststate = $this->lateststate;
+        if ($lateststate) {
+            $previous_state = $lateststate->prevesimstate;
+            if ($previous_state) {
+                $this->statutesim()->associate($previous_state->statutesim);
+                $this->save();
+            }
+        }
+    }
+
+    public static function getFirstFree($esim_id = -1): Esim {
         if ($esim_id === -1 || is_null($esim_id)) {
             $esim_nouveau_statut = StatutEsim::where('code', "nouveau")->first();
 
@@ -212,6 +234,14 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
         } else {
             return Esim::where('id', $esim_id)->first();
         }
+    }
+
+    public static function pickupFirstFree(Esim $old_esim = null): Esim
+    {
+        // Revert old esim status if any
+        $old_esim?->revertPreLastPickupStatus();
+
+        return Esim::getFirstFree();
     }
 
     public static function createNew($imsi, $iccid, $ac, $pin, $puk, $eki = null, $pin2 = null, $puk2 = null, $adm1 = null, $opc = null, StatutEsim $statutesim = null, TechnologieEsim $technologieesim = null)
@@ -268,7 +298,7 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
     public function saveQrcode()
     {
         if ($this->qrcode) {
-            // update qrcode
+            // TODO: update qrcode
         } else {
             EsimQrcode::createNew($this, $this->ac);
             $this->save();
@@ -276,12 +306,11 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
     }
 
     public function saveState() {
-        $previous_state = EsimState::with(['esim','statutesim','user'])
-            ->where('esim_id', $this->id)
-            ->orderBy('id', 'DESC')->first();
+        $previous_state = $this->lateststate;
         if ($previous_state) {
+            $previous_state->load(['esim','statutesim','user']);
             if ($this->statut_esim_id !== $previous_state->statut_esim_id) {
-                EsimState::createNew($this);
+                EsimState::createNew($this, $previous_state);
             }
         } else {
             EsimState::createNew($this);
@@ -301,6 +330,10 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
         $this->attributed_at = $date;
 
         return $this;
+    }
+
+    public static function getById(int $esim_id): ?Esim {
+        return Esim::where('id', $esim_id)->first();
     }
 
     #endregion

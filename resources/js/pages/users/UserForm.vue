@@ -8,7 +8,7 @@ import { debounce } from "lodash";
 import RoleListItem from "../roles/RoleListItem.vue";
 import { Bootstrap4Pagination } from "laravel-vue-pagination";
 import Swal from "sweetalert2";
-import { formatDate } from '../../helper.js'
+import { formatDate } from '../../services/helper.js'
 import { useAbility } from "@casl/vue";
 import StatusShow from "../statuses/StatusShow.vue";
 import ResetPassword from "./ResetPassword.vue"
@@ -29,7 +29,7 @@ const form = reactive({
     last_seen: '',
     created_at: '',
     updated_at: '',
-    ldapAccount: {},
+    ldapaccount: {},
     password: '',
 });
 
@@ -53,7 +53,7 @@ const initForm = () => {
     form.last_seen = '';
     form.created_at = '';
     form.updated_at = '';
-    form.ldapAccount = {};
+    form.ldapaccount = {};
 
     form.password = '';
 }
@@ -90,7 +90,9 @@ const createUser = (values, actions) => {
             });
         })
         .catch((error) => {
-            actions.setErrors(error.response?.data.errors);
+            if (error.response.status === 422) {
+                actions.setErrors(error.response?.data.errors);
+            }
         })
         .finally(() => {
             loading.value = false;
@@ -110,7 +112,9 @@ const updateUser = (values, actions) => {
             });
         })
         .catch((error) => {
-            actions.setErrors(error.response.data.errors);
+            if (error.response.status === 422) {
+                actions.setErrors(error.response.data.errors);
+            }
         })
         .finally(() => {
             loading.value = false;
@@ -132,7 +136,7 @@ const getUser = () => {
             form.last_seen = response.data.last_seen;
             form.created_at = response.data.created_at;
             form.updated_at = response.data.updated_at;
-            form.ldapAccount = response.data.ldapAccount;
+            form.ldapaccount = response.data.ldapaccount;
 
             user.value = response.data;
             userroles.value = response.data.roles;
@@ -344,6 +348,13 @@ const isLdap = computed(() => {
     return  form.is_ldap === 1;
 });
 
+const setIsLdap = () => {
+    if (isLdap && !form.ldapaccount) {
+        toastr.error("Please Create LDAP Account before activate !");
+        form.is_ldap = 0;
+    }
+}
+
 watch(searchQuery, debounce(() => {
     //getRoles();
 }, 300));
@@ -501,7 +512,7 @@ onMounted(() => {
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <div class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success col-sm-4">
-                                                <input type="checkbox" class="custom-control-input" id="is_ldap" name="is_ldap" autocomplete="is_ldap" v-model="form.is_ldap" :disabled="formMode === 'show'">
+                                                <input type="checkbox" class="custom-control-input" id="is_ldap" name="is_ldap" autocomplete="is_ldap" v-model="form.is_ldap" @change="setIsLdap" :disabled="!form.ldapaccount || formMode === 'show'">
                                                 <label class="custom-control-label" for="is_ldap"><span class="text text-xs">Is LDAP</span></label>
                                                 <span class="invalid-feedback">{{ errors.is_ldap }}</span>
                                             </div>
@@ -540,6 +551,66 @@ onMounted(() => {
                                             <label for="title"><span class="text text-xs text-olive">Updated at</span></label>
                                             <span class="form-control border-0 text-xs">{{ formatDate(form.updated_at) }}</span>
                                             <span class="invalid-feedback">{{ errors.updated_at }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-if="can('ldapusers-show') && (formMode === 'edit' || formMode === 'show')" class="row">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="card-title mr-2">
+                                                <span class="text text-sm font-weight-lighter"><i class="fas fa-university mr-1"></i>LDAP Account</span>
+                                            </h5>
+
+                                            <div class="card-tools">
+                                                <span v-if="form.ldapaccount">
+                                                    <span class="text text-xs mr-1">
+                                                            <router-link v-if="can('ldapusers-show')" :to="{
+                                                            name: 'ldapusers.show',
+                                                            params: {
+                                                                id: form.ldapaccount.id
+                                                            }
+                                                        }">
+                                                            <i class="fa fa-eye text-xs font-weight-light"></i>
+                                                        </router-link>
+                                                    </span>
+
+                                                    <span class="text text-xs mr-1">
+                                                        <router-link v-if="can('ldapusers-update')" :to="{
+                                                            name: 'ldapusers.edit',
+                                                            params: {
+                                                                id: form.ldapaccount.id
+                                                            }
+                                                        }">
+                                                            <i class="fa fa-edit text-warning text-xs font-weight-light"></i>
+                                                        </router-link>
+                                                    </span>
+                                                </span>
+                                                <span v-else class="text text-xs mr-1">
+                                                    <router-link v-if="can('ldapusers-create')" :to="{
+                                                        name: 'ldapusers.create',
+                                                        params: {
+                                                            userid: userid
+                                                        }
+                                                    }">
+                                                        <i class="fa fa-user-plus text-success"></i>
+                                                    </router-link>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="card-body" v-if="form.ldapaccount">
+                                            <dl class="row">
+                                                <dt class="col-sm-4 text-xs">GUID</dt>
+                                                <dd class="col-sm-8 text-xs">{{ form.ldapaccount?.guid }}</dd>
+                                                <dt class="col-sm-4 text-xs">Name</dt>
+                                                <dd class="col-sm-8 text-xs">{{ form.ldapaccount?.name }}</dd>
+                                                <dt class="col-sm-4 text-xs">Login</dt>
+                                                <dd class="col-sm-8 text-xs">{{ form.ldapaccount?.login }}</dd>
+                                                <dt class="col-sm-4 text-xs">E-Mail</dt>
+                                                <dd class="col-sm-8 text-xs">{{ form.ldapaccount?.email }}</dd>
+                                                <dt class="col-sm-4 text-xs">Phone Number</dt>
+                                                <dd class="col-sm-8 text-xs">{{ form.ldapaccount?.telephone }}</dd>
+                                            </dl>
                                         </div>
                                     </div>
                                 </div>
@@ -621,7 +692,7 @@ onMounted(() => {
                                     <div class="d-flex">
                                         <div class="input-group mb-3">
                                             <input @keyup.enter="getRoles" type="search" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="search text..." />
-                                            <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+                                            <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn btn-sm bg-transparent" style="margin-left: -30px; z-index: 100;">
                                                 <i class="fa fa-times"></i>
                                             </button>
                                             <div class="input-group-append">
@@ -688,7 +759,7 @@ onMounted(() => {
                     <div class="card card-outline direct-chat direct-chat-primary collapsed-card">
                         <div class="card-header">
                             <h3 class="card-title">
-                                Infos Employé
+                                Employee Account
                                 <button v-show="employee" @click.prevent="employeeEdit" type="button" class="ml-2 mb-1 btn btn-warning btn-xs">
                                     <i class="fa fa-edit font-weight-light"></i> Edit
                                 </button>
@@ -766,163 +837,6 @@ onMounted(() => {
                         </div>
 
                         <div v-if="loadingEmployee" class="overlay dark">
-                            <i class="fas fa-2x fa-sync-alt fa-spin"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div v-if="formMode === 'edit' || formMode === 'show'" class="row">
-                <div class="col-lg-12">
-                    <div class="card card-outline direct-chat direct-chat-primary collapsed-card">
-                        <div class="card-header">
-                            <h3 class="card-title">Infos LDAP</h3>
-                            <div class="card-tools">
-                                <span data-toggle="tooltip" title="3 New Messages" class="badge badge-success"></span>
-
-                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div v-if="ldapaccount" class="card-body">
-                            <div class="container-fluid">
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">CN</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.cn_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.cn_result === "OK." ? ldapaccount.cn : ldapaccount.cn_result }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">SN</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.sn_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.sn_result === "OK." ? ldapaccount.sn : ldapaccount.sn_result }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">TITLE</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.title_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.title_result === "OK." ? ldapaccount.title : ldapaccount.title_result }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">DESCRIPTION</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.description_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.description_result === "OK." ? ldapaccount.description : ldapaccount.description_result }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">PHYSICAL DELIVERY OFFICE NAME</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.physicaldeliveryofficename_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.physicaldeliveryofficename_result === "OK." ? ldapaccount.physicaldeliveryofficename : ldapaccount.physicaldeliveryofficename_result }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">TELEPHONE NUMBER</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.telephonenumber_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.telephonenumber_result === "OK." ? ldapaccount.telephonenumber : ldapaccount.telephonenumber_result }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">GIVEN NAME</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.givenname_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.givenname_result === "OK." ? ldapaccount.givenname : ldapaccount.givenname_result }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">WHEN CREATED</span></label>
-                                            <span v-if="ldapaccount.whencreated_result === 'OK.'" class="form-control border-0 text-xs text-default">{{ formatDate(ldapaccount.whencreated) === 'Invalid date' ? ldapaccount.whencreated : formatDate(ldapaccount.whencreated) }}</span>
-                                            <span v-else class="form-control border-0 text-xs text-danger">{{ ldapaccount.whencreated_result }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">DISTINGUISHED NAME</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.distinguishedname_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.distinguishedname_result === "OK." ? ldapaccount.distinguishedname : ldapaccount.distinguishedname_result }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">WHEN CHANGED</span></label>
-                                            <span v-if="ldapaccount.whenchanged_result === 'OK.'" class="form-control border-0 text-xs text-default">{{ formatDate(ldapaccount.whenchanged) === 'Invalid date' ? ldapaccount.whenchanged : formatDate(ldapaccount.whenchanged) }}</span>
-                                            <span v-else class="form-control border-0 text-xs text-danger">{{ ldapaccount.whenchanged_result }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">DEPARTMENT</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.department_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.department_result === "OK." ? ldapaccount.department : ldapaccount.department_result }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">COMPANY</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.company_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.company_result === "OK." ? ldapaccount.company : ldapaccount.company_result }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">NAME</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.name_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.name_result === "OK." ? ldapaccount.name : ldapaccount.name_result }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">BAD PWD COUNT</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.badpwdcount_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.badpwdcount_result === "OK." ? ldapaccount.badpwdcount : ldapaccount.badpwdcount_result }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">LOGON COUNT</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.logoncount_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.logoncount_result === "OK." ? ldapaccount.logoncount : ldapaccount.logoncount_result }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">SAM ACCOUNT NAME</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.samaccountname_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.samaccountname_result === "OK." ? ldapaccount.samaccountname : ldapaccount.samaccountname_result }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">MAIL</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.mail_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.mail_result === "OK." ? ldapaccount.mail : ldapaccount.mail_result }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">USER PRINCIPAL NAME</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.userprincipalname_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.userprincipalname_result === "OK." ? ldapaccount.userprincipalname : ldapaccount.userprincipalname_result }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="title"><span class="text text-xs">THUMBNAIL PHOTO</span></label>
-                                            <span class="form-control border-0 text-xs" :class="'text-' + (ldapaccount.thumbnailphoto_result === 'OK.' ? 'default' : 'danger')">{{ ldapaccount.thumbnailphoto_result === "OK." ? ldapaccount.thumbnailphoto : ldapaccount.thumbnailphoto_result }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-
-                        </div>
-
-                        <div v-if="loadingLdap" class="overlay dark">
                             <i class="fas fa-2x fa-sync-alt fa-spin"></i>
                         </div>
                     </div>

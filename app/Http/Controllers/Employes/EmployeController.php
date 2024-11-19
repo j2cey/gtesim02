@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Employes;
 
 use App\Models\User;
 use App\Models\Employes\Employe;
+use App\Models\Person\EmailAddress;
 use App\Http\Controllers\Controller;
 use App\Models\Employes\Departement;
 use App\Traits\PhoneNum\ModelPhoneNums;
@@ -14,7 +15,9 @@ use App\Http\Resources\Employes\EmployeResource;
 use App\Http\Requests\Employe\StoreEmployeRequest;
 use App\Http\Requests\Employe\UpdateEmployeRequest;
 use App\Http\Resources\Persons\EmailAddressResource;
+use App\Http\Requests\Employe\AddEmployePhoneNumRequest;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Http\Requests\Employe\AddEmployeEmailaddressRequest;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class EmployeController extends Controller
@@ -53,13 +56,22 @@ class EmployeController extends Controller
      *
      * @return AnonymousResourceCollection
      */
-    public function phonenumindex(Employe $employe)
+    public function phonenums(Employe $employe)
     {
         $phonenums = $this->modelPhoneNumQuery(request('query'),Employe::class, $employe->id)
             ->latest()
             ->paginate(5);
 
         return PhoneNumResource::collection( $phonenums );
+    }
+
+    public function phonenumadd(AddEmployePhoneNumRequest $request, Employe $employe)
+    {
+        $phonenum = $employe->addNewPhoneNum($request->phone_number,false,$request->esim_id);
+        $employe->load(['phonenums']);
+        $employe->setPhonenumList();
+
+        return ['employe' => $employe, 'phonenum' => $phonenum];
     }
 
     /**
@@ -75,6 +87,25 @@ class EmployeController extends Controller
 
         return EmailAddressResource::collection( $emailaddresses );
     }
+
+    public function emailaddressadd(AddEmployeEmailaddressRequest $request, Employe $employe)
+    {
+        $emailaddress = $employe->addNewEmailAddress($request->email_address);
+        $employe->load(['emailaddresses']);
+        $employe->setEmailAddressList();
+
+        return ['employe' => $employe, 'emailaddress' => $emailaddress];
+    }
+
+    /*public function emailaddressupdate(UpdateEmployeEmailAddressRequest $request, Employe $employe, EmailAddress $emailaddress)
+    {
+        $emailaddress->updateOne($request->email_address, $request->posi);
+
+        $employe->fresh();
+        $employe->setEmailAddressList();
+
+        return New EmailAddressResource($emailaddress);
+    }*/
 
 
     /**

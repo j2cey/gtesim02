@@ -24,17 +24,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property integer|null $user_id
  *
  * @property string|null $details
+ * @property integer $ord
+ * @property integer|null $prev_esim_state_id
  *
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ *
+ * @property EsimState|null $prevesimstate
+ * @property StatutEsim $statutesim
+ * @method static EsimState create(array $array)
  */
-
 class EsimState extends BaseModel implements Auditable
 {
     use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable;
 
     protected $guarded = [];
-    protected $with = ['user','statutesim'];
+    protected $with = ['user','statutesim','prevesimstate'];
 
     #region Validation Rules
 
@@ -76,11 +81,16 @@ class EsimState extends BaseModel implements Auditable
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function prevesimstate() {
+        return $this->belongsTo(EsimState::class, 'prev_esim_state_id');
+    }
+
     #endregion
 
     #region Custom Functions
 
-    public static function createNew(Esim $esim) {
+    public static function createNew(Esim $esim, EsimState $prev_esim_state = null): EsimState
+    {
         $statutesim_attribue = StatutEsim::attribue()->first();
 
         $statutesim = $esim->statutesim;
@@ -96,12 +106,18 @@ class EsimState extends BaseModel implements Auditable
 
         $user_id = $user ? $user->id : null;
 
-        EsimState::create([
+        $new_esim_state = EsimState::create([
             'esim_id' => $esim->id,
             'statut_esim_id' => $statutesim?->id,
             'user_id' => $user_id,
             'details' => $details,
         ]);
+
+        if ( ! is_null($prev_esim_state) ) {
+            $new_esim_state->prevesimstate()->associate($prev_esim_state);
+        }
+
+        return $new_esim_state;
     }
 
     #endregion

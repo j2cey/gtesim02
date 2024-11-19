@@ -5,6 +5,9 @@ namespace App\Traits\Esim;
 
 use App\Models\Esims\Esim;
 
+/**
+ * @property Esim $esim
+ */
 trait HasEsim
 {
     public function esim() {
@@ -45,7 +48,7 @@ trait HasEsim
 
         $this->esim()->dissociate();
 
-        $esim->setStatutFree();
+        $esim->setStatutSuspendue();
 
         return $this;
     }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->baseFields();
             $table->string('name');
-            $table->string('login')->nullable()->comment('user login');
+            $table->string('login')->unique()->nullable()->comment('user login');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

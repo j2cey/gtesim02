@@ -16,4 +16,6 @@ interface IHasEmailAddresses
     public function removeEmailAddressesAll();
 
     public function getIntituleAttribute();
+
+    public function switchEmailaddressesPosi(EmailAddress $switched_emailaddress);
 }

@@ -10,6 +10,9 @@ import Multiselect from "vue-multiselect";
 import PhonenumList from "../phonenums/PhoneNumList.vue";
 import EmailAddressList from "../emailaddresses/EmailAddressList.vue";
 import StatusShow from "../statuses/StatusShow.vue";
+import { useAbility } from "@casl/vue";
+
+const { can, cannot } = useAbility();
 
 const modeltype = ref('employes');
 const router = useRouter();
@@ -74,10 +77,10 @@ const createEmployee = (values, actions) => {
             });
         })
         .catch((error) => {
-            //console.log("createEmployee, error: ", error);
-            actions.setErrors(error.response?.data.errors);
-            errorMessage.value = error.response?.data.errors;
-            //console.log("createEmployee, errorMessage.value: ", errorMessage.value);
+            if (error.response.status === 422) {
+                actions.setErrors(error.response?.data.errors);
+                errorMessage.value = error.response?.data.errors;
+            }
         })
         .finally(() => {
             loading.value = false;
@@ -97,7 +100,9 @@ const updateEmployee = (values, actions) => {
             });
         })
         .catch((error) => {
-            actions.setErrors(error.response.data.errors);
+            if (error.response.status === 422) {
+                actions.setErrors(error.response.data.errors);
+            }
         })
         .finally(() => {
             loading.value = false;
@@ -383,7 +388,7 @@ onMounted(() => {
                                 </div>
 
                                 <div class="btn-group">
-                                    <button v-if="formMode === 'create' && formMode === 'edit'" type="submit" class="btn btn-sm btn-primary m-2">
+                                    <button v-if="(formMode === 'create' && can('employes-create') || formMode === 'edit' && can('employes-update')) && (formMode === 'create' || formMode === 'edit')" type="submit" class="btn btn-sm btn-primary m-2">
                                         <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                         <i class="fa fa-save mr-1"></i> Valider
                                     </button>

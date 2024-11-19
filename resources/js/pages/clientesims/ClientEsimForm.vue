@@ -9,7 +9,10 @@ import EmailAddressList from "../emailaddresses/EmailAddressList.vue";
 import StatusShow from "../statuses/StatusShow.vue";
 import Swal from 'sweetalert2';
 import { useAbility } from "@casl/vue";
-import { formatDate } from '../../helper.js'
+import { formatDate } from '../../services/helper.js'
+import { useEsimStore } from '../../stores/EsimStore.js';
+
+import pickupEsimModal from "../esims/EsimPickup.vue"
 
 const { can, cannot } = useAbility();
 const router = useRouter();
@@ -24,11 +27,14 @@ const form = reactive({
     model_selected: null,
 });
 
-//const modeltype = ref('clientesims');
+const modeltype = ref('clientesims');
 const loading = ref(false);
+const errorMessage = ref({});
 const formMode = ref('create');
 const creator = ref({});
 const updator = ref({});
+
+const esimStore = useEsimStore();
 
 const initForm = () => {
     form.nom_raison_sociale = '';
@@ -46,18 +52,38 @@ const clientsMatched = ref([
     {id: 3,uuid: '96aac6d1-4829-4e18-a56d-25583d8b4db7',nom_raison_sociale: 'Client 3', prenom: 'Prenom 3', created_at:'2022-07-13 23:16:27'},*/
 ]);
 
-const clientMatchedSelectChanged = () => {
-    console.log(form.model_selected);
+const clientMatchedSelectChanged = (event) => {
+    console.log("clientMatchedSelectChanged", form.model_selected, event.target.value);
 }
 const handleSubmit = (values, actions) => {
+    errorMessage.value = {};
     if (formMode.value === 'edit') {
         updateClientEsim(values, actions);
     } else if (formMode.value === 'create') {
         createClientEsim(values, actions);
     } else if (formMode.value === 'addphone') {
-        addPhoneToClientEsim(values, actions);
+        validatePhoneToClientEsim(values, actions);
     }
     actions.resetForm();
+};
+
+const pickupNewEsim = () => {
+    esimStore.pickupEsim();
+    $('#pickupEsimModal').modal('show');
+};
+const pickupNewEsimSaved = () => {
+    $('#pickupEsimModal').modal('hide');
+    form.esim_id = esimStore.esimpicked.id;
+    if (formMode.value === 'create') {
+        storeClientEsim();
+    } else if (formMode.value === 'addphone') {
+        addPhoneToClientEsim();
+    }
+    esimStore.pickupEsimReset();
+};
+const pickupNewEsimCanceled = () => {
+    esimStore.pickupEsimReset();
+    $('#pickupEsimModal').modal('hide');
 };
 
 const createClientEsim = (values, actions) => {
@@ -72,12 +98,30 @@ const createClientEsim = (values, actions) => {
                 //this.clientesimForm = this.clientesimFormCheck;
                 formMode.value = 'addphone';
             } else {
-                clientSuccessfullySaved(response.data.val.clientesim, response.data.val.phonenum);
+                pickupNewEsim();
+                //clientSuccessfullySaved(response.data.val.clientesim, response.data.val.phonenum);
             }
         })
         .catch((error) => {
-            console.log("createClientEsim, error: ", error);
-            actions.setErrors(error.response?.data.errors);
+            if (error.response.status === 422) {
+                actions.setErrors(error.response?.data.errors);
+                errorMessage.value = error.response?.data.errors;
+            }
+        })
+        .finally(() => {
+            loading.value = false;
+        })
+};
+
+const storeClientEsim = () => {
+    loading.value = true;
+    axios.post('/api/clientesims', form)
+        .then((response) => {
+            console.log("storeClientEsim, response: ", response);
+            clientSuccessfullySaved(response.data.clientesim, response.data.phonenum);
+        })
+        .catch((error) => {
+            //actions.setErrors(error.response?.data.errors);
         })
         .finally(() => {
             loading.value = false;
@@ -97,23 +141,44 @@ const updateClientEsim = (values, actions) => {
             });
         })
         .catch((error) => {
-            actions.setErrors(error.response?.data.errors);
+            if (error.response.status === 422) {
+                actions.setErrors(error.response?.data.errors);
+                errorMessage.value = error.response?.data.errors;
+            }
         })
         .finally(() => {
             loading.value = false;
     })
 };
 
-const addPhoneToClientEsim = (values, actions) => {
+const validatePhoneToClientEsim = (values, actions) => {
+    console.log("validatePhoneToClientEsim, form: ", form)
+    loading.value = true;
+    axios.put(`/api/clientesims/${form.model_selected}/phonenums/validate`, form)
+        .then((response) => {
+            console.log("validatePhoneToClientEsim, response: ", response);
+            pickupNewEsim();
+        })
+        .catch((error) => {
+            if (error.response.status === 422) {
+                actions.setErrors(error.response?.data.errors);
+                errorMessage.value = error.response?.data.errors;
+            }
+        })
+        .finally(() => {
+            loading.value = false;
+    })
+};
+const addPhoneToClientEsim = () => {
     console.log("addPhoneToClientEsim, form: ", form)
     loading.value = true;
-    axios.post(`/api/clientesim/phonenums/add`, form)
+    axios.put(`/api/clientesims/${form.model_selected}/phonenums/add`, form)
         .then((response) => {
             console.log("addPhoneToClientEsim, response: ", response);
             clientSuccessfullySaved(response.data.clientesim, response.data.phonenum);
         })
         .catch((error) => {
-            actions.setErrors(error.response?.data.errors);
+            //actions.setErrors(error.response?.data.errors);
         })
         .finally(() => {
             loading.value = false;
@@ -160,6 +225,7 @@ const getClientEsim = () => {
             status.value = response.data.status;
 
             clientesim.value = response.data;
+            modeltype.value = response.data.modeltype;
         }).then(() => {
 
         }
@@ -256,14 +322,14 @@ onMounted(() => {
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="imsi" class="text text-sm">Nom</label>
-                                            <input v-model="form.nom_raison_sociale" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.nom_raison_sociale }" id="nom_raison_sociale" placeholder="Nom" :disabled="formMode === 'show'">
+                                            <input v-model="form.nom_raison_sociale" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errorMessage?.nom_raison_sociale }" id="nom_raison_sociale" placeholder="Nom" :disabled="formMode === 'show'">
                                             <span class="invalid-feedback">{{ errors.nom_raison_sociale }}</span>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="iccid" class="text text-sm">Prénom</label>
-                                            <input v-model="form.prenom" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.prenom }" id="prenom" placeholder="Prénom" :disabled="formMode === 'show'">
+                                            <input v-model="form.prenom" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errorMessage?.prenom }" id="prenom" placeholder="Prénom" :disabled="formMode === 'show'">
                                             <span class="invalid-feedback">{{ errors.prenom }}</span>
                                         </div>
                                     </div>
@@ -273,14 +339,14 @@ onMounted(() => {
                                     <div v-if="formMode === 'create'" class="col-md-3">
                                         <div class="form-group">
                                             <label for="pin">Téléphone</label>
-                                            <input v-model="form.phone_number" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.phone_number }" id="phone_number" placeholder="Numéro Téléphone">
+                                            <input v-model="form.phone_number" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errorMessage?.phone_number }" id="phone_number" placeholder="Numéro Téléphone">
                                             <span class="invalid-feedback">{{ errors.phone_number }}</span>
                                         </div>
                                     </div>
                                     <div v-if="formMode === 'create'" class="col-md-3">
                                         <div class="form-group">
                                             <label for="puk">E-Mail</label>
-                                            <input v-model="form.email_address" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.email_address }" id="email_address" placeholder="E-Mail">
+                                            <input v-model="form.email_address" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errorMessage?.email_address }" id="email_address" placeholder="E-Mail">
                                             <span class="invalid-feedback">{{ errors.email_address }}</span>
                                         </div>
                                     </div>
@@ -291,7 +357,7 @@ onMounted(() => {
                                                         :status="status"
                                                         @status-changed="statusChanged"
                                                         :modelclass="clientesim.modelclass"
-                                                        :modeltype="clientesim.modeltype"
+                                                        :modeltype="modeltype"
                                                         :modelid="clientesimId"
                                             ></StatusShow>
                                         </div>
@@ -307,7 +373,7 @@ onMounted(() => {
                                 <div class="btn-group">
                                     <button v-if="formMode === 'edit' || formMode === 'create'" type="submit" class="btn btn-sm btn-primary m-2" :disabled="loading">
                                         <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        <i class="fa fa-save mr-1"></i> Valider
+                                        <i v-else class="fa fa-save mr-1"></i> Valider
                                     </button>
                                     <router-link :to="prevRoutePath">
                                         <button type="submit" class="btn btn-sm btn-default m-2">
@@ -336,7 +402,7 @@ onMounted(() => {
                                         <tr v-for="(client, index) in clientsMatched" :key="client.id" class="text text-xs">
                                             <td>
                                                 <div class="text border-right">
-                                                    <input type="radio" @input="clientMatchedSelectChanged()" v-model="form.model_selected" :value="client.uuid"/>
+                                                    <input type="radio" @input="clientMatchedSelectChanged" v-model="form.model_selected" :value="client.uuid"/>
                                                 </div>
                                             </td>
                                             <td><div class="text border-right">{{ client.nom_raison_sociale }}</div></td>
@@ -351,7 +417,7 @@ onMounted(() => {
                                 <div class="btn-group">
                                     <button v-if="formMode === 'addphone'" type="submit" class="btn btn-sm btn-primary m-2" :disabled="loading">
                                         <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        <i class="fa fa-save mr-1"></i> Valider
+                                        <i v-else class="fa fa-save mr-1"></i> Valider
                                     </button>
                                     <button type="button" @click="cancelAddphone" class="btn btn-sm btn-default m-2">Annuler</button>
                                 </div>
@@ -363,18 +429,19 @@ onMounted(() => {
             </div>
 
             <PhonenumList v-if="(formMode === 'edit' || formMode === 'show')"
-                          :modeltype="clientesim.modeltype"
+                          :modeltype="modeltype"
                           :modelid="clientesimId"
             ></PhonenumList>
 
             <EmailAddressList v-if="(formMode === 'edit' || formMode === 'show')"
-                          :modeltype="clientesim.modeltype"
+                          :modeltype="modeltype"
                           :modelid="clientesimId"
             ></EmailAddressList>
 
         </div>
     </div>
 
+    <pickupEsimModal @pickup-saved="pickupNewEsimSaved" @pickup-canceled="pickupNewEsimCanceled"></pickupEsimModal>
 </template>
 
 <style>

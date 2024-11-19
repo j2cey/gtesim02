@@ -53,7 +53,7 @@ class PhoneNumResource extends JsonResource
             'uuid' => $this->uuid,
 
             'phone_number' => $this->phone_number,
-            'posi' => $this->posi,
+            'posi' => $this->posi + 1,
             'hasphonenum_type' => $this->hasphonenum_type,
             'hasphonenum_id' => $this->hasphonenum_id,
 

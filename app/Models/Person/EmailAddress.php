@@ -7,6 +7,7 @@ use App\Models\BaseModel;
 use Illuminate\Support\Carbon;
 use App\Contracts\IsBaseModel;
 use OwenIt\Auditing\Contracts\Auditable;
+use App\Contracts\Persons\IHasEmailAddresses;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property int|null $updated_by user updator reference
  *
  * @property-read Status|null $status
+ * @property IHasEmailAddresses $hasemailaddress
  */
 class EmailAddress extends BaseModel implements IsBaseModel, Auditable
 {
@@ -90,6 +92,17 @@ class EmailAddress extends BaseModel implements IsBaseModel, Auditable
     public function hasemailaddress()
     {
         return $this->morphTo();
+    }
+
+    public function updateOne(string $email_address, int $posi): static
+    {
+        $this->email_address = $email_address;
+        $this->posi = $posi;
+        $this->save();
+
+        $this->hasemailaddress->switchEmailaddressesPosi($this);
+
+        return $this;
     }
 
     #endregion

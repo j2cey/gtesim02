@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Persons;
 use App\Models\Person\EmailAddress;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Persons\EmailAddressResource;
-use App\Http\Requests\EmailAddress\StoreEmailAddressRequest;
+use App\Http\Requests\EmailAddress\StoreEmailAdressRequest;
 use App\Http\Requests\EmailAddress\UpdateEmailAddressRequest;
 
 class EmailAddressController extends Controller
@@ -41,7 +41,7 @@ class EmailAddressController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreEmailAddressRequest $request)
+    public function store(StoreEmailAdressRequest $request)
     {
         //
     }
@@ -67,7 +67,9 @@ class EmailAddressController extends Controller
      */
     public function update(UpdateEmailAddressRequest $request, EmailAddress $emailaddress)
     {
-        //
+        $emailaddress->updateOne($request->email_address,$request->posi);
+
+        return New EmailAddressResource( $emailaddress->load(['status','creator']) );
     }
 
     /**

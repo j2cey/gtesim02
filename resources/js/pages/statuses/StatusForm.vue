@@ -45,7 +45,9 @@ const createStatus = (values, actions) => {
             toastr.success('Statut créé avec succès !');
         })
         .catch((error) => {
-            actions.setErrors(error.response.data.errors);
+            if (error.response.status === 422) {
+                actions.setErrors(error.response.data.errors);
+            }
         })
         .finally(() => {
             loading.value = false;
@@ -59,7 +61,9 @@ const updateStatus = (values, actions) => {
             toastr.success('Statut modifié avec succès !');
         })
         .catch((error) => {
-            actions.setErrors(error.response.data.errors);
+            if (error.response.status === 422) {
+                actions.setErrors(error.response.data.errors);
+            }
         })
         .finally(() => {
             loading.value = false;

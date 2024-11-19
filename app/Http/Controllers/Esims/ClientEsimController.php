@@ -24,12 +24,9 @@ use App\Http\Resources\Persons\EmailAddressResource;
 use App\Http\Requests\ClientEsim\StoreClientEsimRequest;
 use App\Http\Requests\ClientEsim\UpdateClientEsimRequest;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use App\Http\Requests\ClientEsim\AddPhoneClientEsimRequest;
+use App\Http\Requests\ClientEsim\AddClientEsimPhoneNumRequest;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use App\Http\Requests\ClientEsim\StoreClientEsimPhonenumRequest;
-use App\Http\Requests\ClientEsim\UpdateClientEsimPhoneNumRequest;
-use App\Http\Requests\ClientEsim\AddEmailAddressClientEsimRequest;
-use App\Http\Requests\ClientEsim\UpdateClientEsimEmailAddressRequest;
+use App\Http\Requests\ClientEsim\AddClientEsimEmailAddressRequest;
 
 class ClientEsimController extends Controller
 {
@@ -109,7 +106,7 @@ class ClientEsimController extends Controller
      *
      * @return AnonymousResourceCollection
      */
-    public function phonenumindex(ClientEsim $clientesim)
+    public function phonenums(ClientEsim $clientesim)
     {
         $phonenums = $this->modelPhoneNumQuery(request('query'),ClientEsim::class, $clientesim->id)
             ->latest()
@@ -160,7 +157,7 @@ class ClientEsimController extends Controller
         } else {
             // no match
             $res['action_type'] = 2;
-            $res['val'] = $this->store($request);
+            $res['val'] = null;//$this->store($request);
         }
 
         return $res;
@@ -184,7 +181,7 @@ class ClientEsimController extends Controller
         return $this->notifyclientesim($clientesim, $phonenum);
     }
 
-    public function addphone(AddPhoneClientEsimRequest $request)
+    public function addphone(AddClientEsimPhoneNumRequest $request)
     {
         $phonenum = $request->clientesim->addNewPhoneNum($request->phone_number,true,$request->esim_id);
         $clientesim = $request->clientesim;
@@ -193,7 +190,11 @@ class ClientEsimController extends Controller
 
         return $this->notifyclientesim($clientesim, $phonenum);
     }
-    public function phonenumadd(AddPhoneClientEsimRequest $request, ClientEsim $clientesim)
+    public function phonenumvalidate(AddClientEsimPhoneNumRequest $request, ClientEsim $clientesim)
+    {
+        return response()->json(['status' => 'ok'], 200);
+    }
+    public function phonenumadd(AddClientEsimPhoneNumRequest $request, ClientEsim $clientesim)
     {
         $phonenum = $clientesim->addNewPhoneNum($request->phone_number,true,$request->esim_id);
         $clientesim->load(['phonenums']);
@@ -201,7 +202,7 @@ class ClientEsimController extends Controller
 
         return $this->notifyclientesim($clientesim, $phonenum);
     }
-    public function emailaddressadd(AddEmailAddressClientEsimRequest $request, ClientEsim $clientesim)
+    public function emailaddressadd(AddClientEsimEmailAddressRequest $request, ClientEsim $clientesim)
     {
         $emailaddress = $clientesim->addNewEmailAddress($request->email_address);
         $clientesim->load(['emailaddresses']);
@@ -214,7 +215,7 @@ class ClientEsimController extends Controller
 
         ClientEsimSendMailJob::dispatch($phonenum);
 
-        return ['clientesim' => $clientesim, 'phonenum' => $phonenum];
+        return ['clientesim' => $clientesim, 'phonenum' => New PhoneNumResource($phonenum)];
     }
 
     /*
@@ -223,11 +224,10 @@ class ClientEsimController extends Controller
     }
     */
 
-    public function phonenumschangeesim(StoreClientEsimPhonenumRequest $request) {
+    /*public function phonenumschangeesim(StoreClientEsimPhonenumRequest $request) {
         $phonenum = $request->client_esim->phonenums()->where('phonenum', $request->phonenum)->first();
-        //dd($phonenum, $request->all());
         return $phonenum->changeEsim(null);
-    }
+    }*/
 
     public function mailtest($id): void
     {
@@ -286,7 +286,7 @@ class ClientEsimController extends Controller
         );
         return new ClientEsimResource($clientesim);
     }
-    public function phonenumupdate(UpdateClientEsimPhoneNumRequest $request, ClientEsim $clientesim, PhoneNum $phonenum)
+    /*public function phonenumupdate(UpdateClientEsimPhoneNumRequest $request, ClientEsim $clientesim, PhoneNum $phonenum)
     {
         $phonenum->phonenum = $request->phonenum;
         $phonenum->posi = $request->posi;
@@ -296,18 +296,16 @@ class ClientEsimController extends Controller
         $clientesim->setPhonenumList();
 
         return $phonenum;
-    }
-    public function emailaddressupdate(UpdateClientEsimEmailAddressRequest $request, ClientEsim $clientesim, EmailAddress $emailaddress)
+    }*/
+    /*public function emailaddressupdate(UpdateClientEsimEmailAddressRequest $request, ClientEsim $clientesim, EmailAddress $emailaddress)
     {
-        $emailaddress->email = $request->email;
-        $emailaddress->posi = $request->posi;
+        $emailaddress->updateOne($request->email_address, $request->posi);
 
-        $emailaddress->save();
         $clientesim->fresh();
         $clientesim->setEmailAddressList();
 
-        return $emailaddress;
-    }
+        return New EmailAddressResource($emailaddress);
+    }*/
     public function statuschange(StatusChangeRequest $request, ClientEsim $clientesim)
     {
         $clientesim->changeStatus($request->status);

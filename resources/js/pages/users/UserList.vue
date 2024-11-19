@@ -76,9 +76,9 @@ const createUser = (values, { resetForm, setErrors }) => {
             resetForm();
             toastr.success('User created successfully!');
         }).catch((error) => {
-        if (error.response.data.errors) {
-            setErrors(error.response.data.errors);
-        }
+            if (error.response.status === 422 && error.response.data.errors) {
+                setErrors(error.response.data.errors);
+            }
     });
 }
 
@@ -90,8 +90,9 @@ const updateUser = (values, { setErrors }) => {
             $('#userFormModal').modal('hide');
             toastr.success('User updated successfully!');
         }).catch((error) => {
-        console.log("updateUser-error: ", error);
-        setErrors(error.response.data.errors);
+            if (error.response.status === 422) {
+                setErrors(error.response.data.errors);
+            }
     });
 }
 
@@ -204,7 +205,7 @@ onMounted(() => {
                 <div class="d-flex">
                     <router-link v-if="can('users-create')" to="users/create">
                         <button type="button" class="mb-2 btn btn-sm btn-primary">
-                            <i class="fa fa-plus-circle mr-1"></i>
+                            <i class="fa fa-user-plus mr-1"></i>
                             New User
                         </button>
                     </router-link>
@@ -220,7 +221,7 @@ onMounted(() => {
                 <div class="d-flex">
                     <div class="input-group mb-3">
                         <input @keyup.enter="getUsers" type="search" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="Recherche text..." />
-                        <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+                        <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn btn-sm bg-transparent" style="margin-left: -30px; z-index: 100;">
                             <i class="fa fa-times"></i>
                         </button>
                         <div class="input-group-append">

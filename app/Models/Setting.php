@@ -169,6 +169,10 @@ class Setting extends Model implements Auditable
         }
     }
 
+    public static function getAllGroupedTest() {
+
+    }
+
     public static function getAllGroupedFromSettingArray(array $settings) {
         $tree_settings = self::buildTree($settings);
         return self::cleanTree($tree_settings);

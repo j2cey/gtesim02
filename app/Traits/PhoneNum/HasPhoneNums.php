@@ -31,6 +31,11 @@ trait HasPhoneNums
         return $this->morphOne(Phonenum::class, 'hasphonenum')->oldest('id');
     }
 
+    public function getPhonenumMaxposiAttribute()
+    {
+        return $this->phonenums()->count();
+    }
+
     public function addNewPhoneNum($num, $attach_esim = false, $esim_id = null) : ?Phonenum
     {
         // TODO: Valider le numéro de Phone
@@ -105,13 +110,26 @@ trait HasPhoneNums
         }
     }
 
+    public function switchPhonenumsPosi(PhoneNum $switched_phonenum) {
+        $phonenums = $this->phonenums()->orderBy('posi', 'asc')->get();
+
+        foreach ($phonenums as $phonenum) {
+            if ($phonenum->id !== $switched_phonenum->id) {
+                if ( $this->phonenums()->where('posi', $phonenum->posi)->count() > 1 ) {
+                    $phonenum->posi++;
+                    $phonenum->save();
+                }
+            }
+        }
+    }
+
     /**
      * Add, dynamically, Eloquent relation (eager loading) to this model
      */
     protected function initializeHasPhoneNums()
     {
         $this->with = array_unique(array_merge($this->with, ['phonenums','latestPhonenum','oldestPhonenum']));
-        $this->appends = array_unique(array_merge($this->appends, ['intitule']));
+        $this->appends = array_unique(array_merge($this->appends, ['intitule','phonenum_maxposi']));
     }
 
     public static function bootHasPhoneNums()

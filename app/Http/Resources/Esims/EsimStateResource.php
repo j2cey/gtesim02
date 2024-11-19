@@ -4,11 +4,12 @@ namespace App\Http\Resources\Esims;
 
 use JsonSerializable;
 use Illuminate\Http\Request;
-use App\Models\Esims\EsimState;
 use Illuminate\Support\Carbon;
-use App\Http\Resources\UserResource;
+use App\Models\Esims\EsimState;
+use App\Http\Resources\Auth\UserResource;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Resources\Json\JsonResource;
+
 /**
  * Class EsimStateResource
  * @package App\Http\Resources\Esims

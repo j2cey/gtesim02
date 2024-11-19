@@ -17,4 +17,6 @@ interface IHasPhoneNums extends Auditable
     public function removePhonenumsAll();
 
     public function getIntituleAttribute();
+
+    public function switchPhonenumsPosi(PhoneNum $switched_phonenum);
 }

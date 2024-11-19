@@ -18,6 +18,11 @@ import ability from './services/ability';
 // localization
 import { i18nVue } from "laravel-vue-i18n";
 
+//
+import axios from "./plugins/axios.js";
+
+// TODO: Put and use errorMessage on every Form
+
 const pinia = createPinia();
 const app = createApp(App);
 
@@ -51,6 +56,8 @@ router.beforeEach(async (to, from) => {
 
 app.use(pinia);
 app.use(router);
+
+app.config.globalProperties.$axios = axios;
 
 // if (window.location.pathname === '/login') {
 //     const currentApp = createApp({});

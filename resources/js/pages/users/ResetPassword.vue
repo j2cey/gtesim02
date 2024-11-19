@@ -37,8 +37,10 @@ const resetPassword = (values, actions) => {
             });
         })
         .catch((error) => {
-            actions.setErrors(error.response.data.errors);
-            resetPwdErrorMessage.value = error.response?.data.errors;
+            if (error.response.status === 422) {
+                actions.setErrors(error.response.data.errors);
+                resetPwdErrorMessage.value = error.response?.data.errors;
+            }
         })
         .finally(() => {
             loadingResetPassword.value = false;

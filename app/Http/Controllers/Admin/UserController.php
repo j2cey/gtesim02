@@ -3,13 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
-use App\Models\Status;
-use Illuminate\Http\Request;
-use App\Enums\Auth\Permissions;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\UserResource;
-use \Illuminate\Auth\Middleware\Authorize;
+use App\Http\Resources\Auth\UserResource;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use Illuminate\Routing\Controllers\Middleware;
@@ -46,15 +42,9 @@ class UserController extends Controller implements HasMiddleware
 
     public function store(StoreUserRequest $request) {
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'login' => $request->login,
-            'is_local' => $request->is_local,
-            'is_ldap' => $request->is_ldap,
-        ]);
+        $user = User::createNew($request->name,$request->email,$request->login,$request->is_local,$request->is_ldap);
 
-        $user->setPassword(request('password'));
+        $user->localPwdSet(request('password'));
 
         return New UserResource( $user );
     }

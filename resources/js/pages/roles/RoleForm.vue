@@ -9,6 +9,8 @@ import PermissionListItem from "../roles/PermissionListItem.vue";
 import {Bootstrap4Pagination} from "laravel-vue-pagination";
 
 
+// TODO: Load users-in-role
+// TODO: Build Permissions-List View
 const loadingPermissions = ref(false);
 const paginationLinksLimit = ref(5);
 const router = useRouter();
@@ -48,7 +50,9 @@ const createRole = (values, actions) => {
             toastr.success('Role created successfully!');
         })
         .catch((error) => {
-            actions.setErrors(error.response.data.errors);
+            if (error.response.status === 422) {
+                actions.setErrors(error.response.data.errors);
+            }
         })
 };
 
@@ -58,7 +62,9 @@ const updateRole = (values, actions) => {
             toastr.success('Role updated successfully!');
         })
         .catch((error) => {
-            actions.setErrors(error.response.data.errors);
+            if (error.response.status === 422) {
+                actions.setErrors(error.response.data.errors);
+            }
         })
 };
 
@@ -376,7 +382,7 @@ onMounted(() => {
                                     <div class="d-flex">
                                         <div class="input-group mb-3">
                                             <input type="search" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="Search text..." />
-                                            <button v-if="searchQuery" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+                                            <button v-if="searchQuery" @click="clearSearchQuery" type="button" class="btn btn-sm bg-transparent" style="margin-left: -30px; z-index: 100;">
                                                 <i class="fa fa-times"></i>
                                             </button>
                                             <div class="input-group-append">

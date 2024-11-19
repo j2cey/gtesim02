@@ -3,6 +3,7 @@
 namespace App\Traits\EmailAddress;
 
 use App\Models\Status;
+use PharIo\Manifest\Email;
 use App\Models\Person\EmailAddress;
 
 trait HasEmailAddresses
@@ -24,6 +25,11 @@ trait HasEmailAddresses
     public function oldestEmailAddress()
     {
         return $this->morphOne(EmailAddress::class, 'hasemailaddress')->oldest('id');
+    }
+
+    public function getEmailaddressMaxposiAttribute()
+    {
+        return $this->emailaddresses()->count();
     }
 
     public function addNewEmailAddress($email_address) : ?EmailAddress
@@ -84,13 +90,26 @@ trait HasEmailAddresses
         }
     }
 
+    public function switchEmailaddressesPosi(EmailAddress $switched_emailaddress) {
+        $emailaddresses = $this->emailaddresses()->orderBy('posi', 'asc')->get();
+
+        foreach ($emailaddresses as $emailaddress) {
+            if ($emailaddress->id !== $switched_emailaddress->id) {
+                if ( $this->emailaddresses()->where('posi', $emailaddress->posi)->count() > 1 ) {
+                    $emailaddress->posi++;
+                    $emailaddress->save();
+                }
+            }
+        }
+    }
+
     /**
      * Add, dynamically, Eloquent relation (eager loading) to this model
      */
     protected function initializeHasEmailAddresses()
     {
         $this->with = array_unique(array_merge($this->with, ['emailaddresses','latestEmailAddress','oldestEmailAddress']));
-        $this->appends = array_unique(array_merge($this->appends, ['intitule']));
+        $this->appends = array_unique(array_merge($this->appends, ['intitule','emailaddress_maxposi']));
     }
 
     public static function bootHasEmailAddresses()

@@ -19,6 +19,16 @@ abstract class Permissions
         $additionalactions = null;
         return new PermissionAction("profile", $customlevels, $additionalactions);
     }
+    public static function Dashboard() : PermissionAction {
+        $customlevels = ['create' => 1,'update' => 1,'delete' => 1];
+        $additionalactions =  ['agence-show' => 3];
+        return new PermissionAction("dashboards", $customlevels, $additionalactions);
+    }
+    public static function LdapUser() : PermissionAction {
+        $customlevels = ['create' => 1,'update' => 1,'delete' => 1];
+        $additionalactions =  ['integrate' => 1];
+        return new PermissionAction("ldapusers", $customlevels, $additionalactions);
+    }
 
     public static function User() : BaseModelAction {
         $customlevels = ['create' => 1,'update' => 1,'delete' => 1];

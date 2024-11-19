@@ -2,29 +2,26 @@
 
 namespace App\Http\Requests\EmailAddress;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Models\Person\EmailAddress;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class StoreEmailAddressRequest extends FormRequest
+class StoreEmailAdressRequest extends EmailAddressRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
-    public function authorize()
+    public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array
+     * @return array<string, ValidationRule|array|string>
      */
-    public function rules()
+    public function rules(): array
     {
-        return [
-            //
-        ];
+        return EmailAddress::createRules($this->email_address, $this->hasemailaddress_type);
     }
 }

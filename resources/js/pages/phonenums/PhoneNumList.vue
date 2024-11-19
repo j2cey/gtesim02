@@ -1,11 +1,14 @@
 <script setup>
 import axios from 'axios';
-import {reactive, onMounted, ref, watch, computed} from 'vue';
+import { reactive, onMounted, ref, watch, computed } from 'vue';
 import PhonenumListItem from "./PhonenumListItem.vue";
 import { Bootstrap4Pagination } from "laravel-vue-pagination";
 import { useAbility } from "@casl/vue";
 import { debounce } from "lodash";
 import Swal from 'sweetalert2';
+import { useEsimStore } from '../../stores/EsimStore.js';
+
+import pickupEsimModal from "../esims/EsimPickup.vue"
 
 const { can, cannot } = useAbility();
 
@@ -14,12 +17,18 @@ const props = defineProps({
     modelid: { type: String, default: ''},
 });
 
+const form = reactive({
+    phone_number: '',
+    esim_id: '',
+});
+
 //<editor-fold desc="PhoneNum">
 const loading = ref(false);
 const selectAll = ref(false);
 const selecteds = ref([]);
 const phonenums = ref({'data': []});
 const paginationLinksLimit = ref(5);
+const esimStore = useEsimStore();
 
 const toggleSelection = (phonenum) => {
     const index = selecteds.value.indexOf(phonenum.id);
@@ -44,7 +53,7 @@ const clearSearchQuery = () => {
 
 const searchQuery = ref(null);
 const getPhonenums = (page = 1) => {
-    let linkstr = '/api/' + (props.modeltype === '' ? 'phonenums' : props.modeltype + '/' + props.modelid + '/phonenumindex');
+    let linkstr = '/api/' + (props.modeltype === '' ? 'phonenums' : props.modeltype + '/' + props.modelid + '/phonenums');
     console.log("getPhonenums launched, : props.modeltype: ", props.modeltype, ", props.modelid: ", props.modelid, ", linkstr: ", linkstr, ", page: ", page);
     loading.value = true;
     axios.get( `${linkstr}?page=${page}`, {
@@ -80,13 +89,30 @@ const deletePhoneNum = () => {
 };
 
 const loadingPhoneNumEsimRecycle = ref(false);
-const phonenumIdEsimBeingRecycled = ref(null);
+const phonenumEsimBeingRecycled = ref(null);
+//const phonenumIdEsimBeingRecycled = ref(null);
 
 const confirmPhonenumEsimRecycle = (phonenum) => {
-    phonenumIdEsimBeingRecycled.value = phonenum.uuid;
-    //$('#recyclePhoneNumEsimModal').modal('show');
+    phonenumEsimBeingRecycled.value = phonenum;
+    pickupNewEsim();
+};
+
+const pickupNewEsim = () => {
+    esimStore.pickupEsim();
+    $('#pickupEsimModal').modal('show');
+};
+
+const pickupNewEsimSaved = () => {
+    $('#pickupEsimModal').modal('hide');
+    form.esim_id = esimStore.esimpicked.id;
+    loadingPhoneNumEsimRecycle.value = true;
+
+    saveEsimRecycle();
+};
+
+const saveEsimRecycle = () => {
     Swal.fire({
-        html: '<small>Affecter une nouvelle eSIM au <b>' + phonenum.phone_number + '</b></small>',
+        html: '<small>Confirmer Affectation de nouvelle eSIM au <b>' + phonenumEsimBeingRecycled.value.phone_number + '</b></small>',
         icon: 'warning',
         showCancelButton: true,
         showLoaderOnConfirm: true,
@@ -94,7 +120,7 @@ const confirmPhonenumEsimRecycle = (phonenum) => {
         cancelButtonText: 'Annuler',
         preConfirm: () => {
             loadingPhoneNumEsimRecycle.value = true;
-            return axios.put(`/api/phonenums/${phonenumIdEsimBeingRecycled.value}/esimrecycle`, null)
+            return axios.put(`/api/phonenums/${phonenumEsimBeingRecycled.value.uuid}/esimrecycle`, form)
                 .then(response => {
                     console.log("confirmPhonenumEsimRecycle, preConfirm, response: ", response);
                     return response;
@@ -120,12 +146,15 @@ const confirmPhonenumEsimRecycle = (phonenum) => {
 
                 loadingPhoneNumEsimRecycle.value = false;
 
-                if ( props.modeltype === 'clientesims' ) {
-                    window.location = '/clientesims.previewpdf/' + result.value.data.id;
-                }
+                window.location = '/clientesims.previewpdf/' + result.value.data.id;
             })
         }
     })
+};
+
+const pickupNewEsimCanceled = () => {
+    esimStore.pickupEsimReset();
+    $('#pickupEsimModal').modal('hide');
 };
 
 const setPhoneNumUpdated = (phonenum) => {
@@ -190,7 +219,7 @@ onMounted(() => {
                             <div class="d-flex">
                                 <div class="input-group mb-3">
                                     <input @keyup.enter="getPhonenums" type="search" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="Recherche text..." />
-                                    <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+                                    <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn btn-sm bg-transparent" style="margin-left: -30px; z-index: 100;">
                                         <i class="fa fa-times"></i>
                                     </button>
                                     <div class="input-group-append">
@@ -285,6 +314,7 @@ onMounted(() => {
         </div>
     </div>
 
+    <pickupEsimModal @pickup-saved="pickupNewEsimSaved" @pickup-canceled="pickupNewEsimCanceled"></pickupEsimModal>
 </template>
 
 <style scoped>

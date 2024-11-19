@@ -11,16 +11,15 @@ use Illuminate\Foundation\Http\FormRequest;
  * Class PhoneNumRequest
  * @package App\Http\Requests\PhoneNum
  *
- * @property string $phonenum
+ * @property string $phone_number
  * @property string $hasphonenum_type
  * @property integer $hasphonenum_id
  * @property integer $posi
  * @property integer|null $esim_id
  *
- * @property PhoneNum $phonenum_obj
+ * @property PhoneNum $phonenum
  * @property IHasPhoneNums $hasphonenum
  */
-
 class PhoneNumRequest extends FormRequest
 {
     use RequestTraits;
@@ -42,7 +41,7 @@ class PhoneNumRequest extends FormRequest
      */
     public function rules()
     {
-        return PhoneNum::defaultRules($this->phonenum,$this->hasphonenum_type);
+        return PhoneNum::defaultRules();
     }
 
     /**

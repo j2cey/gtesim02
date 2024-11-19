@@ -10,6 +10,7 @@ import {Bootstrap4Pagination} from "laravel-vue-pagination";
 import Multiselect from 'vue-multiselect';
 import Swal from "sweetalert2";
 import StatusShow from "@/pages/statuses/StatusShow.vue";
+import { formatDate } from '../../services/helper.js'
 
 const router = useRouter();
 const route = useRoute();
@@ -27,6 +28,7 @@ const form = reactive({
     opc: '',
     statutesim: {},
     technologieesim: {},
+    attributed_at: null,
 });
 
 const loading = ref(false);
@@ -49,6 +51,7 @@ const initForm = () => {
     form.opc = '';
     form.statutesim = {};
     form.technologieesim = {};
+    form.attributed_at = null;
 }
 
 const handleSubmit = (values, actions) => {
@@ -77,7 +80,9 @@ const createEsim = (values, actions) => {
             });
         })
         .catch((error) => {
-            actions.setErrors(error.response.data.errors);
+            if (error.response.status === 422) {
+                actions.setErrors(error.response.data.errors);
+            }
         })
         .finally(() => {
             loadingEsim.value = false;
@@ -98,7 +103,9 @@ const updateEsim = (values, actions) => {
             });
         })
         .catch((error) => {
-            actions.setErrors(error.response.data.errors);
+            if (error.response.status === 422) {
+                actions.setErrors(error.response.data.errors);
+            }
         })
         .finally(() => {
             loadingEsim.value = false;
@@ -117,7 +124,9 @@ const deleteEsim = (values, actions) => {
             });
         })
         .catch((error) => {
-            actions.setErrors(error.response.data.errors);
+            if (error.response.status === 422) {
+                actions.setErrors(error.response.data.errors);
+            }
         })
         .finally(() => {
             loadingEsim.value = false;
@@ -143,6 +152,7 @@ const getEsim = () => {
             form.opc = response.data.opc;
             form.statutesim = response.data.statutesim;
             form.technologieesim = response.data.technologieesim;
+            form.attributed_at = response.data.attributed_at;
 
             phonenum.value = response.data.phonenum;
             status.value = response.data.status;
@@ -402,12 +412,32 @@ onMounted(() => {
                                             <span class="invalid-feedback">{{ errors.adm1 }}</span>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="opc">opc</label>
                                             <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.opc }}</span>
                                             <input v-else v-model="form.opc" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errors.opc }" id="opc" placeholder="opc">
                                             <span class="invalid-feedback">{{ errors.opc }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="technologie">Technologie</label>
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.technologieesim?.libelle }}</span>
+                                            <multiselect v-else
+                                                         id="technologie"
+                                                         v-model="form.technologieesim"
+                                                         value=""
+                                                         :options="esimtechnologies"
+                                                         :searchable="true"
+                                                         label="libelle"
+                                                         track-by="id"
+                                                         key="id"
+                                                         :max-height="100"
+                                                         placeholder="Technologie Esim"
+                                            >
+                                            </multiselect >
+                                            <span class="invalid-feedback">{{ errors.technologieesim }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -432,24 +462,12 @@ onMounted(() => {
                                             <span class="invalid-feedback">{{ errors.statutesim }}</span>
                                         </div>
                                     </div>
+
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="technologie">Technologie</label>
-                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.technologieesim?.libelle }}</span>
-                                            <multiselect v-else
-                                                id="technologie"
-                                                v-model="form.technologieesim"
-                                                value=""
-                                                :options="esimtechnologies"
-                                                :searchable="true"
-                                                label="libelle"
-                                                track-by="id"
-                                                key="id"
-                                                :max-height="100"
-                                                placeholder="Technologie Esim"
-                                            >
-                                            </multiselect >
-                                            <span class="invalid-feedback">{{ errors.technologieesim }}</span>
+                                            <label for="opc">Date Attribution</label>
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ formatDate(form.attributed_at) }}</span>
+                                            <span class="invalid-feedback">{{ errors.attributed_at }}</span>
                                         </div>
                                     </div>
 
@@ -525,7 +543,7 @@ onMounted(() => {
                                     <div class="d-flex">
                                         <div class="input-group mb-3">
                                             <input @keyup.enter="getEsimStates" type="search" v-model="searchEsimStateQuery" class="form-control text-xs form-control-sm" placeholder="Recherche text..." />
-                                            <button v-if="searchEsimStateQuery && !loadingEsimStates" @click="clearSearchEsimStateQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+                                            <button v-if="searchEsimStateQuery && !loadingEsimStates" @click="clearSearchEsimStateQuery" type="button" class="btn btn-sm bg-transparent" style="margin-left: -30px; z-index: 100;">
                                                 <i class="fa fa-times"></i>
                                             </button>
                                             <div class="input-group-append">

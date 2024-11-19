@@ -33,6 +33,11 @@ trait StatusTrait
         }
     }
 
+    public function isActive() {
+        //return $this->is_local || $this->is_ldap;
+        return Status::active()->first() && $this->status_id === Status::active()->first()->id;
+    }
+
     public function setStatus(Status $status = null, $save = false) {
         if ( is_null($status) ) {
             $this->status()->disassociate();

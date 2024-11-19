@@ -24,6 +24,7 @@ class SettingController extends Controller
     }
 
     public function fetch() {
+        //return Setting::all()->toArray();
         return Setting::getAllGrouped();
     }
 

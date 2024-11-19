@@ -4,10 +4,7 @@ import { useToastr } from '../../toastr.js';
 import axios from 'axios';
 import { Can } from "@casl/vue";
 import { useAbility } from "@casl/vue";
-import { formatDate } from '../../helper.js'
-
-// TODO: Navigate from PhoneNum to Esim details
-// TODO: Add PhoneNum pdf view button
+import { formatDate } from '../../services/helper.js'
 
 const { can, cannot } = useAbility();
 
@@ -19,7 +16,7 @@ const props = defineProps({
     modelid: { type: String, default: ''},
     selecteds: Object,
     index: Number,
-    selectAll: Boolean,
+    selectAll: Boolean
 });
 
 const emit = defineEmits(['confirmPhonenumDeletion','confirmPhonenumEsimRecycle']);
@@ -75,7 +72,7 @@ onMounted(() => {
             }">
                 <i class="fa fa-edit mr-2 text text-xs text-warning font-weight-light"></i>
             </router-link>
-            <a class="text text-xs" v-if="can('phonenums-esim-recycle')" href="#" @click.prevent="$emit('confirmPhonenumEsimRecycle', phonenum)">
+            <a class="text text-xs" v-if="phonenum.esim && can('phonenums-esim-recycle')" href="#" @click.prevent="$emit('confirmPhonenumEsimRecycle', phonenum)">
                 <i class="fa fa-recycle mr-2 text text-xs text-success"></i>
             </a>
             <a class="text text-xs" v-if="can( ( modeltype === '' ? '' : modeltype + '-' ) + 'previewpdf')" href="#" @click.prevent="previewPdf(phonenum)">

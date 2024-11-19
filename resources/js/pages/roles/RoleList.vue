@@ -65,8 +65,9 @@ const updateRole = (values, { setErrors }) => {
             $('#roleFormModal').modal('hide');
             toastr.success('Role updated successfully!');
         }).catch((error) => {
-        console.log("updateRole-error: ", error);
-        setErrors(error.response.data.errors);
+            if (error.response.status === 422) {
+                setErrors(error.response.data.errors);
+            }
     });
 }
 

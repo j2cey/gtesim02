@@ -3,7 +3,7 @@ import {computed, onMounted, ref} from 'vue';
 import { useToastr } from '../../toastr.js';
 import axios from 'axios';
 import { useAbility } from "@casl/vue";
-import { formatDate } from '../../helper.js'
+import { formatDate } from '../../services/helper.js'
 
 const { can, cannot } = useAbility();
 

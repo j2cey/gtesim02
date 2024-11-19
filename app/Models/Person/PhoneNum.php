@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property Carbon $updated_at
  * @property int|null $created_by user creator reference
  * @property int|null $updated_by user updator reference
+ * @property IHasPhoneNums $hasphonenum
  */
 
 class PhoneNum extends BaseModel implements IsBaseModel, IHasEsim
@@ -110,6 +111,17 @@ class PhoneNum extends BaseModel implements IsBaseModel, IHasEsim
     }*/
 
     #endregion
+
+    public function updateOne(string $phone_number, int $posi): static
+    {
+        $this->phone_number = $phone_number;
+        $this->posi = $posi;
+        $this->save();
+
+        $this->hasphonenum->switchPhonenumsPosi($this);
+
+        return $this;
+    }
 
     public function setCreator(User $creator) {
         $this->creator()->associate($creator);

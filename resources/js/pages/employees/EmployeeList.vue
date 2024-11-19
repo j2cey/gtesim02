@@ -123,13 +123,13 @@ onMounted(() => {
 
             <div class="d-flex justify-content-between">
                 <div class="d-flex">
-                    <router-link v-if="can('clientesims-create')" to="employes/create">
+                    <router-link v-if="can('employes-create')" to="employees/create">
                         <button type="button" class="mb-2 btn btn-sm btn-primary">
                             <i class="fa fa-plus-circle mr-1"></i>
                             Nouveau
                         </button>
                     </router-link>
-                    <div v-if="can('clientesims-delete') && selectedEmployees.length > 0">
+                    <div v-if="can('employes-delete') && selectedEmployees.length > 0">
                         <button @click="bulkDelete" type="button" class="ml-2 mb-2 btn btn-sm btn-danger">
                             <i class="fa fa-trash mr-1"></i>
                             Supprimer Sélection
@@ -141,7 +141,7 @@ onMounted(() => {
                 <div class="d-flex">
                     <div class="input-group mb-3">
                         <input @keyup.enter="getEmployees" type="search" v-model="searchQuery" class="form-control text-xs form-control-sm" placeholder="Recherche text..." />
-                        <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn bg-transparent" style="margin-left: -40px; z-index: 100;">
+                        <button v-if="searchQuery && !loading" @click="clearSearchQuery" type="button" class="btn btn-sm bg-transparent" style="margin-left: -30px; z-index: 100;">
                             <i class="fa fa-times"></i>
                         </button>
                         <div class="input-group-append">

@@ -23,7 +23,7 @@ class UpdatePhoneNumRequest extends PhoneNumRequest
      */
     public function rules()
     {
-        return PhoneNum::updateRules($this->phonenum,$this->phonenum,$this->hasphonenum_type);
+        return PhoneNum::updateRules($this->phonenum->phone_number,$this->phone_number,$this->hasphonenum_type);
     }
 
     /**

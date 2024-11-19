@@ -104,7 +104,7 @@ class Employe extends BaseModel implements Auditable, IsBaseModel, IHasPhoneNums
         return "{$this->nom} {$this->prenom}";
     }
 
-    #region Validation Tools
+    #region Validation Rules
 
     public static function defaultRules() {
         return [

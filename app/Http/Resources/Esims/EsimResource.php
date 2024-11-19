@@ -4,17 +4,13 @@ namespace App\Http\Resources\Esims;
 
 use App\Models\User;
 use App\Models\Status;
-use App\Models\BaseModel;
 use App\Models\Esims\Esim;
 use Illuminate\Support\Carbon;
 use App\Models\Person\PhoneNum;
+use App\Models\Esims\EsimState;
 use App\Models\Esims\StatutEsim;
 use App\Models\Esims\EsimQrcode;
-use App\Models\Person\EmailAddress;
-use App\Http\Resources\UserResource;
 use App\Models\Esims\TechnologieEsim;
-use App\Http\Resources\StatusResource;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
@@ -46,11 +42,13 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property User|null $updator
  * @property User|null $attributor
  * @property mixed $states
+ * @property EsimState $lateststate
  *
  * @property Status $status
  *
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property Carbon $attributed_at
  */
 class EsimResource extends JsonResource
 {
@@ -82,7 +80,11 @@ class EsimResource extends JsonResource
             'qrcode' => $this->qrcode,
 
             'attributor' => $this->attributor,
+            'attributed_at' => $this->attributed_at,
+            'phonenum' => $this->phonenum,
+
             'states' => $this->states,
+            'lateststate' => $this->lateststate,
 
             'status' => $this->status,
             'modelclass' => Esim::class,

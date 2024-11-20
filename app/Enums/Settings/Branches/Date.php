@@ -17,6 +17,6 @@ class Date extends SettingNode
     {
         parent::__construct("date",null,null,null,null,"Date Settings");
 
-        $this->addChild("format", DateFormat::dmY_dash, "string", "Application Name.");
+        $this->addChild("format", DateFormat::dmY_slash, "string", "Application Default Date format.");
     }
 }

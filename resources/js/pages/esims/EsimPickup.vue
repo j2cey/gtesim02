@@ -1,5 +1,6 @@
 <script setup>
-import {useEsimStore} from "../../stores/EsimStore.js";
+import { useEsimStore } from "../../stores/EsimStore.js";
+import { formatDate } from '../../services/helper.js'
 
 const esimStore = useEsimStore();
 
@@ -29,6 +30,7 @@ const pickupCanceled = () => {
                             <th class="text text-sm text-capitalize">iccid</th>
                             <th class="text text-sm text-capitalize">Etat</th>
                             <th class="text text-sm text-capitalize">Statut ARIS</th>
+                            <th class="text text-sm text-capitalize">Date Statut ARIS</th>
                         </tr>
                         </thead>
                         <tbody v-if="esimStore.esimpicked">
@@ -36,7 +38,8 @@ const pickupCanceled = () => {
                             <td class="text text-xs" >{{ esimStore.esimpicked?.imsi }}</td>
                             <td class="text text-xs" >{{ esimStore.esimpicked?.iccid }}</td>
                             <td class="text text-xs" >{{ esimStore.esimpicked?.lateststate?.prevesimstate ? esimStore.esimpicked?.lateststate?.prevesimstate?.statutesim?.libelle : esimStore.esimpicked?.statutesim?.libelle }}</td>
-                            <td class="text text-xs" >Statut ARIS</td>
+                            <td class="text text-xs" >{{ esimStore.esimpicked?.latestarisstatus ? esimStore.esimpicked?.latestarisstatus?.formatted_status : 'NaN' }}</td>
+                            <td class="text text-xs" >{{ esimStore.esimpicked?.latestarisstatus ? formatDate(esimStore.esimpicked?.latestarisstatus?.status_change_date) : 'NaN' }}</td>
                         </tr>
                         </tbody>
                         <tbody v-else>

@@ -7,6 +7,7 @@ use App\Models\BaseModel;
 use Illuminate\Support\Carbon;
 use App\Contracts\IsBaseModel;
 use App\Models\Person\PhoneNum;
+use App\Models\Aris\ArisStatus;
 use Illuminate\Support\Facades\Auth;
 use OwenIt\Auditing\Contracts\Auditable;
 use App\Models\ModelPickers\ModelPicker;
@@ -154,6 +155,15 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
     public function lateststate(): HasOne
     {
         return $this->states()->one()->ofMany('id', 'max');
+    }
+
+    public function arisstatuses() {
+        return $this->hasMany(ArisStatus::class, 'esim_id');
+    }
+
+    public function latestarisstatus(): HasOne
+    {
+        return $this->arisstatuses()->one()->ofMany('id', 'max');
     }
 
     #endregion
@@ -334,6 +344,10 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
 
     public static function getById(int $esim_id): ?Esim {
         return Esim::where('id', $esim_id)->first();
+    }
+
+    public static function getByIccid(string $iccid): ?Esim {
+        return Esim::where('iccid', $iccid)->first();
     }
 
     #endregion

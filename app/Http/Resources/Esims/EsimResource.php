@@ -8,6 +8,7 @@ use App\Models\Esims\Esim;
 use Illuminate\Support\Carbon;
 use App\Models\Person\PhoneNum;
 use App\Models\Esims\EsimState;
+use App\Models\Aris\ArisStatus;
 use App\Models\Esims\StatutEsim;
 use App\Models\Esims\EsimQrcode;
 use App\Models\Esims\TechnologieEsim;
@@ -43,6 +44,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property User|null $attributor
  * @property mixed $states
  * @property EsimState $lateststate
+ *
+ * @property mixed $arisstatuses
+ * @property ArisStatus $latestarisstatus
  *
  * @property Status $status
  *
@@ -85,6 +89,9 @@ class EsimResource extends JsonResource
 
             'states' => $this->states,
             'lateststate' => $this->lateststate,
+
+            'arisstatuses' => $this->arisstatuses,
+            'latestarisstatus' => $this->latestarisstatus,
 
             'status' => $this->status,
             'modelclass' => Esim::class,

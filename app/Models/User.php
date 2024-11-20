@@ -149,7 +149,7 @@ class User extends Authenticatable implements IsBaseModel, Auditable, LdapAuthen
 
     public function getFormattedCreatedAtAttribute()
     {
-        return $this->created_at->format(config('settings.default.date_format'));
+        return $this->created_at->format(config('Settings.date.format'));
     }
 
     public function avatar(): Attribute

@@ -144,7 +144,7 @@ class EsimController extends Controller
         $esim = Esim::getByUuid($esimid);
         $new_esim = Esim::pickupFirstFree($esim);
 
-        return New EsimResource( $new_esim->load(['statutesim', 'technologieesim', 'phonenum', 'states', 'lateststate']) );
+        return New EsimResource( $new_esim->load(['statutesim', 'technologieesim', 'phonenum', 'states', 'lateststate', 'arisstatuses', 'latestarisstatus']) );
     }
 
     public function release(Esim $esim) {

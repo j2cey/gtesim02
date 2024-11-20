@@ -28,6 +28,12 @@ class SettingController extends Controller
         return Setting::getAllGrouped();
     }
 
+    public function test() {
+        $result = config('Settings.date.format');
+
+        return json_encode($result);
+    }
+
     public function groups()
     {
         $group = is_null( request('groupid') ) ? null : Setting::find( (int)request('groupid') );

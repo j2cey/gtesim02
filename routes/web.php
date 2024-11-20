@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\LdapUserController;
 use App\Http\Controllers\Esims\EsimStateController;
 use App\Http\Controllers\Auth\PermissionController;
+use App\Http\Controllers\Aris\ArisStatusController;
 use App\Http\Controllers\Esims\StatutEsimController;
 use App\Http\Controllers\Esims\ClientEsimController;
 use App\Http\Controllers\Employes\EmployeController;
@@ -67,6 +68,11 @@ Route::get('clientesims.preprintpdf/{id}',[ClientEsimController::class,'preprint
 Route::get('clientesims.generatepdf/{id}',[ClientEsimController::class,'generatePDF'])
     ->name('clientesims.generatepdf')
     ->middleware('auth');
+
+#region ArisStatus
+Route::post('/api/arisstatuses/', [ArisStatusController::class, 'store'])->name('arisstatuses.store');
+Route::get('/api/arisstatuses', [ArisStatusController::class, 'index'])->name('arisstatuses.index');
+#endregion
 
 Route::middleware('auth')->group(function () {
     Route::get('/api/abilities', [ProfileController::class, 'abilities']);
@@ -172,6 +178,7 @@ Route::middleware('auth')->group(function () {
 
     #region Settings
     Route::get('/api/settings/fetch', [SettingController::class, 'fetch']);
+    Route::get('/api/settings/test', [SettingController::class, 'test']);
     Route::get('/api/settings', [SettingController::class, 'index']);
     Route::put('/api/settings/{setting}', [SettingController::class, 'update']);
     Route::get('/api/settinggroups', [SettingController::class, 'groups']);
@@ -276,6 +283,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/employes/{user?}', [EmployeController::class, 'store'])->name('employes.store');
     Route::put('/api/employes/{employe}', [EmployeController::class, 'update'])->name('employes.update');
     #endregion
+
+
 
 });
 Route::get('{view}', ApplicationController::class)->where('view', '(.*)')->middleware('auth');

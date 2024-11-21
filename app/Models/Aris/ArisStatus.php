@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * Class ClientEsim
+ * Class ArisStatus
  *
- * @package App\Models\Esims
+ * @package App\Models\Aris
  * @property integer $id
  *
  * @property string|null $icc

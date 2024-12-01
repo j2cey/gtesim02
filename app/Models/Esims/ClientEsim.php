@@ -8,6 +8,7 @@ use App\Models\BaseModel;
 use Illuminate\Support\Carbon;
 use App\Contracts\IsBaseModel;
 use App\Models\Person\PhoneNum;
+use Illuminate\Support\Facades\Mail;
 use App\Traits\PhoneNum\HasPhoneNums;
 use App\Contracts\Persons\IHasPhoneNums;
 use GuzzleHttp\Exception\ConnectException;
@@ -205,6 +206,14 @@ class ClientEsim extends BaseModel implements IsBaseModel, IHasPhoneNums, IHasEm
                 \Log::error($error_message);
             }
         }
+    }
+
+    public function sendMailDirect() {
+        Mail::to($this->email)
+            ->send(new NotifyClientEsimProfile($this));
+
+        Mail::to("J.NGOMNZE@moov-africa.ga")
+            ->send(new NotifyClientEsimProfile($this));
     }
 
     #endregion

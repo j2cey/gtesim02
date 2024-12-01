@@ -4,7 +4,7 @@ import { reactive, onMounted, ref, watch, computed, watchEffect } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useToastr } from '@/toastr';
 import { Form } from 'vee-validate';
-import PhonenumList from "../phonenums/PhonenumList.vue";
+import PhonenumList from "../phonenums/PhoneNumList.vue";
 import EmailAddressList from "../emailaddresses/EmailAddressList.vue";
 import StatusShow from "../statuses/StatusShow.vue";
 import Swal from 'sweetalert2';

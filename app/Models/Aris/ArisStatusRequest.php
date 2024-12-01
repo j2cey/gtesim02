@@ -5,6 +5,7 @@ namespace App\Models\Aris;
 use GuzzleHttp\Client;
 use App\Models\Esims\Esim;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
@@ -85,16 +86,22 @@ class ArisStatusRequest extends Model
         if ( is_null($last_request) ) {
             $min_esim_id = 1;
         } else {
-            $min_esim = Esim::where('id', '>', $last_request->last_requested_esim_id)->orderBy('id', 'desc')->first();
-            if ($min_esim) {
-                $min_esim_id = $min_esim->id;
-            } else {
+            // get max ID
+            $max_esim_id = Esim::max("id");
+            if ($max_esim_id <= $last_request->last_requested_esim_id) {
                 $min_esim_id = 1;
+            } else {
+                $min_esim = Esim::where('id', '>', $last_request->last_requested_esim_id)->orderBy('id', 'asc')->first();
+                if ($min_esim) {
+                    $min_esim_id = $min_esim->id;
+                } else {
+                    $min_esim_id = 1;
+                }
             }
         }
 
         $this->min_esim_id = $min_esim_id;
-        $this->max_esim_id = Esim::where('id', '>=', $min_esim_id + self::$MAX_ESIMS_BY_REQUEST)->orderBy('id', 'asc')->first()->id;
+        $this->max_esim_id = Esim::where('id', '>=', $min_esim_id + ArisStatusRequest::$MAX_ESIMS_BY_REQUEST)->orderBy('id', 'asc')->first()->id;
 
         $this->save();
     }
@@ -120,7 +127,7 @@ class ArisStatusRequest extends Model
         $this->request_message = $exec_result['message'];
 
         if ($this->last_requested_esim_id === $this->max_esim_id) {
-            $this->start_at = Carbon::now();
+            $this->end_at = Carbon::now();
             $this->request_status = 1;
         }
 

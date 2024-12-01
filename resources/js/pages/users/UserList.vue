@@ -8,6 +8,7 @@ import UserListItem from './UserListItem.vue';
 import { debounce } from 'lodash';
 import { Bootstrap4Pagination } from 'laravel-vue-pagination';
 import {useAbility} from "@casl/vue";
+import Swal from "sweetalert2";
 
 const { can, cannot } = useAbility();
 
@@ -170,6 +171,41 @@ const clearSearchQuery = () => {
     searchQuery.value = '';
 }
 
+const confirmAccountInfosSendmail = (user) => {
+    Swal.fire({
+        html: '<small>Confirmer Envoie Infos Compte utilisateur <b>' + user.name + ' par Mail</b></small>',
+        icon: 'warning',
+        showCancelButton: true,
+        showLoaderOnConfirm: true,
+        confirmButtonText: 'Valider',
+        cancelButtonText: 'Annuler',
+        preConfirm: () => {
+            return axios.put(`/api/users/${user.uuid}/accountinfossendmail`, form)
+                .then(response => {
+                    console.log("confirmAccountInfosSendmail, preConfirm, response: ", response);
+                    return response;
+                })
+                .catch(error => {
+                    //console.log("request failed: ", error)
+                    Swal.showValidationMessage(
+                        `Request failed: ${error}`
+                    )
+                })
+        }, allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+        if (result.value) {
+            console.log("confirmAccountInfosSendmail, DONE, response: ", result);
+            Swal.fire({
+                html: '<small>Mail envoyé avec Succes !</small>',
+                icon: 'success',
+                timer: 3000
+            }).then(() => {
+
+            })
+        }
+    })
+};
+
 watch(searchQuery, debounce(() => {
     //getUsers();
 }, 300));
@@ -258,6 +294,7 @@ onMounted(() => {
                                       :user=user :index=index
                                       @edit-user="editUser"
                                       @confirm-user-deletion="confirmUserDeletion"
+                                      @confirm-account-infos-sendmail="confirmAccountInfosSendmail"
                                       @toggle-selection="toggleSelection"
                                       :selectAll="selectAll" />
                         </tbody>

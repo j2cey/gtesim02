@@ -16,7 +16,7 @@ const props = defineProps({
     selectAll: Boolean,
 });
 
-const emit = defineEmits(['userDeleted', 'editUser', 'confirmUserDeletion']);
+const emit = defineEmits(['userDeleted', 'editUser', 'confirmUserDeletion', 'confirmAccountInfosSendmail']);
 
 const changeRole = (user, role) => {
     axios.patch(`/api/users/${user.id}/change-role`, {
@@ -55,6 +55,9 @@ onMounted(() => {
             <router-link v-if="can('users-update')" :to="`/users/${user.uuid}/edit`">
                 <i class="fa fa-edit mr-2 text text-xs font-weight-light"></i>
             </router-link>
+            <a class="text text-xs" v-if="can('users-accountinfos-sendmail')" href="#" @click.prevent="$emit('confirmAccountInfosSendmail', user)">
+                <i class="fa fa-envelope mr-2 text text-xs text-success"></i>
+            </a>
             <a class="text text-xs" v-if="can('users-delete')" href="#" @click.prevent="$emit('confirmUserDeletion', user)"><i class="fa fa-trash-alt text-danger ml-2 font-weight-light"></i></a>
         </td>
     </tr>

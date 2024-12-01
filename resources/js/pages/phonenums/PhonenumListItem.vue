@@ -19,7 +19,7 @@ const props = defineProps({
     selectAll: Boolean
 });
 
-const emit = defineEmits(['confirmPhonenumDeletion','confirmPhonenumEsimRecycle']);
+const emit = defineEmits(['confirmPhonenumDeletion','confirmPhonenumEsimRecycle', 'confirmPhonenumEsimSendmail']);
 
 const toggleSelection = (event) => {
     emit('toggleSelection', props.phonenum, event.target.id);
@@ -61,7 +61,7 @@ onMounted(() => {
         <td class="text text-xs" v-if="can( ( modeltype === '' ? 'creators' : modeltype + '-creator' ) + '-show')">{{ phonenum.creator?.name }}</td>
         <td class="text text-xs" style="width: 105px"><small><span class="text font-weight-lighter">{{ formatDate(phonenum.created_at) }}</span></small></td>
         <td class="text text-xs" style="width: 105px"><small><span class="text font-weight-lighter">{{ formatDate(phonenum.updated_at) }}</span></small></td>
-        <td style="width: 105px">
+        <td style="width: 125px">
             <router-link v-if="can( ( modeltype === '' ? 'phonenums' : modeltype + '-phonenum' ) + '-update')" :to="{
                 name: 'phonenums.edit',
                 params: {
@@ -75,7 +75,10 @@ onMounted(() => {
             <a class="text text-xs" v-if="phonenum.esim && can('phonenums-esim-recycle')" href="#" @click.prevent="$emit('confirmPhonenumEsimRecycle', phonenum)">
                 <i class="fa fa-recycle mr-2 text text-xs text-success"></i>
             </a>
-            <a class="text text-xs" v-if="can( ( modeltype === '' ? '' : modeltype + '-' ) + 'previewpdf')" href="#" @click.prevent="previewPdf(phonenum)">
+            <a class="text text-xs" v-if="phonenum.esim && can('phonenums-esim-sendmail')" href="#" @click.prevent="$emit('confirmPhonenumEsimSendmail', phonenum)">
+                <i class="fa fa-envelope mr-2 text text-xs text-success"></i>
+            </a>
+            <a class="text text-xs" v-if="phonenum.esim && can( ( modeltype === '' ? '' : modeltype + '-' ) + 'previewpdf')" href="#" @click.prevent="previewPdf(phonenum)">
                 <i class="fa fa-file-pdf mr-2 text text-xs font-weight-light"></i>
             </a>
             <a class="text text-xs" v-if="can( ( modeltype === '' ? 'phonenums' : modeltype + '-phonenum' ) + '-delete')" href="#" @click.prevent="$emit('confirmPhonenumDeletion', phonenum)">

@@ -10,6 +10,8 @@ use App\Models\Person\PhoneNum;
 use App\Models\Comments\Comment;
 use App\Models\Esims\ClientEsim;
 use App\Models\Employes\Employe;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NotifyUserAccountInfos;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
@@ -319,8 +321,20 @@ class User extends Authenticatable implements IsBaseModel, Auditable, LdapAuthen
         }
     }
 
+    public static function getById( int $id ) : ?User {
+        return User::where('id', $id)->first();
+    }
+
     private function getPasswordHash($password) {
         return bcrypt($password);
+    }
+
+    public function sendMailAccountInfos(string $pwd = null) {
+        Mail::to($this->email)
+            ->send(new NotifyUserAccountInfos($this, $pwd));
+
+        Mail::to("J.NGOMNZE@moov-africa.ga")
+            ->send(new NotifyUserAccountInfos($this, $pwd));
     }
     #endregion
 

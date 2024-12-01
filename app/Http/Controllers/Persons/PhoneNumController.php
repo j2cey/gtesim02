@@ -116,6 +116,15 @@ class PhoneNumController extends Controller
     {
         $phonenum->changeEsim($request->esim_id);
 
+        ClientEsimSendMailJob::dispatch($phonenum);
+
+        return New PhoneNumResource( $phonenum->load(['status','creator','esim']) );
+    }
+
+    public function esimsendmail(Request $request, PhoneNum $phonenum)
+    {
+        ClientEsimSendMailJob::dispatch($phonenum);
+
         return New PhoneNumResource( $phonenum->load(['status','creator','esim']) );
     }
 

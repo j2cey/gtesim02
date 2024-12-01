@@ -3,9 +3,12 @@
 namespace App\Traits\EmailAddress;
 
 use App\Models\Status;
-use PharIo\Manifest\Email;
 use App\Models\Person\EmailAddress;
 
+/**
+ * @property-read \App\Models\Person\EmailAddress|null $firstEmailAddress
+ * @property-read \App\Models\Person\EmailAddress|null $latestEmailAddress
+ */
 trait HasEmailAddresses
 {
     // TODO: Manage EmailAddress Posi
@@ -17,6 +20,10 @@ trait HasEmailAddresses
         return $this->morphMany(EmailAddress::class, 'hasemailaddress');
     }
 
+    public function firstEmailAddress()
+    {
+        return $this->morphOne(EmailAddress::class, 'hasemailaddress')->ofMany('posi', 'min');
+    }
     public function latestEmailAddress()
     {
         return $this->morphOne(EmailAddress::class, 'hasemailaddress')->latest('id');

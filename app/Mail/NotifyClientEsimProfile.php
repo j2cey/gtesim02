@@ -3,22 +3,33 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use App\Models\Person\PhoneNum;
+use App\Models\Esims\ClientEsim;
 use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
 class NotifyClientEsimProfile extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $subject;
+    public $client;
+    public $phonenum;
+
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct(ClientEsim $client, PhoneNum $phonenum)
     {
-        //
+        $this->client = $client;
+
+        $phonenum->load('esim');
+        $this->phonenum = $phonenum;
+
+        $this->subject = "Fiche de Configuration de Profile e-sim";
     }
 
     /**
@@ -27,7 +38,7 @@ class NotifyClientEsimProfile extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Notify Client Esim Profile',
+            subject: $this->subject,
         );
     }
 
@@ -37,7 +48,7 @@ class NotifyClientEsimProfile extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'clientesims.emailprofile',
         );
     }
 

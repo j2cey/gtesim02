@@ -18,7 +18,7 @@ export default [
     {
         path: '/',
         name: 'home',
-        redirect: '/dashboard',
+        redirect: '/clientesims',
     },
     {
         path: '/login',

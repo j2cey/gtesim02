@@ -5,9 +5,11 @@ namespace App\Providers;
 use App\Models\Setting;
 use App\Events\LdapUserSaved;
 use App\Listeners\FormatLdapUser;
+use App\Events\UserActivatedEvent;
 use Illuminate\Support\Facades\Event;
 use App\Events\ClientEsimCreatedEvent;
 use Illuminate\Support\ServiceProvider;
+use App\Listeners\UserActivatedListener;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Validator;
 use App\Listeners\SendClientEsimNotification;
@@ -105,6 +107,10 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(
             LdapUserSaved::class,
             FormatLdapUser::class,
+        );
+        Event::listen(
+            UserActivatedEvent::class,
+            UserActivatedListener::class,
         );
     }
 }

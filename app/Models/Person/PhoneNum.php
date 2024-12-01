@@ -129,4 +129,8 @@ class PhoneNum extends BaseModel implements IsBaseModel, IHasEsim
 
         return $creator;
     }
+
+    public static function getById(int $id) : ?PhoneNum {
+        return PhoneNum::where('id', $id)->first();
+    }
 }

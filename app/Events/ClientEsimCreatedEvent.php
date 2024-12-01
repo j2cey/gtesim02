@@ -12,7 +12,7 @@ class ClientEsimCreatedEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $phonenum;
+    public int $phonenum_id;
 
     /**
      * Create a new event instance.
@@ -20,7 +20,7 @@ class ClientEsimCreatedEvent
     public function __construct(PhoneNum $phonenum)
     {
         //\Log::info("clientesim received ClientEsimCreatedEvent : " . json_encode( $phonenum ) );
-        $this->phonenum = $phonenum;
+        $this->phonenum_id = $phonenum->id;
     }
 
     /**

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
+use App\Models\Status;
+use Illuminate\Http\Request;
+use App\Jobs\ManageUserActivated;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Auth\UserResource;
@@ -42,9 +45,13 @@ class UserController extends Controller implements HasMiddleware
 
     public function store(StoreUserRequest $request) {
 
+        $status_active = Status::active()->first();
         $user = User::createNew($request->name,$request->email,$request->login,$request->is_local,$request->is_ldap);
 
         $user->localPwdSet(request('password'));
+
+        // launch userActivated event
+        ManageUserActivated::dispatch($user, request('password'));
 
         return New UserResource( $user );
     }
@@ -71,6 +78,7 @@ class UserController extends Controller implements HasMiddleware
     public function resetpwd(ResetPasswordRequest $request, User $user)
     {
         $user->setPassword($request->newpwd);
+        ManageUserActivated::dispatch($user, $request->newpwd);
 
         return $user;
     }
@@ -111,6 +119,13 @@ class UserController extends Controller implements HasMiddleware
         }
 
         return response()->json(['success' => true, 'roles' => $roles,'message' => $nb === 0 ? 'NO role to revoke' : $nb . ' Role(s) remove from User successfully!']);
+    }
+
+    public function accountinfossendmail(Request $request, User $user)
+    {
+        ManageUserActivated::dispatch($user);
+
+        return new UserResource($user);
     }
 
     public function destroy(User $user)

@@ -14,14 +14,14 @@ class ClientEsimSendMailJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $phonenum;
+    public int $phonenum_id;
 
     /**
      * Create a new job instance.
      */
     public function __construct(PhoneNum $phonenum)
     {
-        $this->phonenum = $phonenum;
+        $this->phonenum_id = $phonenum->id;
     }
 
     /**
@@ -29,6 +29,6 @@ class ClientEsimSendMailJob implements ShouldQueue
      */
     public function handle(): void
     {
-        event( new ClientEsimCreatedEvent( $this->phonenum ));
+        event( new ClientEsimCreatedEvent( PhoneNum::getById($this->phonenum_id) ));
     }
 }

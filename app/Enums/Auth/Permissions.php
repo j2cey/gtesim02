@@ -33,7 +33,7 @@ abstract class Permissions
     public static function User() : BaseModelAction {
         $customlevels = ['create' => 1,'update' => 1,'delete' => 1];
         $additionalactions = [
-            'reset-password' => 1,
+            'reset-password' => 1, 'accountinfos-sendmail' => 2
         ];
         return new BaseModelAction("users", $customlevels, $additionalactions);
     }
@@ -83,7 +83,7 @@ abstract class Permissions
         return new BaseModelAction("esimqrcodes");
     }
     public static function PhoneNum() : BaseModelAction {
-        $additionalactions = ['esim-recycle' => 2];
+        $additionalactions = ['esim-recycle' => 2, 'esim-sendmail' => 2];
         return new BaseModelAction("phonenums", null, $additionalactions);
     }
     public static function EmailAddress() : BaseModelAction {

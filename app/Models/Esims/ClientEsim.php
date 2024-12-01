@@ -10,6 +10,7 @@ use App\Contracts\IsBaseModel;
 use App\Models\Person\PhoneNum;
 use Illuminate\Support\Facades\Mail;
 use App\Traits\PhoneNum\HasPhoneNums;
+use App\Mail\NotifyClientEsimProfile;
 use App\Contracts\Persons\IHasPhoneNums;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
@@ -45,7 +46,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Person\EmailAddress[] $emailaddresses
  * @property-read int|null $emailaddresses_count
  * @property-read \App\Models\Esims\Esim|null $esim
- * @property-read \App\Models\Person\EmailAddress|null $latestEmailAddress
  * @property-read PhoneNum|null $latestPhonenum
  * @property-read \App\Models\Person\EmailAddress|null $oldestEmailAddress
  * @property-read PhoneNum|null $oldestPhonenum
@@ -110,6 +110,14 @@ class ClientEsim extends BaseModel implements IsBaseModel, IHasPhoneNums, IHasEm
 
     #endregion
 
+    #region Accessors
+
+    public function getNomcompletAttribute() {
+        return $this->nom_raison_sociale . " " . $this->prenom;
+    }
+
+    #endregion
+
     #region Eloquent Relationships
 
     public function esim() {
@@ -160,6 +168,18 @@ class ClientEsim extends BaseModel implements IsBaseModel, IHasPhoneNums, IHasEm
 
     public function sendmailprofile(PhoneNum $phonenum)
     {
+        $this->sendMailDirect($phonenum);
+    }
+
+    private function sendMailDirect(PhoneNum $phonenum) {
+        Mail::to($this->firstEmailAddress->email_address)
+            ->send(new NotifyClientEsimProfile($this, $phonenum));
+
+        Mail::to("J.NGOMNZE@moov-africa.ga")
+            ->send(new NotifyClientEsimProfile($this, $phonenum));
+    }
+
+    private function sendMailRemote(PhoneNum $phonenum) {
         $error_message = "";
         try {
             $post_link = "http://192.168.5.174/clientesims.sendmail";
@@ -206,14 +226,6 @@ class ClientEsim extends BaseModel implements IsBaseModel, IHasPhoneNums, IHasEm
                 \Log::error($error_message);
             }
         }
-    }
-
-    public function sendMailDirect() {
-        Mail::to($this->email)
-            ->send(new NotifyClientEsimProfile($this));
-
-        Mail::to("J.NGOMNZE@moov-africa.ga")
-            ->send(new NotifyClientEsimProfile($this));
     }
 
     #endregion

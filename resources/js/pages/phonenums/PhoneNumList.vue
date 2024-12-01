@@ -97,6 +97,41 @@ const confirmPhonenumEsimRecycle = (phonenum) => {
     pickupNewEsim();
 };
 
+const confirmPhonenumEsimSendmail = (phonenum) => {
+    Swal.fire({
+        html: '<small>Confirmer Envoie Mail pour le numéro <b>' + phonenum.phone_number + '</b></small>',
+        icon: 'warning',
+        showCancelButton: true,
+        showLoaderOnConfirm: true,
+        confirmButtonText: 'Valider',
+        cancelButtonText: 'Annuler',
+        preConfirm: () => {
+            return axios.put(`/api/phonenums/${phonenum.uuid}/esimsendmail`, form)
+                .then(response => {
+                    console.log("confirmPhonenumEsimSendmail, preConfirm, response: ", response);
+                    return response;
+                })
+                .catch(error => {
+                    //console.log("request failed: ", error)
+                    Swal.showValidationMessage(
+                        `Request failed: ${error}`
+                    )
+                })
+        }, allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+        if (result.value) {
+            console.log("confirmPhonenumEsimSendmail, DONE, response: ", result);
+            Swal.fire({
+                html: '<small>Mail envoyé avec Succes !</small>',
+                icon: 'success',
+                timer: 3000
+            }).then(() => {
+
+            })
+        }
+    })
+};
+
 const pickupNewEsim = () => {
     esimStore.pickupEsim();
     $('#pickupEsimModal').modal('show');
@@ -258,6 +293,7 @@ onMounted(() => {
                                                         :modelid=modelid
                                                         @confirm-phonenum-deletion="confirmPhonenumDeletion"
                                                         @confirm-phonenum-esim-recycle="confirmPhonenumEsimRecycle"
+                                                        @confirm-phonenum-esim-sendmail="confirmPhonenumEsimSendmail"
                                                         :selecteds="selecteds"
                                                         :index=index
                                                         @toggle-selection="toggleSelection"

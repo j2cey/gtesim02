@@ -165,6 +165,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/api/users', [UserController::class, 'bulkDelete']);
     Route::patch('/api/users/{user}/assign-roles', [UserController::class, 'assignRoles']);
     Route::patch('/api/users/{user}/revoke-roles', [UserController::class, 'revokeRoles']);
+    Route::put('/api/users/{user}/accountinfossendmail', [UserController::class, 'accountinfossendmail'])->name('users.accountinfossendmail');
     #endregion
 
     #region Status
@@ -238,6 +239,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/api/phonenums/{phonenum}', [PhoneNumController::class, 'destroy'])->name('phonenums.destory');
     Route::put('/api/phonenums/{phonenum}', [PhoneNumController::class, 'update'])->name('phonenums.update');
     Route::put('/api/phonenums/{phonenum}/esimrecycle', [PhoneNumController::class, 'esimrecycle'])->name('phonenums.esimrecycle');
+    Route::put('/api/phonenums/{phonenum}/esimsendmail', [PhoneNumController::class, 'esimsendmail'])->name('phonenums.esimsendmail');
     #endregion
 
     #region EmailAddress

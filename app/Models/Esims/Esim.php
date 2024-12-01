@@ -84,6 +84,8 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
     protected $guarded = [];
     protected $with = ['qrcode'];
 
+    public const CONFIG_DIR = "esim_fichier_qrcode";
+
     #region Validation Rules
 
     public static function defaultRules() {
@@ -122,6 +124,27 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
             'adm1.required' => 'Le champs ADM1 est requis',
             'opc.required' => 'Le champs OPC est requis',
         ];
+    }
+
+    #endregion
+
+    #region Eloquent Relationships
+
+    #endregion
+
+    #region Accessors
+
+    public function getQrcodeimageFullpathAttribute() {
+        $separator = "/";
+        if ( ! is_null($this->qrcode->qrcode_img) ) {
+            return public_path('/') . config('app.' . self::CONFIG_DIR) . $separator . $this->qrcode->qrcode_img;
+        }
+        return null;
+    }
+
+    public function getQrcodeimageFolderpathAttribute() {
+        $separator = "/";
+        return public_path('/') . config('app.' . self::CONFIG_DIR) . $separator;
     }
 
     #endregion

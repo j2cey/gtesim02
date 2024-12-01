@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Models\Person\PhoneNum;
 use App\Events\ClientEsimCreatedEvent;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -22,7 +23,9 @@ class SendClientEsimNotification
     public function handle(ClientEsimCreatedEvent $event): void
     {
         //\Log::info("event received SendClientEsimNotification : " . json_encode( $event ) );
-        $client = $event->phonenum->hasphonenum;
-        $client->sendmailprofile($event->phonenum);
+        $phonenum = PhoneNum::getById( $event->phonenum_id );
+        $client = $phonenum->hasphonenum;
+
+        $client->sendmailprofile($phonenum);
     }
 }

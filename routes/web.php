@@ -2,12 +2,14 @@
 
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Tags\TagController;
 use App\Http\Controllers\Auth\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Esims\EsimController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Admin\StatusController;
+use App\Http\Controllers\HowTos\HowToController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\LdapUserController;
 use App\Http\Controllers\Esims\EsimStateController;
@@ -17,6 +19,7 @@ use App\Http\Controllers\Esims\StatutEsimController;
 use App\Http\Controllers\Esims\ClientEsimController;
 use App\Http\Controllers\Employes\EmployeController;
 use App\Http\Controllers\Persons\PhoneNumController;
+use App\Http\Controllers\HowTos\HowToTypeController;
 use App\Http\Controllers\Admin\DashboardStatController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Employes\DepartementController;
@@ -269,9 +272,9 @@ Route::middleware('auth')->group(function () {
     #region Departement
     Route::get('/api/departements', [DepartementController::class, 'index'])->name('departements.index');
     Route::get('/api/departements/all', [DepartementController::class, 'fetchall'])->name('departements.fetchall');
-    Route::get('/api/departements/{departement}/edit', [TypeDepartementController::class, 'edit'])->name('departements.edit');
-    Route::get('/api/departements/{departement}/show', [TypeDepartementController::class, 'show'])->name('departements.show');
-    Route::post('/api/departements/', [TypeDepartementController::class, 'store'])->name('departements.store');
+    Route::get('/api/departements/{departement}/edit', [DepartementController::class, 'edit'])->name('departements.edit');
+    Route::get('/api/departements/{departement}/show', [DepartementController::class, 'show'])->name('departements.show');
+    Route::post('/api/departements/', [DepartementController::class, 'store'])->name('departements.store');
     #endregion
 
     #region Employe
@@ -286,7 +289,26 @@ Route::middleware('auth')->group(function () {
     Route::put('/api/employes/{employe}', [EmployeController::class, 'update'])->name('employes.update');
     #endregion
 
+    #region HowToTypes
+    Route::get('/api/howtotypes', [HowToTypeController::class, 'index'])->name('howtotypes.index');
+    Route::get('/api/howtotypes/all', [HowToTypeController::class, 'fetchall'])->name('howtotypes.fetchall');
+    Route::get('/api/howtotypes/{howtotype}/edit', [HowToTypeController::class, 'edit'])->name('howtotypes.edit');
+    Route::get('/api/howtotypes/{howtotype}/show', [HowToTypeController::class, 'show'])->name('howtotypes.show');
+    Route::post('/api/howtotypes/', [HowToTypeController::class, 'store'])->name('howtotypes.store');
+    #endregion
 
+    #region HowTos
+    Route::get('/api/howtos', [HowToController::class, 'index'])->name('howtos.index');
+    Route::get('/api/howtos/all', [HowToController::class, 'fetchall'])->name('howtos.fetchall');
+    Route::get('/api/howtos/{howto}/edit', [HowToController::class, 'edit'])->name('howtos.edit');
+    Route::get('/api/howtos/{howto}/show', [HowToController::class, 'show'])->name('howtos.show');
+    Route::post('/api/howtos/', [HowToController::class, 'store'])->name('howtos.store');
+    #endregion
+
+    #region Tags
+    Route::get('/api/tags', [TagController::class, 'index'])->name('tags.index');
+    Route::get('/api/tags/all', [TagController::class, 'fetchall'])->name('tags.fetchall');
+    #endregion
 
 });
 Route::get('{view}', ApplicationController::class)->where('view', '(.*)')->middleware('auth');

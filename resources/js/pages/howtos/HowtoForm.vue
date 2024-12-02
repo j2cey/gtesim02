@@ -4,11 +4,8 @@ import { reactive, onMounted, ref, watch, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useToastr } from '@/toastr';
 import { Form } from 'vee-validate';
-import { debounce } from "lodash";
 import Swal from "sweetalert2";
 import Multiselect from "vue-multiselect";
-import PhonenumList from "../phonenums/PhoneNumList.vue";
-import EmailAddressList from "../emailaddresses/EmailAddressList.vue";
 import StatusShow from "../statuses/StatusShow.vue";
 import { useAbility } from "@casl/vue";
 
@@ -84,7 +81,7 @@ const updateHowto = (values, actions) => {
     axios.put(`/api/howtos/${route.params.id}`, form)
         .then((response) => {
             Swal.fire({
-                html: '<small>Employé modifié avec succès !</small>',
+                html: '<small>Rubrique modifié avec succès !</small>',
                 icon: 'success',
                 timer: 3000
             }).then(() => {
@@ -110,7 +107,11 @@ const getHowto = () => {
             form.code = response.data.code;
 
             form.title = response.data.title;
-            form.matricule = response.data.matricule;
+            form.code = response.data.code;
+            form.view = response.data.view;
+            form.description = response.data.description;
+            form.tags = response.data.tags;
+            form.howtotype = response.data.howtotype;
 
             howto.value = response.data;
             status.value = response.data.status;
@@ -121,38 +122,29 @@ const getHowto = () => {
     )
 };
 
-const getUser = () => {
-    axios.get(`/api/users/${form.userid}/edit`)
+const howtotypes = ref([]);
+const getHowtoTypes = () => {
+    axios.get(`/api/howtotypes/all`)
         .then((response) => {
-            console.log("getUser, response: ", response);
-            user.value = response.data;
+            console.log("getHowtoTypes, response: ", response)
+            howtotypes.value = response.data;
+        }).then(() => {
+
         })
 };
 
-const departements = ref([]);
-const getDepartements = () => {
-    axios.get(`/api/departements/all`)
+const alltags = ref([]);
+const getAllTags = () => {
+    axios.get(`/api/tags/all`)
         .then((response) => {
-            console.log("getDepartements, response: ", response)
-            departements.value = response.data;
+            console.log("getAllTags, response: ", response)
+            alltags.value = response.data;
         }).then(() => {
 
-        }
-
-    )
+        })
 };
-
-const fonctions = ref([]);
-const getFonctions = () => {
-    axios.get(`/api/fonctionhowtos/all`)
-        .then((response) => {
-            console.log("getFunctions, response: ", response)
-            fonctions.value = response.data;
-        }).then(() => {
-
-        }
-
-    )
+const addTag = (newTag) => {
+    console.log("addTag: ", newTag);
 };
 
 //<editor-fold desc="Status">
@@ -201,8 +193,8 @@ const initComponent = () => {
 
 onMounted(() => {
     initComponent();
-    getDepartements();
-    getFonctions();
+    getHowtoTypes();
+    getAllTags();
 });
 </script>
 
@@ -215,8 +207,7 @@ onMounted(() => {
                         <span v-if="formMode === 'edit'">Modification</span>
                         <span v-else-if="formMode === 'create'">Création</span>
                         <span v-else>Détails</span>
-                        Employé
-                        <span v-show="form.userid" class="text text-sm"> <span class="text text-muted">Pour l'utilisateur </span><span class="text text-bold text-indigo">{{ user.name }}</span></span>
+                        Rubriques Comment-Faire
                     </h3>
                 </div>
                 <div class="col-sm-6">
@@ -225,7 +216,7 @@ onMounted(() => {
                             <router-link to="/">Accueil</router-link>
                         </li>
                         <li class="breadcrumb-item">
-                            <router-link to="/howtos">Employés</router-link>
+                            <router-link to="/howtos">Rubriques Comment-Faire</router-link>
                         </li>
                         <li class="breadcrumb-item active">
                             <span v-if="formMode === 'edit'">Modification</span>
@@ -256,26 +247,26 @@ onMounted(() => {
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="prenom"><span class="text text-xs">Prénom</span></label>
-                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.prenom }}</span>
-                                            <input v-else v-model="form.prenom" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errorMessage.prenom }" id="prenom" placeholder="Prénom">
-                                            <span class="invalid-feedback">{{ errors.prenom }}</span>
+                                            <label for="code"><span class="text text-xs">Code</span></label>
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.code }}</span>
+                                            <input v-else v-model="form.code" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errorMessage.code }" id="code" placeholder="Code">
+                                            <span class="invalid-feedback">{{ errors.code }}</span>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="matricule"><span class="text text-xs">Matricule</span></label>
-                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.matricule }}</span>
-                                            <input v-else v-model="form.matricule" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errorMessage.matricule }" id="matricule" placeholder="Matricule">
-                                            <span class="invalid-feedback">{{ errors.matricule }}</span>
+                                            <label for="view"><span class="text text-xs">Vue</span></label>
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.view }}</span>
+                                            <input v-else v-model="form.view" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errorMessage.view }" id="view" placeholder="Vue">
+                                            <span class="invalid-feedback">{{ errors.view }}</span>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="adresse"><span class="text text-xs">Adresse</span></label>
-                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.adresse }}</span>
-                                            <input v-else v-model="form.adresse" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errorMessage.adresse }" id="adresse" placeholder="Adresse">
-                                            <span class="invalid-feedback">{{ errors.adresse }}</span>
+                                            <label for="description"><span class="text text-xs">Description</span></label>
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.description }}</span>
+                                            <input v-else v-model="form.description" type="text" class="form-control form-control-sm" :class="{ 'is-invalid': errorMessage.description }" id="description" placeholder="Description">
+                                            <span class="invalid-feedback">{{ errors.description }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -283,82 +274,37 @@ onMounted(() => {
                                 <div class="row">
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="pin"><span class="text text-xs">Fonction</span></label>
-                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.fonction?.intitule }}</span>
+                                            <label for="howtotype"><span class="text text-xs">Type</span></label>
+                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.howtotype?.title }}</span>
                                             <multiselect v-else
-                                                         id="fonction"
-                                                         v-model="form.fonction"
+                                                         id="howtotype"
+                                                         v-model="form.howtotype"
                                                          value=""
-                                                         :options="fonctions"
+                                                         :options="howtotypes"
                                                          :searchable="true"
-                                                         label="intitule"
+                                                         label="title"
                                                          track-by="id"
                                                          key="id"
                                                          :max-height="100"
-                                                         placeholder="Fonction"
+                                                         placeholder="Type"
                                             >
                                             </multiselect >
-                                            <span v-show="errorMessage.fonction" class="text text-xs text-danger">{{ errors.fonction }}</span>
+                                            <span v-show="errorMessage.howtotype" class="text text-xs text-danger">{{ errors.howtotype }}</span>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <label for="pin"><span class="text text-xs">Département</span></label>
-                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.departement?.intitule }}</span>
-                                            <multiselect v-else
-                                                         id="departement"
-                                                         v-model="form.departement"
-                                                         value=""
-                                                         :options="departements"
-                                                         :searchable="true"
-                                                         label="intitule"
-                                                         track-by="id"
-                                                         key="id"
-                                                         :max-height="100"
-                                                         placeholder="Département"
-                                            >
-                                            </multiselect >
+                                            <label for="tags"><span class="text text-xs">Tags</span></label>
+                                            <multiselect id="tags"
+                                                         v-model="form.tags" tag-placeholder="Ajouter Nouveau tag" placeholder="Rechercher / Ajouter Tag" label="name"
+                                                         track-by="code" :options="alltags" :multiple="true" :taggable="true" @tag="addTag"></multiselect>
                                             <span v-show="errorMessage.departement" class="text text-xs text-danger">{{ errors.departement }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="pin"><span class="text text-xs">Département en charge</span></label>
-                                            <span v-if="formMode === 'show'" class="form-control border-0 text-xs">{{ form.departements_responsable?.intitule }}</span>
-                                            <multiselect v-else
-                                                         id="departements_responsable"
-                                                         v-model="form.departements_responsable"
-                                                         value=""
-                                                         :options="departements"
-                                                         :searchable="true"
-                                                         label="intitule"
-                                                         track-by="id"
-                                                         key="id"
-                                                         :max-height="100"
-                                                         placeholder="Département à charge"
-                                            >
-                                            </multiselect >
-                                            <span v-show="errorMessage.departements_responsable" class="text text-xs text-danger">{{ errors.departements_responsable }}</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="row" v-if="formMode === 'edit' || formMode === 'show'">
                                     <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="pin"><span class="text text-xs">Object GUID</span></label>
-                                            <span class="form-control border-0 text-xs">{{ form.objectguid }}</span>
-                                            <span class="invalid-feedback">{{ errors.objectguid }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label for="pin"><span class="text text-xs">THUMBNAIL PHOTO</span></label>
-                                            <span class="form-control border-0 text-xs">{{ form.thumbnailphoto }}</span>
-                                            <span class="invalid-feedback">{{ errors.thumbnailphoto }}</span>
-                                        </div>
-                                    </div>
-                                    <div v-if="formMode === 'edit' || formMode === 'show'" class="col-md-3">
                                         <div class="form-group">
                                             <label for="puk"><span class="text text-xs">Statut</span></label> <br>
                                             <StatusShow :key="statusKey" v-if="status"
@@ -389,16 +335,6 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
-
-            <PhonenumList v-if="(formMode === 'edit' || formMode === 'show')"
-                          :modeltype="modeltype"
-                          :modelid="howtoid"
-            ></PhonenumList>
-
-            <EmailAddressList v-if="(formMode === 'edit' || formMode === 'show')"
-                              :modeltype="modeltype"
-                              :modelid="howtoid"
-            ></EmailAddressList>
         </div>
     </div>
 

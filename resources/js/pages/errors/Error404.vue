@@ -53,7 +53,7 @@ onMounted(() => {
                     <h3><i class="fa fa-warning text-yellow"></i> Oops! Page introuvable.</h3>
                     <p>
                         <span class="text font-weight-light">Nous n'avons pas pu trouver la page que vous recherchiez.
-                        En attendant, vous pouvez retourner vers la</span> <router-link :to="prevRoutePath">Page PRÉCÉDENTE</router-link> <span class="text font-weight-light">ou essayez d'utiliser le formulaire de recherche.</span>
+                        En attendant, vous pouvez retourner vers la</span> <router-link :to="prevRoutePath">Page PRÉCÉDENTE</router-link> <span class="text font-weight-light">ou retourner à l'</span> <router-link to="/">ACCUEIL</router-link> <span class="text font-weight-light">ou encore essayez d'utiliser le formulaire de recherche.</span>
                     </p>
                     <form class='search-form'>
                         <div class='input-group'>

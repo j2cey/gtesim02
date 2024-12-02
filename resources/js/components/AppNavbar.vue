@@ -2,10 +2,12 @@
 import {onMounted, ref} from 'vue';
 import { useSettingStore } from '../stores/SettingStore';
 import { useAuthUserStore } from "../stores/AuthUserStore.js";
+import { useAbility } from "@casl/vue";
 
 const authUserStore = useAuthUserStore();
 const settingStore = useSettingStore();
 const availableLanguages = ref([{name: 'Fr', value: "fr"}, {name: 'En', value: "en"}]);
+const { can, cannot } = useAbility();
 
 const setLanguage = (event) => {
     console.log('setLocal, event.target.value:', event.target.value)
@@ -181,7 +183,30 @@ onMounted(() => {
                     <i class="fas fa-expand-arrows-alt"></i>
                 </a>
             </li>
-            <li class="nav-item">
+
+            <li class="nav-item dropdown">
+                <a class="nav-link" data-toggle="dropdown" href="#">
+                    <i class="fas fa-book-reader"></i>
+                    <span class="badge badge-warning navbar-badge"></span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                    <span class="dropdown-header">Rubrique d'Aide</span>
+                    <div class="dropdown-divider"></div>
+                    <router-link class="text text-xs dropdown-item" v-if="can('howtothreads-list')" :to="`/howtothreads`">
+                        <i class="fa fa-lightbulb mr-2 text-xs"></i>&nbsp;Comment Faire
+                        <span class="float-right text-muted text-sm"></span>
+                    </router-link>
+                    <div class="dropdown-divider"></div>
+                    <router-link class="text text-xs dropdown-item" v-if="can('howtos-list')" :to="`/howtos`">
+                        <i class="fa fa-book mr-2 text-xs"></i>&nbsp;Rubriques de Tutos
+                        <span class="float-right text-muted text-sm"></span>
+                    </router-link>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" class="dropdown-item dropdown-footer"></a>
+                </div>
+            </li>
+
+            <li v-if="authUserStore.hasRole('adminxxx')" class="nav-item">
                 <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
                     <i class="fas fa-book-reader text text-warning"></i>
                 </a>

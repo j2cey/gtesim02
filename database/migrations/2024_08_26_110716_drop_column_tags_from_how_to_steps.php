@@ -28,7 +28,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('how_to_steps', function (Blueprint $table) {
-            //
+            $table->string('tags')->nullable()->comment('Tags, if any');
         });
     }
 };

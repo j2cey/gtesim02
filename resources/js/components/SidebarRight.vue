@@ -14,7 +14,7 @@ const { can, cannot } = useAbility();
                     <span class="text text-warning"><i class="fa fa-lightbulb mr-2 text-xs"></i>&nbsp;Comment Faire</span>
                 </router-link>
                 <br>
-                <router-link class="text text-xs" v-if="can('howtothreads-list')" :to="`/howtos`">
+                <router-link class="text text-xs" v-if="can('howtos-list')" :to="`/howtos`">
                     <span class="text text-danger"><i class="fa fa-book mr-2 text-xs"></i>&nbsp;Rubriques de Tutos</span>
                 </router-link>
             </p>

@@ -13,6 +13,7 @@ import { phonenumsRoutes, emailaddressesRoutes } from "./routes/persons.js";
 import employeesRoutes from "./routes/employees.js";
 import settingsRoutes from "./routes/settings.js";
 import statusesRoutes from "./routes/statuses.js";
+import { howtosRoutes } from "./routes/howtos.js";
 
 export default [
     {
@@ -46,6 +47,7 @@ export default [
     ...employeesRoutes,
     ...settingsRoutes,
     ...statusesRoutes,
+    ...howtosRoutes,
     {
         path: '/:notFound',
         name: 'error.404',

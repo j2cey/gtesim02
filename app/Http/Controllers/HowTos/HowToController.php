@@ -2,49 +2,20 @@
 
 namespace App\Http\Controllers\HowTos;
 
-use \Illuminate\View\View;
+use Illuminate\View\View;
 use App\Models\HowTos\HowTo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\Factory;
-use App\Http\Resources\SearchCollection;
-use App\Http\Requests\HowTo\FetchRequest;
 use App\Http\Resources\HowTos\HowToResource;
 use App\Http\Requests\HowTo\StoreHowToRequest;
 use App\Http\Requests\HowTo\UpdateHowToRequest;
 use Illuminate\Contracts\Foundation\Application;
-use App\Repositories\Contracts\IHowToRepositoryContract;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class HowToController extends Controller
 {
-    /**
-     * @var IHowToRepositoryContract
-     */
-    private $repository;
-
-    /**
-     * ClientEsimController constructor.
-     *
-     * @param IHowToRepositoryContract $repository [description]
-     */
-    public function __construct(IHowToRepositoryContract $repository) {
-        $this->repository = $repository;
-    }
-
-    /**
-     * Fetch records.
-     *
-     * @param  FetchRequest     $request [description]
-     * @return SearchCollection          [description]
-     */
-    public function fetch(FetchRequest $request): SearchCollection
-    {
-        return new SearchCollection(
-            $this->repository->search($request), HowToResource::class
-        );
-    }
-
     public function fetchall() {
         return HowTo::all();
     }
@@ -107,13 +78,23 @@ class HowToController extends Controller
     /**
      * Display products page.
      *
-     * @return Application|Factory|\Illuminate\Contracts\View\View|View
+     * @return AnonymousResourceCollection
      */
     public function index()
     {
-        return view('howtos.index')
-            ->with('perPage', new Collection(config('system.per_page')))
-            ->with('defaultPerPage', config('system.default_per_page'));
+        $howtos = HowTo::query()
+            ->when(request('query'), function ($query, $searchQuery) {
+                $query->where('title', 'like', "%{$searchQuery}%")
+                    ->orWhere('code', 'like', "%{$searchQuery}%")
+                    ->orWhere('view', 'like', "%{$searchQuery}%")
+                    ->orWhere('description', 'like', "%{$searchQuery}%")
+                ;
+            })
+            ->with(["status", "creator"])
+            ->latest()
+            ->paginate(50);
+
+        return HowToResource::collection( $howtos );
     }
 
     /**
@@ -160,11 +141,11 @@ class HowToController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param HowTo $howto
-     * @return void
+     * @return HowToResource
      */
     public function edit(HowTo $howto)
     {
-        //
+        return New HowToResource( $howto->load(['howtotype', 'status'. 'tags']) );
     }
 
     /**

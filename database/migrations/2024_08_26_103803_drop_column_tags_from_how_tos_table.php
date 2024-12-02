@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('how_tos', function (Blueprint $table) {
-            //$table->dropColumn(['tags']);
+            $table->dropColumn(['tags']);
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('how_tos', function (Blueprint $table) {
-            //
+            $table->string('tags')->nullable()->comment('Tags, if any');
         });
     }
 };

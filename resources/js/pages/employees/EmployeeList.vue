@@ -9,7 +9,6 @@ import { debounce } from 'lodash';
 import { Bootstrap4Pagination } from 'laravel-vue-pagination';
 import { useAbility } from "@casl/vue";
 
-
 const { can, cannot } = useAbility();
 
 const loading = ref(false);

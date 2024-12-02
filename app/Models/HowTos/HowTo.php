@@ -8,7 +8,7 @@ use App\Traits\Code\HasCode;
 use Illuminate\Support\Carbon;
 use App\Contracts\Media\IHasMedia;
 use Illuminate\Support\Facades\Auth;
-use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -67,7 +67,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class HowTo extends BaseModel implements IHasMedia
 {
-    use HasMediaTrait, HasTags, HasCode, HasFactory, \OwenIt\Auditing\Auditable;
+    use HasTags, InteractsWithMedia, HasCode, HasFactory, \OwenIt\Auditing\Auditable;
 
     protected $guarded = [];
     protected $with = ['tags'];

@@ -2,15 +2,20 @@
 
 namespace App\Models\HowTos;
 
-use Spatie\Tags\HasTags;
 use App\Models\BaseModel;
+use Illuminate\Support\Str;
 use App\Traits\Code\HasCode;
 use Illuminate\Support\Carbon;
+use App\Traits\Media\HasMedia;
+use App\Contracts\IsBaseModel;
 use App\Contracts\Media\IHasMedia;
 use Illuminate\Support\Facades\Auth;
-use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\InvalidBase64Data;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileCannotBeAdded;
 
 /**
  * Class HowTos
@@ -20,7 +25,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property integer $id
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  * @property string $title
  * @property string $code
  * @property string|null $view
@@ -67,13 +71,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class HowTo extends BaseModel implements IHasMedia
 {
-    use HasTags, InteractsWithMedia, HasCode, HasFactory, \OwenIt\Auditing\Auditable;
+    use HasMedia, HasCode, HasFactory, \OwenIt\Auditing\Auditable;
 
     protected $guarded = [];
     protected $with = ['tags'];
 
     protected $auditExclude = [
-        'htmlbody',
+        'htmlbody', 'htmlbody_parsed',
     ];
 
     #region Validation Rules
@@ -170,6 +174,52 @@ class HowTo extends BaseModel implements IHasMedia
         }
 
         return $this;
+    }
+
+    public function saveHtmlBody(string $htmlbody, array $images): static
+    {
+        $this->update([
+            'htmlbody_parsed' => html_entity_decode($htmlbody)
+        ]);
+
+        $this->update([
+            'htmlbody' => html_entity_decode($htmlbody)
+        ]);
+
+        //$howto->htmlbody = $body;
+        //$howto->save();
+
+        // If images not empty
+        if ($images) {
+            foreach ($images as $image)
+            {
+                // Create a new image from base64 string and attach it to article in article-images collection
+                $media = $this->saveBase64Image($image, 'howto-images','howtos');
+
+                // Replace the base64 string in article body with the url of the last uploaded image
+                $this->htmlbody = str_replace($image['base64data'], $media->getFullUrl(), $this->htmlbody);
+            }
+        }
+
+        $this->save();
+        $this->removeImagesNotPresent();
+
+        return $this;
+    }
+
+    private function removeImagesNotPresent(): void
+    {
+        $mediaItems = $this->load('media')->getMedia('howto-images');
+        foreach ($mediaItems as $mediaItem)
+        {
+            if ( ! str_contains($this->htmlbody, $mediaItem->getFullUrl()) ) {
+                $mediaItem->delete();
+            }
+        }
+    }
+
+    public static function getById(int $id) : ?HowTo {
+        return HowTo::whereId($id)->first();
     }
 
     #endregion

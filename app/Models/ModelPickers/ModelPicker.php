@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property integer $id
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  *
  * @property string $model_type
  * @property integer|null $model_id

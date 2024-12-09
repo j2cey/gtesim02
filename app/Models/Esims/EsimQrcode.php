@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property integer $id
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  * @property string|null $raw_value
  * @property string|null $qrcode_img
  * @property integer|null $esim_id

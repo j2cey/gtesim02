@@ -17,7 +17,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property integer $id
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  *
  * @property integer|null $esim_id
  * @property integer|null $statut_esim_id

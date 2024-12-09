@@ -13,7 +13,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property integer $id
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  *
  * @property string $code
  * @property string $name
@@ -21,6 +20,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property mixed $tags
  */
 class StatusResource extends JsonResource
 {

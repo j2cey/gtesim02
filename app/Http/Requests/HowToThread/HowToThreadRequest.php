@@ -12,6 +12,7 @@ use Illuminate\Foundation\Http\FormRequest;
  *
  * @property string $title
  * @property string $code
+ * @property array $image
  *
  * @property string $description
  *

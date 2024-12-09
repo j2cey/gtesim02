@@ -4,10 +4,12 @@ namespace App\Http\Controllers\HowTos;
 
 use App\Models\HowTos\HowToStep;
 use Illuminate\Http\JsonResponse;
+use App\Models\HowTos\HowToThread;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\HowTos\HowToStepResource;
 use App\Http\Requests\HowToStep\StoreHowToStepRequest;
 use App\Http\Requests\HowToStep\UpdateHowToStepRequest;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class HowToStepController extends Controller
 {
@@ -42,11 +44,40 @@ class HowToStepController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return void
+     * @return AnonymousResourceCollection
      */
     public function index()
     {
-        //
+        $howtosteps = HowToStep::query()
+            ->when(request('query'), function ($query, $searchQuery) {
+                $query->where('title', 'like', "%{$searchQuery}%")
+                    ->orWhere('description', 'like', "%{$searchQuery}%")
+                ;
+            })
+            ->with(["status", "creator"])
+            ->latest()
+            ->paginate(10);
+
+        return HowToStepResource::collection( $howtosteps );
+    }
+
+    public function threadsteps(HowToThread $howtothread)
+    {
+        $howtosteps = HowToStep::query()
+            ->when(request('query'), function ($query, $searchQuery) {
+                $query->where('title', 'like', "%{$searchQuery}%")
+                    ->orWhere('code', 'like', "%{$searchQuery}%")
+                    ->orWhere('description', 'like', "%{$searchQuery}%")
+                ;
+            })
+            ->whereHas('howtothread', function ($query) use ($howtothread) {
+                $query->where( 'id', $howtothread->id );
+            })
+            ->with(["status", "creator"])
+            ->orderBy('posi')
+            ->paginate(10);
+
+        return HowToStepResource::collection( $howtosteps );
     }
 
     /**
@@ -63,7 +94,7 @@ class HowToStepController extends Controller
      * Store a newly created resource in storage.
      *
      * @param StoreHowToStepRequest $request
-     * @return HowToStepResource|HowToStep|void
+     * @return HowToStepResource
      */
     public function store(StoreHowToStepRequest $request)
     {
@@ -78,18 +109,18 @@ class HowToStepController extends Controller
      */
     public function show(HowToStep $howtostep)
     {
-        //
+
     }
 
     /**
      * Show the form for editing the specified resource.
      *
      * @param HowToStep $howtostep
-     * @return void
+     * @return HowToStepResource
      */
     public function edit(HowToStep $howtostep)
     {
-        //
+        return new HowToStepResource( $howtostep->load(['howtothread','howto', 'status', 'tags']) );
     }
 
     /**
@@ -97,7 +128,7 @@ class HowToStepController extends Controller
      *
      * @param UpdateHowToStepRequest $request
      * @param HowToStep $howtostep
-     * @return HowToStepResource|HowToStep|void
+     * @return HowToStepResource
      */
     public function update(UpdateHowToStepRequest $request, HowToStep $howtostep)
     {

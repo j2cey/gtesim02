@@ -117,6 +117,7 @@ watch(props.status, () => {
 }, { immediate: true });
 
 onMounted(() => {
+    console.log("StatusShow, props", props);
     getStatusesCode();
 });
 </script>

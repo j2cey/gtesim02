@@ -8,45 +8,16 @@ use App\Models\HowTos\HowToThread;
 use Illuminate\Support\Collection;
 use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\Factory;
-use App\Http\Resources\SearchCollection;
-use App\Http\Requests\HowToThread\FetchRequest;
 use App\Http\Resources\HowTos\HowToStepResource;
 use Illuminate\Contracts\Foundation\Application;
 use App\Http\Resources\HowTos\HowToThreadResource;
 use App\Http\Requests\HowToStep\StoreHowToStepRequest;
 use App\Http\Requests\HowToThread\StoreHowToThreadRequest;
 use App\Http\Requests\HowToThread\UpdateHowToThreadRequest;
-use App\Repositories\Contracts\IHowToThreadRepositoryContract;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class HowToThreadController extends Controller
 {
-    /**
-     * @var IHowToThreadRepositoryContract
-     */
-    private $repository;
-
-    /**
-     * ClientEsimController constructor.
-     *
-     * @param IHowToThreadRepositoryContract $repository [description]
-     */
-    public function __construct(IHowToThreadRepositoryContract $repository) {
-        $this->repository = $repository;
-    }
-
-    /**
-     * Fetch records.
-     *
-     * @param  FetchRequest     $request [description]
-     * @return SearchCollection          [description]
-     */
-    public function fetch(FetchRequest $request): SearchCollection
-    {
-        return new SearchCollection(
-            $this->repository->search($request), HowToThreadResource::class
-        );
-    }
-
     public function fetchall() {
         return HowToThread::all();
     }
@@ -81,13 +52,22 @@ class HowToThreadController extends Controller
     /**
      * Display products page.
      *
-     * @return Application|Factory|\Illuminate\Contracts\View\View|View
+     * @return AnonymousResourceCollection
      */
     public function index()
     {
-        return view('howtothreads.index')
-            ->with('perPage', new Collection(config('system.per_page')))
-            ->with('defaultPerPage', config('system.default_per_page'));
+        $howtothreads = HowToThread::query()
+            ->when(request('query'), function ($query, $searchQuery) {
+                $query->where('title', 'like', "%{$searchQuery}%")
+                    ->orWhere('code', 'like', "%{$searchQuery}%")
+                    ->orWhere('description', 'like', "%{$searchQuery}%")
+                ;
+            })
+            ->with(["status", "creator", "tags"])
+            ->latest()
+            ->paginate(10);
+
+        return HowToThreadResource::collection( $howtothreads );
     }
 
     /**
@@ -104,7 +84,7 @@ class HowToThreadController extends Controller
      * Store a newly created resource in storage.
      *
      * @param StoreHowToThreadRequest $request
-     * @return HowToThreadResource|void
+     * @return HowToThreadResource
      */
     public function store(StoreHowToThreadRequest $request)
     {
@@ -114,6 +94,9 @@ class HowToThreadController extends Controller
             $request->code,
             $request->tags
         );
+
+        $howtothread->saveImage($request->image);
+
         return new HowToThreadResource($howtothread);
     }
 
@@ -133,11 +116,11 @@ class HowToThreadController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param HowToThread $howtothread
-     * @return void
+     * @return HowToThreadResource
      */
     public function edit(HowToThread $howtothread)
     {
-        //
+        return New HowToThreadResource( $howtothread->load(['steps', 'status', 'tags']) );
     }
 
     /**
@@ -145,7 +128,7 @@ class HowToThreadController extends Controller
      *
      * @param UpdateHowToThreadRequest $request
      * @param HowToThread $howtothread
-     * @return HowToThreadResource|void
+     * @return HowToThreadResource
      */
     public function update(UpdateHowToThreadRequest $request, HowToThread $howtothread)
     {
@@ -155,6 +138,9 @@ class HowToThreadController extends Controller
             $request->code,
             $request->tags
         );
+
+        $howtothread->saveImage($request->image);
+
         return new HowToThreadResource($howtothread);
     }
 

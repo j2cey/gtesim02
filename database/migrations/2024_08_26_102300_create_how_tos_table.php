@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('code')->comment('how-to code');
             $table->string('view')->nullable()->comment('how-to view');
             $table->string('description')->nullable()->comment('how-to description');
-            $table->longText('htmlbody')->nullable()->comment('how-to description');
+            $table->longText('htmlbody')->nullable()->comment('how-to html body');
 
             $table->foreignId('how_to_type_id')->nullable()
                   ->comment('how_to_type reference')

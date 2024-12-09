@@ -8,12 +8,8 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
- *
- *
- */
-/**
- * Class StatusChange
- * @package App\Models\Status
+ * Class StatusChangeRequest
+ * @package App\Http\Requests\Status
  *
  * @property string $statuscode
  * @property string $modelclass

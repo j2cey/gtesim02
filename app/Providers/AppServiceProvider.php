@@ -40,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
          */
         Blueprint::macro('baseFields', function () {
             $this->uuid('uuid');
-            $this->string('tags')->nullable()->comment('Tags, if any');
+            $this->string('oldtags')->nullable()->comment('Tags, if any');
             $this->foreignId('status_id')->nullable()
                 ->comment('status reference')
                 ->constrained('statuses')->onDelete('set null');

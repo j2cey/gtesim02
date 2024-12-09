@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property integer $id
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  * @property string $title
  * @property string $description
  * @property integer|null $created_by
@@ -89,6 +88,33 @@ class HowToType extends BaseModel implements Auditable
             'title' => $title,
             'description' => $description,
         ]);
+    }
+
+    public static function updateOrNew($title, $description): HowToType
+    {
+        $howtotype = HowToType::whereTitle($title)->first();
+
+        if ($howtotype) {
+            return $howtotype->updateOne($title, $description);
+        } else {
+            return HowToType::createNew($title, $description);
+        }
+    }
+
+    public function updateOne($title, $description): static
+    {
+        $this->title = $title;
+        if ( ! is_null($description) ) {
+            $this->description = $description;
+        }
+
+        $this->save();
+
+        return $this;
+    }
+
+    public static function getById(int $id): ?HowToType {
+        return HowToType::whereId($id)->first();
     }
 
     #endregion;

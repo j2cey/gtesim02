@@ -13,7 +13,9 @@ import { phonenumsRoutes, emailaddressesRoutes } from "./routes/persons.js";
 import employeesRoutes from "./routes/employees.js";
 import settingsRoutes from "./routes/settings.js";
 import statusesRoutes from "./routes/statuses.js";
-import { howtosRoutes } from "./routes/howtos.js";
+import { howtosRoutes, howtostepsRoutes, howtothreadsRoutes } from "./routes/howtos.js";
+
+// TODO: Home redirect link, dynamic
 
 export default [
     {
@@ -48,6 +50,8 @@ export default [
     ...settingsRoutes,
     ...statusesRoutes,
     ...howtosRoutes,
+    ...howtostepsRoutes,
+    ...howtothreadsRoutes,
     {
         path: '/:notFound',
         name: 'error.404',

@@ -8,25 +8,21 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('how_tos', function (Blueprint $table) {
-            $table->dropColumn(['tags']);
+            $table->longText('htmlbody_parsed')->nullable()->comment('how-to html body parsed');
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('how_tos', function (Blueprint $table) {
-            $table->string('tags')->nullable()->comment('Tags, if any');
+            $table->dropColumn('htmlbody_parsed');
         });
     }
 };

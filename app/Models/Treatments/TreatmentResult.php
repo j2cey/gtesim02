@@ -20,7 +20,6 @@ use App\Models\Treatments\TreatmentResult\ResultFailing;
  * @property integer $id
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  * @property integer|null $status_id
  *
  * @property integer $num_ord

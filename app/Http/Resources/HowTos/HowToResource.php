@@ -5,6 +5,7 @@ namespace App\Http\Resources\HowTos;
 use App\Models\User;
 use App\Models\Status;
 use Illuminate\Http\Request;
+use App\Models\HowTos\HowTo;
 use Illuminate\Support\Carbon;
 use App\Models\HowTos\HowToType;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -58,6 +59,7 @@ class HowToResource extends JsonResource
             'howtotype' => $this->howtotype,
 
             'status' => $this->status,
+            'modelclass' => HowTo::class,
 
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

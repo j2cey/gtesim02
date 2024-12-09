@@ -18,7 +18,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  *
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  * @property integer|null $status_id
  *
  * @property string $objectguid

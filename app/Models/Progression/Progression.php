@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  *
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  *
  * @property string $process_name
  * @property integer $nb_todo

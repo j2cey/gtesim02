@@ -2,10 +2,12 @@
 
 namespace App\Models\HowTos;
 
-use Spatie\Tags\HasTags;
 use App\Models\BaseModel;
 use App\Traits\Code\HasCode;
 use Illuminate\Support\Carbon;
+use App\Traits\Media\HasMedia;
+use App\Contracts\Media\IHasMedia;
+use Illuminate\Support\Facades\Auth;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -16,10 +18,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property integer $id
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  *
  * @property string $title
  * @property string $code
+ * @property string $image
  *
  * @property string $description
  *
@@ -32,9 +34,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property Carbon $updated_at
  */
 
-class HowToThread extends BaseModel implements Auditable
+class HowToThread extends BaseModel implements Auditable, IHasMedia
 {
-    use HasTags, HasCode, HasFactory, \OwenIt\Auditing\Auditable;
+    use HasMedia, HasCode, HasFactory, \OwenIt\Auditing\Auditable;
 
     protected $guarded = [];
     protected $with = ['tags','steps'];
@@ -89,6 +91,17 @@ class HowToThread extends BaseModel implements Auditable
     #endregion
 
     #region Custom Functions
+
+    public function saveImage(array $image): static
+    {
+        if ( ! empty($image) ) {
+            $media = $this->saveBase64Image($image, 'howto-images','howtos');
+
+            $this->image = $media->getFullUrl();
+            $this->save();
+        }
+        return $this;
+    }
 
     public function getPosiSteps($posi) {
 

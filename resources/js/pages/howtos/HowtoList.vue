@@ -105,6 +105,7 @@ onMounted(() => {
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h1 class="m-0">Liste des Rubriques Comment-Faire</h1>
+                    <span class="text text-muted text-xs">Une Rubrique de Tuto Comment-Faire est destinée à contenir le détail <b>HTML</b> à afficher</span>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">

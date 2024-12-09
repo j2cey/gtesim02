@@ -34,7 +34,7 @@ class UpdateHowToThreadRequest extends HowToThreadRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'tags' => $this->getTagsAsAray( $this->decodeJsonField( $this->input('tags') ) ),
+            //'tags' => $this->getTagsAsAray( $this->decodeJsonField( $this->input('tags') ) ),
         ]);
     }
 }

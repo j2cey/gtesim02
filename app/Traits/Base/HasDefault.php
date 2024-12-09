@@ -23,7 +23,7 @@ trait HasDefault
         $old_val = $this->is_default;
 
         $this->update(['is_default' => $new_val]);
-        if ($olddefault) {
+        if ($olddefault && ! is_null($old_val)) {
             $olddefault->setDefault($old_val);
         }
 

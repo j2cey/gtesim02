@@ -23,7 +23,6 @@ use App\Traits\ReportTreatment\Workflow\HasTreatmentWorkflow;
  *
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  * @property integer|null $status_id
  *
  * @property string $title

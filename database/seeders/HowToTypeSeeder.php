@@ -13,7 +13,7 @@ class HowToTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        HowToType::createNew("default","the default how to type")
+        HowToType::updateOrNew("default","the default how to type")
             ->setDefault();
     }
 }

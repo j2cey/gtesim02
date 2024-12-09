@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  *
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  *
  * @property string $comment_text
  * @property integer $votes

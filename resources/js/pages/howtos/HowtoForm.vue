@@ -7,6 +7,7 @@ import { Form } from 'vee-validate';
 import Swal from "sweetalert2";
 import Multiselect from "vue-multiselect";
 import StatusShow from "../statuses/StatusShow.vue";
+import TagsShow from "../tags/TagsShow.vue";
 import { useAbility } from "@casl/vue";
 
 const { can, cannot } = useAbility();
@@ -22,7 +23,7 @@ const form = reactive({
     code: '',
     view: '',
     description: '',
-    tags: '',
+    tags: [],
 });
 
 const formMode = ref('create');
@@ -35,7 +36,7 @@ const initForm = () => {
     form.code = '';
     form.view = '';
     form.description = '';
-    form.tags = '';
+    form.tags = [];
 }
 
 const handleSubmit = (values, actions) => {
@@ -133,20 +134,6 @@ const getHowtoTypes = () => {
         })
 };
 
-const alltags = ref([]);
-const getAllTags = () => {
-    axios.get(`/api/tags/all`)
-        .then((response) => {
-            console.log("getAllTags, response: ", response)
-            alltags.value = response.data;
-        }).then(() => {
-
-        })
-};
-const addTag = (newTag) => {
-    console.log("addTag: ", newTag);
-};
-
 //<editor-fold desc="Status">
 const status = ref({});
 const statusChanged = (obj) => {
@@ -194,7 +181,6 @@ const initComponent = () => {
 onMounted(() => {
     initComponent();
     getHowtoTypes();
-    getAllTags();
 });
 </script>
 
@@ -208,6 +194,7 @@ onMounted(() => {
                         <span v-else-if="formMode === 'create'">Création</span>
                         <span v-else>Détails</span>
                         Rubriques Comment-Faire
+                        <p class="text text-muted text-xs">Une Rubrique de Tuto Comment-Faire est destinée à contenir le détail <b>HTML</b> à afficher</p>
                     </h3>
                 </div>
                 <div class="col-sm-6">
@@ -292,13 +279,15 @@ onMounted(() => {
                                             <span v-show="errorMessage.howtotype" class="text text-xs text-danger">{{ errors.howtotype }}</span>
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-3" v-if="formMode === 'edit' || formMode === 'show'">
                                         <div class="form-group">
                                             <label for="tags"><span class="text text-xs">Tags</span></label>
-                                            <multiselect id="tags"
-                                                         v-model="form.tags" tag-placeholder="Ajouter Nouveau tag" placeholder="Rechercher / Ajouter Tag" label="name"
-                                                         track-by="code" :options="alltags" :multiple="true" :taggable="true" @tag="addTag"></multiselect>
-                                            <span v-show="errorMessage.departement" class="text text-xs text-danger">{{ errors.departement }}</span>
+                                            <TagsShow :key="howto.uuid"
+                                                        :tags="form.tags"
+                                                        :modelclass="howto.modelclass"
+                                                        :modelid="howtoid"
+                                            ></TagsShow>
+                                            <span v-show="errorMessage.tags" class="text text-xs text-danger">{{ errors.tags }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -321,11 +310,17 @@ onMounted(() => {
                                 <div class="btn-group">
                                     <button v-if="(formMode === 'create' && can('howtos-create') || formMode === 'edit' && can('howtos-update')) && (formMode === 'create' || formMode === 'edit')" type="submit" class="btn btn-sm btn-primary m-2">
                                         <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        <i class="fa fa-save mr-1"></i> Valider
+                                        <i v-else class="fa fa-save mr-1"></i>
+                                        Valider
                                     </button>
                                     <router-link :to="prevRoutePath">
                                         <button type="submit" class="btn btn-sm btn-default m-2">
                                             <i class="fa fa-backward mr-1"></i> Retour
+                                        </button>
+                                    </router-link>
+                                    <router-link v-if="(formMode === 'edit' || formMode === 'show') && can('howtos-edithtml')" :to="`/howtos/${howto.uuid}/htmledit`">
+                                        <button type="submit" class="btn btn-sm btn-secondary m-2">
+                                            <i class="fa fa-file-code mr-1"></i> Modification HTML
                                         </button>
                                     </router-link>
                                 </div>

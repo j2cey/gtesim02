@@ -22,7 +22,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property integer $id
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  * @property string $imsi
  * @property string $iccid
  * @property string $ac

@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  *
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  *
  * @property string $code
  * @property string $name

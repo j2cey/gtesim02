@@ -56,6 +56,14 @@ return [
             'throw' => false,
         ],
 
+        'howtos' => [
+            'driver' => 'local',
+            'root' => public_path('uploads/howtos'),
+            'url' => env('APP_URL').'/uploads/howtos',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
     ],
 
     /*

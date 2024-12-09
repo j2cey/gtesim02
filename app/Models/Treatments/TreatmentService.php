@@ -33,7 +33,6 @@ use App\Models\Treatments\TreatmentService\ServiceActions;
  * @property integer $id
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  * @property integer|null $status_id
  *
  * @property int|null $exec_id

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\HowTo;
 
 use App\Models\HowTos\HowTo;
+use App\Models\HowTos\HowToType;
 
 class UpdateHowToRequest extends HowToRequest
 {
@@ -34,8 +35,8 @@ class UpdateHowToRequest extends HowToRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'howtotype' => $this->setRelevantHowToType( $this->input('howtotype'), 'id', true ),
-            'tags' => $this->getTagsAsAray( $this->decodeJsonField( $this->input('tags') ) ),
+            'howtotype' =>  HowToType::getById($this->input('howtotype')['id']),//$this->setRelevantHowToType( $this->input('howtotype'), 'id', true ),
+            //'tags' => $this->getTagsAsAray( $this->decodeJsonField( $this->input('tags') ) ),
         ]);
     }
 }

@@ -20,6 +20,8 @@ use App\Http\Controllers\Esims\ClientEsimController;
 use App\Http\Controllers\Employes\EmployeController;
 use App\Http\Controllers\Persons\PhoneNumController;
 use App\Http\Controllers\HowTos\HowToTypeController;
+use App\Http\Controllers\HowTos\HowToStepController;
+use App\Http\Controllers\HowTos\HowToThreadController;
 use App\Http\Controllers\Admin\DashboardStatController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Employes\DepartementController;
@@ -303,11 +305,36 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/howtos/{howto}/edit', [HowToController::class, 'edit'])->name('howtos.edit');
     Route::get('/api/howtos/{howto}/show', [HowToController::class, 'show'])->name('howtos.show');
     Route::post('/api/howtos/', [HowToController::class, 'store'])->name('howtos.store');
+    Route::put('/api/howtos/{howto}', [HowToController::class, 'update'])->name('howtos.update');
+    Route::put('/api/howtos/{howto}/storehtml', [HowToController::class, 'storehtml'])->name('howtos.storehtml');
+    #endregion
+
+    #region HowToStep
+    Route::get('/api/howtosteps', [HowToStepController::class, 'index'])->name('howtosteps.index');
+    Route::get('/api/howtosteps/all', [HowToStepController::class, 'fetchall'])->name('howtosteps.fetchall');
+    Route::get('/api/howtosteps/howtothread/{howtothread}/threadsteps', [HowToStepController::class, 'threadsteps'])->name('howtosteps.threadsteps');
+    Route::get('/api/howtosteps/{howtostep}/edit', [HowToStepController::class, 'edit'])->name('howtosteps.edit');
+    Route::get('/api/howtosteps/{howtostep}/show', [HowToStepController::class, 'show'])->name('howtosteps.show');
+    Route::post('/api/howtosteps/', [HowToStepController::class, 'store'])->name('howtosteps.store');
+    Route::put('/api/howtosteps/{howtostep}', [HowToStepController::class, 'update'])->name('howtosteps.update');
+    #endregion
+
+    #region HowToThread
+    Route::get('/api/howtothreads', [HowToThreadController::class, 'index'])->name('howtothreads.index');
+    Route::get('/api/howtothreads/all', [HowToThreadController::class, 'fetchall'])->name('howtothreads.fetchall');
+    Route::get('/api/howtothreads/{howtothread}/edit', [HowToThreadController::class, 'edit'])->name('howtothreads.edit');
+    Route::get('/api/howtothreads/{howtothread}/show', [HowToThreadController::class, 'show'])->name('howtothreads.show');
+    Route::get('/api/howtothreads/{howtothread}/steps', [HowToThreadController::class, 'steps'])->name('howtothreads.steps');
+    Route::post('/api/howtothreads/', [HowToThreadController::class, 'store'])->name('howtothreads.store');
+    Route::put('/api/howtothreads/{howtothread}', [HowToThreadController::class, 'update'])->name('howtothreads.update');
     #endregion
 
     #region Tags
     Route::get('/api/tags', [TagController::class, 'index'])->name('tags.index');
     Route::get('/api/tags/all', [TagController::class, 'fetchall'])->name('tags.fetchall');
+    Route::get('/api/tags/sync', [TagController::class, 'synctags'])->name('tags.sync');
+    Route::put('/api/tags/add', [TagController::class, 'addtag'])->name('tags.add');
+    Route::put('/api/tags/remove', [TagController::class, 'removetag'])->name('tags.remove');
     #endregion
 
 });

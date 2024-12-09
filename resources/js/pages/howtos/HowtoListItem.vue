@@ -44,9 +44,15 @@ onMounted(() => {
         <td class="text text-xs" v-if="can('howtos-creator-list')" >{{ howto.creator?.name }}</td>
         <td class="text text-xs" style="width: 110px" ><small>{{ formatDate(howto.created_at) }}</small></td>
         <td class="text text-xs" style="width: 110px" ><small>{{ formatDate(howto.updated_at) }}</small></td>
-        <td style="width: 90px">
+        <td style="width: 100px">
             <router-link v-if="can('howtos-update')" :to="`/howtos/${howto.uuid}/edit`">
                 <i class="fa fa-edit mr-2 text text-xs font-weight-light"></i>
+            </router-link>
+            <router-link v-if="can('howtos-readhtml')" :to="`/howtos/${howto.uuid}/htmlread`">
+                <i class="fa fa-eye mr-2 text text-xs text-success font-weight-light"></i>
+            </router-link>
+            <router-link v-if="can('howtos-edithtml')" :to="`/howtos/${howto.uuid}/htmledit`">
+                <i class="fa fa-file-code mr-2 text text-xs text-secondary font-weight-light"></i>
             </router-link>
             <a class="text text-xs" v-if="can('howtos-delete')" href="#" @click.prevent="$emit('confirmHowtoDeletion', howto)"><i class="fa fa-trash-alt text-danger font-weight-light"></i></a>
         </td>

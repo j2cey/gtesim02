@@ -2,9 +2,9 @@
 
 namespace App\Models\HowTos;
 
-use Spatie\Tags\HasTags;
 use App\Models\BaseModel;
 use Illuminate\Support\Carbon;
+use App\Contracts\IsBaseModel;
 use App\Traits\Comment\HasComments;
 use App\Contracts\Comments\ICommentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  *
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  * @property int|null $status_id status reference
  *
  * @property string $title
@@ -30,19 +29,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property integer|null $updated_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ *
+ * @property HowToThread $howtothread
+ * @property HowTo $howto
  */
 
-class HowToStep extends BaseModel implements ICommentable
+class HowToStep extends BaseModel implements ICommentable, IsBaseModel
 {
-    use HasComments, HasTags, HasFactory, \OwenIt\Auditing\Auditable;
+    use HasComments, HasFactory, \OwenIt\Auditing\Auditable;
 
     protected $guarded = [];
-    protected $with = ['tags'];
+    protected $with = ['tags','howto'];
 
     #region Validation Rules
 
     public static function defaultRules() {
         return [
+            'title' => ['required'],
+            'howto' => ['required']
         ];
     }
     public static function createRules() {
@@ -59,6 +63,7 @@ class HowToStep extends BaseModel implements ICommentable
     public static function messagesRules() {
         return [
             'title.required' => 'The Title is required',
+            'howto.required' => 'The Section (HTML) is required',
         ];
     }
 

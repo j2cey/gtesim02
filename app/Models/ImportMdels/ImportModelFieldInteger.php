@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $importvalue the import value
  * @property string|null $comment comment
  * @property string $uuid
- * @property string|null $tags Tags, if any
  * @property int|null $status_id status reference
  * @property int $is_default determine whether is the default one.
  * @property \Illuminate\Support\Carbon|null $created_at

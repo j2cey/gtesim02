@@ -97,12 +97,16 @@ abstract class Permissions
         return new BasePersonAction("employes", null, $additionalactions);
     }
     public static function Howto() : BaseModelAction {
-        $additionalactions = ['update-code' => 1,'edithtml' => 1];
+        $additionalactions = ['update-code' => 1,'edithtml' => 1,'readhtml' => 2];
         return new BaseModelAction("howtos", null, $additionalactions);
     }
     public static function HowtoThread() : BaseModelAction {
-        $additionalactions = ['update-code' => 1];
+        $additionalactions = ['update-code' => 1,'add-step' => 1];
         return new BaseModelAction("howtothreads", null, $additionalactions);
+    }
+    public static function HowtoStep() : BaseModelAction {
+        $additionalactions = ['update-code' => 1];
+        return new BaseModelAction("howtosteps", null, $additionalactions);
     }
 
     public static function Creator() : PermissionAction {

@@ -47,6 +47,9 @@ trait RequestTraits
      */
     public function decodeJsonField($value) {
         try {
+            if ( is_array($value) ) {
+                return $value;
+            }
             return json_decode($value, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
         }

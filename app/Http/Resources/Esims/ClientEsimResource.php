@@ -20,7 +20,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *
  * @property string $uuid
  * @property bool $is_default
- * @property string|null $tags
  *
  * @property string $nom_raison_sociale
  * @property string $prenom

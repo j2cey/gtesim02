@@ -10,7 +10,6 @@ use App\Models\Person\PhoneNum;
  */
 trait HasPhoneNums
 {
-    // TODO: Manage PhoneNum Posi
     public function phonenums()
     {
         return $this->morphMany(PhoneNum::class, 'hasphonenum');

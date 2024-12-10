@@ -54,7 +54,7 @@ class HowToThreadResource extends JsonResource
             'code' => $this->code,
             'image' => $this->image,
             'description' => $this->description,
-            'steps' => $this->steps,
+            'steps' => HowToStepResource::collection($this->steps),
             'firststep' => $this->firststep,
             'tags' => $this->tags,
 

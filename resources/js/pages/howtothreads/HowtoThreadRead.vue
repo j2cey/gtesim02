@@ -200,7 +200,7 @@ onMounted(() => {
                         </div>
 
                         <hr>
-                        <commentsManager :comments="currcomments" :commentable_type="currstep.model_type" :commentable_id="currstep.id" :key="currstep.id"></commentsManager>
+                        <commentsManager :comments="currcomments" :commentable_type="currstep.modelclass" :commentable_id="currstep.id" :key="currstep.id"></commentsManager>
 
                     </div>
                 </div>

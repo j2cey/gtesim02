@@ -36,9 +36,9 @@ const loading = ref(false);
 const state = ref('default');
 const commentsdata = ref(props.comments);
 const form = reactive({
-    commentable_type: '',
-    commentable_id: '',
-    comment_text: '',
+    commentable_type: props.commentable_type,
+    commentable_id: props.commentable_id,
+    comment_text: props.comment_text,
 });
 
 const startEditing = () => {
@@ -49,12 +49,12 @@ const stopEditing = () => {
     form.comment_text = '';
 };
 const saveComment = () => {
-
+    console.log("saveComment, form: ", form);
     axios.post('/api/comments', form)
         .then(resp => {
 
-            console.log("comment created: ", resp)
-            commentsdata.value.unshift(resp);
+            console.log("comment created: resp.data", resp.data);
+            commentsdata.value.unshift(resp.data);
 
             stopEditing();
 
@@ -71,10 +71,11 @@ const updateComment = ($event) => {
         id: $event.id,
         uuid: $event.uuid,
     });
+    console.log("updateComment, updateForm", updateForm);
     axios.put(`/api/comments/${$event.uuid}`, updateForm)
         .then(resp => {
-            console.log("comment updated: ", resp);
-            commentsdata.value[commentIndex($event.id)].comment_text = resp.comment_text;
+            console.log("comment updated: ", resp.data);
+            commentsdata.value[commentIndex($event.id)].comment_text = resp.data.comment_text;
         })
 };
 const deleteComment = ($event) => {
@@ -97,7 +98,7 @@ const commentIndex = (commentId) => {
             <div class="mb-4">
                 <h5 class="text-black">Commentaires</h5>
             </div>
-            <textarea v-model="form.comment_text" placeholder="Laissez un commentaire" style="min-width: 50%; min-height: 5px;"
+            <textarea v-model="form.comment_text" placeholder="Laissez un commentaire" style="min-width: 100%; min-height: 5px;"
                       class="bg-grey-lighter rounded leading-normal resize-none w-full py-2 px-3"
                       :class="[state === 'editing' ? 'h-24' : 'h-10']" @focus="startEditing">
             </textarea>

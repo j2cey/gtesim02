@@ -11,7 +11,6 @@ use App\Models\Person\EmailAddress;
  */
 trait HasEmailAddresses
 {
-    // TODO: Manage EmailAddress Posi
     /**
      * Renvoie les e-mails (Adresseemail) de ce model.
      */

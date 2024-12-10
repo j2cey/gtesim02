@@ -21,6 +21,7 @@ use App\Http\Controllers\Employes\EmployeController;
 use App\Http\Controllers\Persons\PhoneNumController;
 use App\Http\Controllers\HowTos\HowToTypeController;
 use App\Http\Controllers\HowTos\HowToStepController;
+use App\Http\Controllers\Comments\CommentController;
 use App\Http\Controllers\HowTos\HowToThreadController;
 use App\Http\Controllers\Admin\DashboardStatController;
 use App\Http\Controllers\Dashboard\DashboardController;
@@ -335,6 +336,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/tags/sync', [TagController::class, 'synctags'])->name('tags.sync');
     Route::put('/api/tags/add', [TagController::class, 'addtag'])->name('tags.add');
     Route::put('/api/tags/remove', [TagController::class, 'removetag'])->name('tags.remove');
+    #endregion
+
+    #region Comments
+    Route::resource('/api/comments',CommentController::class);
+    Route::get('/api/comments/fetchall',[CommentController::class,'fetchall'])
+        ->name('comments.fetchall')
+        ->middleware('auth');
     #endregion
 
 });

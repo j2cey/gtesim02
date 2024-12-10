@@ -25,6 +25,7 @@ const resetEdit = () => {
 
 const saveEdit = () => {
     state.value = 'default';
+    console.log("saveEdit, props.comment: ", props.comment);
     emit('commentUpdated', {
         'id': props.comment.id,
         'uuid': props.comment.uuid,
@@ -63,7 +64,7 @@ const editable = computed(() => {
                 <h5 class="text-black text-sm">Modifer Commentaire</h5>
             </div>
             <textarea v-model="commentdata.comment_text"
-                      placeholder="Update comment" style="min-width: 50%"
+                      placeholder="Update comment" style="min-width: 100%"
                       class="bg-grey-lighter rounded leading-normal resize-none w-full h-24 py-2 px-3">
             </textarea>
             <div class="flex flex-col md:flex-row items-center mt-2">

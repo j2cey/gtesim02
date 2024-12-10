@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Comments;
 
-use Auth;
 use App\Models\User;
 use Illuminate\Http\Response;
 use App\Models\Comments\Comment;
 use App\Http\Controllers\Controller;
 use App\Models\Comments\CommentVote;
 use App\Models\Comments\CommentSpam;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
-use Tightenco\Collect\Support\Collection;
+//use Tightenco\Collect\Support\Collection;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use App\Http\Requests\Comment\StoreCommentRequest;
@@ -28,7 +28,7 @@ class CommentController extends Controller
      * Display a listing of the resource.
      *
      * @param $pageId
-     * @return \Illuminate\Support\Collection|Collection|void
+     * @return \Illuminate\Support\Collection|void
      */
     public function index($pageId)
     {

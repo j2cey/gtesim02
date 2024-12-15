@@ -82,6 +82,11 @@ abstract class Permissions
         $additionalactions = null;
         return new BaseModelAction("esimqrcodes");
     }
+
+    public static function ArisStatus() : BaseModelAction {
+        $additionalactions = null;
+        return new BaseModelAction("arisstatuses");
+    }
     public static function PhoneNum() : BaseModelAction {
         $additionalactions = ['esim-recycle' => 2, 'esim-sendmail' => 2];
         return new BaseModelAction("phonenums", null, $additionalactions);

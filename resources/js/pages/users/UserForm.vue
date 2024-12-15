@@ -618,7 +618,8 @@ onMounted(() => {
                                 <div class="btn-group">
                                     <button v-if="formMode === 'edit' || formMode === 'create'" type="submit" class="btn btn-sm btn-primary m-2" :disabled="loading">
                                         <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        <i class="fa fa-save mr-1"></i> Save
+                                        <i v-else class="fa fa-save mr-1"></i>
+                                        Save
                                     </button>
 
                                     <ResetPassword v-if="formMode === 'edit' && can('users-reset-password') && form.is_local" ref="resetPasswordRef"

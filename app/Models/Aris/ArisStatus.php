@@ -4,6 +4,7 @@ namespace App\Models\Aris;
 
 use App\Models\Esims\Esim;
 use Illuminate\Support\Carbon;
+use App\Traits\Aris\ArisStatusCode;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -21,14 +22,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string|null $response_message
  *
  * @property int|null $esim_id
+ * @property int|null $request_id
  *
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @method static ArisStatus create(array $array)
+ * @property ArisStatusRequest|null $statusrequest
  */
 class ArisStatus extends Model
 {
-    use HasFactory;
+    use HasFactory, ArisStatusCode;
 
     protected $guarded = [];
 
@@ -70,12 +74,7 @@ class ArisStatus extends Model
 
     public function getFormattedStatusAttribute()
     {
-        if( strtoupper( $this->status ) === "U") {
-            return "Utilisé";
-        } else if ( strtoupper( $this->status ) === "A" ) {
-            return "Libre";
-        }
-        return "OCCUPE-ARIS";
+        return self::formatStatus($this->status);
     }
 
     #region Validation Rules
@@ -105,10 +104,14 @@ class ArisStatus extends Model
         return $this->belongsTo(Esim::class, 'esim_id');
     }
 
+    public function statusrequest() {
+        return $this->belongsTo(ArisStatusRequest::class, 'request_id');
+    }
+
     #endregion
 
     #region Custom Functions
-    public static function createNew($iccid, $icc, $status, $status_change_date, $requested_at, $responded_at, $response_message): ArisStatus
+    public static function createNew($iccid, $icc, $status, $status_change_date, $requested_at, $responded_at, $response_message, $request_id = null): ArisStatus
     {
         $arisstatus = ArisStatus::create([
             'icc' => $icc,
@@ -123,6 +126,14 @@ class ArisStatus extends Model
 
         if ($esim) {
             $arisstatus->esim()->associate($esim)->save();
+            $esim->lastarisstatus()->associate($arisstatus)->save();
+        }
+
+        if ( ! is_null($request_id) ) {
+            $statusrequest = ArisStatusRequest::whereId($request_id)->first();
+            if ($statusrequest) {
+                $arisstatus->statusrequest()->associate($statusrequest)->save();
+            }
         }
 
         return $arisstatus;

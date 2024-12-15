@@ -390,7 +390,8 @@ onMounted(() => {
                                 <div class="btn-group">
                                     <button v-if="(formMode === 'create' && can('employes-create') || formMode === 'edit' && can('employes-update')) && (formMode === 'create' || formMode === 'edit')" type="submit" class="btn btn-sm btn-primary m-2">
                                         <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        <i class="fa fa-save mr-1"></i> Valider
+                                        <i v-else class="fa fa-save mr-1"></i>
+                                        Valider
                                     </button>
                                     <router-link :to="prevRoutePath">
                                         <button type="submit" class="btn btn-sm btn-default m-2">

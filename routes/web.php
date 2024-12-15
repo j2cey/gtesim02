@@ -77,11 +77,15 @@ Route::get('clientesims.generatepdf/{id}',[ClientEsimController::class,'generate
 
 #region ArisStatus
 Route::post('/api/arisstatuses/', [ArisStatusController::class, 'store'])->name('arisstatuses.store');
-Route::get('/api/arisstatuses', [ArisStatusController::class, 'index'])->name('arisstatuses.index');
 #endregion
 
 Route::middleware('auth')->group(function () {
     Route::get('/api/abilities', [ProfileController::class, 'abilities']);
+
+    #region ArisStatus
+    Route::get('/api/arisstatuses', [ArisStatusController::class, 'index'])->name('arisstatuses.index');
+    Route::get('/api/arisstatuses/{esim}', [ArisStatusController::class, 'esimindex'])->name('arisstatuses.esimindex');
+    #endregion
 
     #region Dashboard
     Route::get('/api/dashboards.details',[DashboardController::class,'detailsget'])

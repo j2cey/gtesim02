@@ -14,6 +14,7 @@ import employeesRoutes from "./routes/employees.js";
 import settingsRoutes from "./routes/settings.js";
 import statusesRoutes from "./routes/statuses.js";
 import { howtosRoutes, howtostepsRoutes, howtothreadsRoutes } from "./routes/howtos.js";
+import { arisstatusesRoutes } from "./routes/aris.js";
 
 // TODO: Home redirect link, dynamic
 
@@ -52,6 +53,7 @@ export default [
     ...howtosRoutes,
     ...howtostepsRoutes,
     ...howtothreadsRoutes,
+    ...arisstatusesRoutes,
     {
         path: '/:notFound',
         name: 'error.404',

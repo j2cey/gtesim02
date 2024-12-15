@@ -9,8 +9,11 @@ import StateListItem from "./StateListItem.vue";
 import {Bootstrap4Pagination} from "laravel-vue-pagination";
 import Multiselect from 'vue-multiselect';
 import Swal from "sweetalert2";
-import StatusShow from "@/pages/statuses/StatusShow.vue";
+import StatusShow from "../statuses/StatusShow.vue";
 import { formatDate } from '../../services/helper.js'
+import ArisStatusList from "../arisstatuses/ArisStatusList.vue";
+
+// TODO: Add attach-esim button
 
 const router = useRouter();
 const route = useRoute();
@@ -495,7 +498,8 @@ onMounted(() => {
                                 <div class="btn-group">
                                     <button type="submit" class="btn btn-sm btn-primary m-2" :disabled="loadingEsim">
                                         <span v-if="loadingEsim" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                        <i class="fa fa-save mr-1"></i> Valider
+                                        <i v-else class="fa fa-save mr-1"></i>
+                                        Valider
                                     </button>
                                     <router-link :to="prevRoutePath">
                                         <button type="submit" class="btn btn-sm btn-default m-2">
@@ -605,6 +609,12 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
+
+            <ArisStatusList v-if="formMode === 'edit' || formMode === 'show'"
+                            :key="esim.uuid"
+                            :modeltype="esim.modelclass"
+                            :modelid="esim.uuid"
+            ></ArisStatusList>
         </div>
     </div>
 

@@ -18,6 +18,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
  * @property Carbon|null $requested_at
  * @property Carbon|null $responded_at
  * @property string|null $response_message
+ * @property string|null $request_id
  */
 class ArisStatusRequest extends FormRequest
 {

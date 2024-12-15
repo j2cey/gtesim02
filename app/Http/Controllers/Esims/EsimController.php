@@ -10,6 +10,7 @@ use App\Models\Esims\Esim;
 use Illuminate\Http\Request;
 use App\Models\Esims\StatutEsim;
 use Illuminate\Support\Collection;
+use App\Traits\Aris\ArisStatusCode;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use App\Models\Esims\TechnologieEsim;
@@ -28,6 +29,8 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class EsimController extends Controller
 {
+    use ArisStatusCode;
+
     public function fetchall() {
         return Esim::all();
     }
@@ -53,6 +56,10 @@ class EsimController extends Controller
                     ->orWhereHas('statutesim', function ($query) use ($searchQuery) {
                         $query->where( 'code', 'like', '%'.$searchQuery.'%' );
                     })
+                    ->orWhereHas('lastarisstatus', function ($query) use ($searchQuery) {
+                        $arisstatuscode = self::unFormatStatus($searchQuery);
+                        $query->where( 'status', 'like', "%{$arisstatuscode}%" );
+                    })
                 ;
             })
             ->with("statutesim")
@@ -71,6 +78,10 @@ class EsimController extends Controller
                         ->orWhere('iccid', 'like', "%{$searchQuery}%")
                         ->orWhereHas('statutesim', function ($query) use ($searchQuery) {
                             $query->where( 'code', 'like', '%'.$searchQuery.'%' );
+                        })
+                        ->orWhereHas('lastarisstatus', function ($query) use ($searchQuery) {
+                            $arisstatuscode = self::unFormatStatus($searchQuery);
+                            $query->where( 'status', 'like', "%{$arisstatuscode}%" );
                         })
                     ;
                 });

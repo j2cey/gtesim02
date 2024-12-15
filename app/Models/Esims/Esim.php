@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string $adm1
  * @property string $opc
  * @property integer|null $statut_esim_id
+ * @property integer|null $last_aris_status_id
  * @property integer|null $technologie_esim_id
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -186,6 +187,10 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
     public function latestarisstatus(): HasOne
     {
         return $this->arisstatuses()->one()->ofMany('id', 'max');
+    }
+
+    public function lastarisstatus() {
+        return $this->belongsTo(ArisStatus::class, 'last_aris_status_id');
     }
 
     #endregion

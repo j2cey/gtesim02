@@ -35,7 +35,8 @@ class ArisStatusRequest extends Model
 
     protected $guarded = [];
 
-    public static int $STATUS_CODE_RUNNING = 2;
+    public static int $STATUS_CODE_WAITING = 2;
+    public static int $STATUS_CODE_BUSY = 3;
     public static int $MAX_ESIMS_BY_REQUEST = 100;
     public static string $SUCCESS_MESSAGE = "Success";
 
@@ -63,7 +64,7 @@ class ArisStatusRequest extends Model
     #region Custom Functions
     public static function startNew(): ?ArisStatusRequest
     {
-        if ( ArisStatusRequest::whereRequestStatus( self::$STATUS_CODE_RUNNING )->count() > 0 ) {
+        if ( ArisStatusRequest::whereRequestStatus( self::$STATUS_CODE_WAITING )->count() > 0 ) {
             return null;
         }
 
@@ -77,8 +78,17 @@ class ArisStatusRequest extends Model
     }
 
     public function setStarted() {
-        $this->request_status = self::$STATUS_CODE_RUNNING;
+        $this->request_status = self::$STATUS_CODE_WAITING;
         $this->start_at = Carbon::now();
+        $this->save();
+    }
+    public function setWaiting() {
+        $this->request_status = self::$STATUS_CODE_WAITING;
+        $this->save();
+    }
+
+    public function setBusy() {
+        $this->request_status = self::$STATUS_CODE_BUSY;
         $this->save();
     }
 
@@ -113,6 +123,8 @@ class ArisStatusRequest extends Model
     }
 
     public function execNextEsim() {
+        $this->setBusy();
+
         $next_esim = Esim::whereBetween('id', [$this->last_requested_esim_id + 1, $this->max_esim_id])->orderBy('id', 'asc')->first();
 
         $exec_result = self::execEsim($next_esim);
@@ -129,6 +141,8 @@ class ArisStatusRequest extends Model
         if ($this->last_requested_esim_id === $this->max_esim_id) {
             $this->end_at = Carbon::now();
             $this->request_status = 1;
+        } else {
+            $this->setWaiting();
         }
 
         $this->save();
@@ -152,6 +166,7 @@ class ArisStatusRequest extends Model
             $data = [
                 'iccid' => $esim->iccid,
                 'imsi' => $esim->imsi,
+                'request_id' => $esim->id,
             ];
 
             // POST request using the created object

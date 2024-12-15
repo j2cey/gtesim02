@@ -26,10 +26,11 @@ class EsimArisStatusRequestNext extends Command
      */
     public function handle()
     {
-        $curr_request = ArisStatusRequest::whereRequestStatus( ArisStatusRequest::$STATUS_CODE_RUNNING )->orderBy('id', 'asc')->first();
+        $curr_request = ArisStatusRequest::whereRequestStatus( ArisStatusRequest::$STATUS_CODE_WAITING )->orderBy('id', 'asc')->first();
         if ( ! $curr_request ) {
-            $curr_request = ArisStatusRequest::startNew();
+            ArisStatusRequest::startNew();
+        } else {
+            $curr_request->execNextEsim();
         }
-        $curr_request->execNextEsim();
     }
 }

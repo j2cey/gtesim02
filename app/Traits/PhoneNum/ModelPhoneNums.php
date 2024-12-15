@@ -15,8 +15,7 @@ trait ModelPhoneNums
      */
     public function modelPhoneNumQuery(string $searchQuery = null, string $model_class = null, int $model_id = null): Builder
     {
-        $builder = PhoneNum::query()
-            ->with(["hasphonenum","creator","esim"]);
+        $builder = PhoneNum::query()->with(["hasphonenum","creator","esim"]);
         if ( ! is_null($model_class) ) {
             $builder->where('hasphonenum_type', $model_class);
         }

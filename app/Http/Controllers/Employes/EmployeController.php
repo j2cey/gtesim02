@@ -35,7 +35,7 @@ class EmployeController extends Controller
      */
     public function index()
     {
-        $employe = Employe::query()
+        $employes = Employe::query()
             ->when(request('query'), function ($query, $searchQuery) {
                 $query->where('nom', 'like', "%{$searchQuery}%")
                     ->orWhere('prenom', 'like', "%{$searchQuery}%")
@@ -48,7 +48,7 @@ class EmployeController extends Controller
             ->latest()
             ->paginate(50);
 
-        return EmployeResource::collection( $employe );
+        return EmployeResource::collection( $employes );
     }
 
     /**

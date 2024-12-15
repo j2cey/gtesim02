@@ -208,6 +208,12 @@ onUnmounted(() => {
                                     <p>Nouveau</p>
                                 </router-link>
                             </li>
+                            <li v-if="can('arisstatuses-list')" class="nav-item">
+                                <router-link to="/arisstatuses" active-class="active" class="nav-link text text-xs font-weight-lighter">
+                                    <i class="fas fa-list nav-icon text-success text-xs"></i>
+                                    <p>Statuts ARIS</p>
+                                </router-link>
+                            </li>
                         </ul>
                     </li>
 

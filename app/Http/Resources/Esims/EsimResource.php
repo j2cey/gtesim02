@@ -46,6 +46,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *
  * @property mixed $arisstatuses
  * @property ArisStatus $latestarisstatus
+ * @property ArisStatus $lastarisstatus
  *
  * @property Status $status
  *
@@ -91,6 +92,7 @@ class EsimResource extends JsonResource
 
             'arisstatuses' => $this->arisstatuses,
             'latestarisstatus' => $this->latestarisstatus,
+            'lastarisstatus' => $this->lastarisstatus,
 
             'status' => $this->status,
             'modelclass' => Esim::class,

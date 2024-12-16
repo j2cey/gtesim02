@@ -76,13 +76,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property-read \App\Models\Status|null $status
  *
  * @property EsimState|null $lateststate latest esim state
+ * @property PhoneNum|null $phonenum
  */
 class Esim extends BaseModel implements IsBaseModel, Auditable
 {
+    // TODO: Track esim on status 'Atribution'
+
     use HasFactory, SoftDeletes, \OwenIt\Auditing\Auditable;
 
     protected $guarded = [];
-    protected $with = ['qrcode'];
+    protected $with = ['qrcode','latestarisstatus'];
 
     public const CONFIG_DIR = "esim_fichier_qrcode";
 
@@ -232,8 +235,7 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
     public function setStatutFree() {
         if ( ! $this->phonenum ) {
             $esim_nouveau_statut = StatutEsim::where('code', "nouveau")->first();
-            $this->statutesim()->associate($esim_nouveau_statut);
-            $this->save();
+            $this->statutesim()->associate($esim_nouveau_statut)->save();
         }
     }
 

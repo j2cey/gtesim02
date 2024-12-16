@@ -13,6 +13,7 @@ use App\Enums\Settings\Branches\Treatment;
 use App\Enums\Settings\Branches\ReportFile;
 use App\Enums\Settings\Branches\JobBatches;
 use App\Enums\Settings\Branches\Pagination;
+use App\Enums\Settings\Branches\ArisRequest;
 use App\Enums\Settings\Branches\LogTreatments;
 use App\Enums\Settings\Branches\ReportFileType;
 use App\Enums\Settings\Branches\TreatmentArchive;
@@ -73,5 +74,9 @@ class Settings
     }
     public static function CollectedReportFile() {
         return new CollectedReportFile();
+    }
+
+    public static function ArisRequest() {
+        return new ArisRequest();
     }
 }

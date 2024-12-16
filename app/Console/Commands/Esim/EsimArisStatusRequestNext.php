@@ -3,6 +3,7 @@
 namespace App\Console\Commands\Esim;
 
 use Illuminate\Console\Command;
+use App\Jobs\ArisStatusRequestJob;
 use App\Models\Aris\ArisStatusRequest;
 
 class EsimArisStatusRequestNext extends Command
@@ -26,11 +27,14 @@ class EsimArisStatusRequestNext extends Command
      */
     public function handle()
     {
-        $curr_request = ArisStatusRequest::whereRequestStatus( ArisStatusRequest::$STATUS_CODE_WAITING )->orderBy('id', 'asc')->first();
-        if ( ! $curr_request ) {
-            ArisStatusRequest::startNew();
-        } else {
-            $curr_request->execNextEsim();
+        if ( ArisStatusRequest::isRequestsActivated() ) {
+            $curr_request = ArisStatusRequest::whereRequestStatus(ArisStatusRequest::$STATUS_CODE_WAITING)->orderBy('id', 'asc')->first();
+            if ($curr_request) {
+                //$curr_request->execNextEsim();
+                ArisStatusRequestJob::dispatch($curr_request);
+            } else {
+                ArisStatusRequest::startNew();
+            }
         }
     }
 }

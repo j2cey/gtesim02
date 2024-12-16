@@ -15,9 +15,9 @@ trait ArisStatusCode
     }
 
     public static function unFormatStatus(string $status) {
-        if( strpos(strtolower( $status ), "utilisé") || strpos(strtolower( $status ), "utilise") ) {
+        if( strtolower( $status ) === "utilisé" || strtolower( $status ) === "utilise" ) {
             return "U";
-        } else if ( strpos(strtolower( $status ), "libre") ) {
+        } else if ( strtolower( $status ) === "libre" ) {
             return "A";
         }
         return "";

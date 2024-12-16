@@ -5,7 +5,6 @@ namespace App\Models\Aris;
 use GuzzleHttp\Client;
 use App\Models\Esims\Esim;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
@@ -28,6 +27,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  *
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
+ * @property Carbon|null $last_queueing_start_at
+ * @property Carbon|null $last_queueing_end_at
+ * @property int|null $last_queueing_job_id
  */
 class ArisStatusRequest extends Model
 {
@@ -37,7 +40,8 @@ class ArisStatusRequest extends Model
 
     public static int $STATUS_CODE_WAITING = 2;
     public static int $STATUS_CODE_BUSY = 3;
-    public static int $MAX_ESIMS_BY_REQUEST = 100;
+    public static int $STATUS_CODE_QUEUEING = 4;
+    //public static int $MAX_ESIMS_BY_REQUEST = 100;
     public static string $SUCCESS_MESSAGE = "Success";
 
     #region Validation Rules
@@ -68,6 +72,10 @@ class ArisStatusRequest extends Model
             return null;
         }
 
+        if ( ArisStatusRequest::whereRequestStatus( self::$STATUS_CODE_WAITING )->count() === self::getMaxRunningRequests() ) {
+            return null;
+        }
+
         $last_request = ArisStatusRequest::orderBy('id', 'desc')->first();
         $arisstatusrequest = New ArisStatusRequest();
 
@@ -92,7 +100,22 @@ class ArisStatusRequest extends Model
         $this->save();
     }
 
+    public function setQueueing(string $job_id = null) {
+        $this->request_status = self::$STATUS_CODE_QUEUEING;
+        $this->last_queueing_start_at = Carbon::now();
+        if ( ! is_null($job_id) ) {
+            $this->last_queueing_job_id = $job_id;
+        }
+        $this->save();
+    }
+
+    public function endQueueing() {
+        $this->last_queueing_end_at = Carbon::now();
+        $this->save();
+    }
+
     public function setNextEsimsInterval(ArisStatusRequest $last_request = null) {
+
         if ( is_null($last_request) ) {
             $min_esim_id = 1;
         } else {
@@ -111,7 +134,7 @@ class ArisStatusRequest extends Model
         }
 
         $this->min_esim_id = $min_esim_id;
-        $this->max_esim_id = Esim::where('id', '>=', $min_esim_id + ArisStatusRequest::$MAX_ESIMS_BY_REQUEST)->orderBy('id', 'asc')->first()->id;
+        $this->max_esim_id = Esim::where('id', '>=', $min_esim_id + ArisStatusRequest::getMaxEsimsByRequest())->orderBy('id', 'asc')->first()->id;
 
         $this->save();
     }
@@ -127,7 +150,11 @@ class ArisStatusRequest extends Model
 
         $next_esim = Esim::whereBetween('id', [$this->last_requested_esim_id + 1, $this->max_esim_id])->orderBy('id', 'asc')->first();
 
-        $exec_result = self::execEsim($next_esim);
+        if ($next_esim->id < $this->last_requested_esim_id) {
+            $next_esim = Esim::find($this->last_requested_esim_id);
+        }
+
+        $exec_result = self::execEsim($next_esim, $this->id);
 
         if ( $exec_result['message'] === self::$SUCCESS_MESSAGE ) {
             $this->last_requested_esim_id = $next_esim->id;
@@ -148,7 +175,7 @@ class ArisStatusRequest extends Model
         $this->save();
     }
 
-    public static function execEsim(Esim $esim)
+    public static function execEsim(Esim $esim, $request_id)
     {
         $result_message = self::$SUCCESS_MESSAGE;
         $response_code = 0;
@@ -166,7 +193,7 @@ class ArisStatusRequest extends Model
             $data = [
                 'iccid' => $esim->iccid,
                 'imsi' => $esim->imsi,
-                'request_id' => $esim->id,
+                'request_id' => $request_id,
             ];
 
             // POST request using the created object
@@ -194,6 +221,20 @@ class ArisStatusRequest extends Model
             }
             return ['response_code' => $response_code, 'message' => $result_message];
         }
+    }
+
+    public static function getMaxEsimsByRequest() {
+        return config('Settings.arisrequest.max_esims.status');
+    }
+    public static function getMaxRunningRequests() {
+        return config('Settings.arisrequest.max_running.status');
+    }
+    public static function isRequestsActivated() {
+        return config('Settings.arisrequest.activate');
+    }
+
+    public static function getById(int $id) : ?ArisStatusRequest {
+        return ArisStatusRequest::find($id);
     }
     #endregion
 }

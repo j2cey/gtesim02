@@ -208,7 +208,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/esims/{user}/attributed', [EsimController::class, 'esimsattributed']);
     Route::get('/api/esims/{esim}/edit', [EsimController::class, 'edit']);
     Route::get('/api/esims/{esimid?}/pickup', [EsimController::class, 'pickup'])->name('esims.pickup');
-    Route::get('/api/esims/{esimid}/release', [EsimController::class, 'release'])->name('esims.release');
+    Route::get('/api/esims/{esim}/release', [EsimController::class, 'release'])->name('esims.release');
     Route::post('/api/esims/', [EsimController::class, 'store']);
     Route::put('/api/esims/{esim}', [EsimController::class, 'update']);
     Route::delete('/api/esims/{esim}', [EsimController::class, 'destroy']);

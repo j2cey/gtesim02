@@ -22,6 +22,8 @@ class ManageUserActivated implements ShouldQueue
      */
     public function __construct(User $user, string $pwd = null)
     {
+        $this->onQueue('users');
+
         $this->user_id = $user->id;
         $this->pwd = $pwd;
     }

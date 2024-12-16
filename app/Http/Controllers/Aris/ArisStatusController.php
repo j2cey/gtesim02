@@ -20,6 +20,11 @@ class ArisStatusController extends Controller
      */
     public function index()
     {
+        if (request('query')) {
+            $arisstatuscode = self::unFormatStatus(request('query'));
+        } else {
+            $arisstatuscode = "";
+        }
         $arisstatuses = ArisStatus::query()
             ->when(request('query'), function ($query, $searchQuery) {
                 $arisstatuscode = self::unFormatStatus($searchQuery);
@@ -30,6 +35,8 @@ class ArisStatusController extends Controller
             })
             ->latest()
             ->paginate(50);
+
+        //dd($arisstatuses->ddRawSql());
 
         return ArisStatusResource::collection( $arisstatuses );
     }

@@ -21,6 +21,8 @@ class ClientEsimSendMailJob implements ShouldQueue
      */
     public function __construct(PhoneNum $phonenum)
     {
+        $this->onQueue('emails');
+
         $this->phonenum_id = $phonenum->id;
     }
 

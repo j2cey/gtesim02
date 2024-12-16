@@ -22,7 +22,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('how_to_threads', function (Blueprint $table) {
-            $table->dropColumn('image');
+            if (Schema::hasColumn('how_to_threads', 'image')) {
+                $table->dropColumn('image');
+            }
         });
     }
 };

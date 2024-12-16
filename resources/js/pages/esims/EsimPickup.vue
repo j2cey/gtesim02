@@ -54,7 +54,7 @@ const pickupCanceled = () => {
                     <p><span v-show="esimStore.esimpicked" class="text text-xs text-danger font-weight-bold">Valider Cette ESIM ?</span></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-xs btn-secondary" @click.prevent="emit('pickupCanceled')">Annuler</button>
+                    <button type="button" class="btn btn-xs btn-secondary" @click.prevent="pickupCanceled">Annuler</button>
                     <button @click.prevent="esimStore.pickupEsim()" type="button" class="btn btn-xs btn-warning" :disabled="esimStore.loadingesim">
                         <span v-if="esimStore.loadingesim" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                         Re-Selectionner

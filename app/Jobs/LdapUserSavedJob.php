@@ -20,6 +20,8 @@ class LdapUserSavedJob implements ShouldQueue
      */
     public function __construct($ldap_user_id)
     {
+        $this->onQueue('ldap');
+
         $this->ldap_user_id = $ldap_user_id;
     }
 

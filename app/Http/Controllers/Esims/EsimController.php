@@ -56,7 +56,7 @@ class EsimController extends Controller
                     ->orWhereHas('statutesim', function ($query) use ($searchQuery) {
                         $query->where( 'code', 'like', '%'.$searchQuery.'%' );
                     })
-                    ->orWhereHas('lastarisstatus', function ($query) use ($searchQuery) {
+                    ->orWhereHas('latestarisstatus', function ($query) use ($searchQuery) {
                         $arisstatuscode = self::unFormatStatus($searchQuery);
                         $query->where( 'status', 'like', "%{$arisstatuscode}%" );
                     })
@@ -65,6 +65,8 @@ class EsimController extends Controller
             ->with("statutesim")
             ->latest()
             ->paginate(50);
+
+        //dd($esims->ddRawSql());
 
         return EsimResource::collection( $esims );
     }
@@ -79,7 +81,7 @@ class EsimController extends Controller
                         ->orWhereHas('statutesim', function ($query) use ($searchQuery) {
                             $query->where( 'code', 'like', '%'.$searchQuery.'%' );
                         })
-                        ->orWhereHas('lastarisstatus', function ($query) use ($searchQuery) {
+                        ->orWhereHas('latestarisstatus', function ($query) use ($searchQuery) {
                             $arisstatuscode = self::unFormatStatus($searchQuery);
                             $query->where( 'status', 'like', "%{$arisstatuscode}%" );
                         })

@@ -324,10 +324,14 @@ class ArisStatusRequest extends Model
             ->sum( 'requests_waiting_result_count' );
         $max_waiting_requests = ArisStatusRequest::getMaxWaitingRequests();
 
-        Log::info("requests_waiting_result_count - all: " . $requests_waiting_result_count_all);
-        Log::info("getMaxWaitingRequests: " . $max_waiting_requests);
+        $result = ( $requests_waiting_result_count_all >= $max_waiting_requests );
 
-        return ( $requests_waiting_result_count_all >= $max_waiting_requests );
+        if ( $result ) {
+            Log::info("ArisStatusRequest - Max Waiting Reached !");
+            Log::info("MaxWaitingRequests Treshold: " . $max_waiting_requests . ", requests waiting All count: " . $requests_waiting_result_count_all);
+        }
+
+        return $result;
     }
 
     public static function getById(int $id) : ?ArisStatusRequest {

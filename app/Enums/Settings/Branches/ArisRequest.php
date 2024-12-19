@@ -35,6 +35,6 @@ class ArisRequest extends SettingNode
         $max_retries->addChild("status", "10", "integer", "nombre max de tentatives de Requêtes de Statut.");
 
         $max_retries = $this->addChild("max_waiting", "10", "integer", "nombre max de Requêtes en attente.");
-        $max_retries->addChild("status", "10", "integer", "nombre max de Requêtes de Statut en attente.");
+        $max_retries->addChild("status", "200", "integer", "nombre max de Requêtes de Statut en attente autorisé.");
     }
 }

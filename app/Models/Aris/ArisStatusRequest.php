@@ -5,6 +5,7 @@ namespace App\Models\Aris;
 use GuzzleHttp\Client;
 use App\Models\Esims\Esim;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
@@ -86,7 +87,7 @@ class ArisStatusRequest extends Model
             return null;
         }
 
-        if ( ArisStatusRequest::whereRequestStatus( self::$STATUS_CODE_WAITING )->sum('requests_waiting_result_count') >= self::getMaxWaitingRequests() ) {
+        if ( self::isMaxWaitingReached() ) {
             return null;
         }
 
@@ -162,33 +163,38 @@ class ArisStatusRequest extends Model
     }
 
     public function execNextEsim() {
+
         $this->setBusy();
 
-        $next_esim = Esim::whereBetween('id', [$this->last_requested_esim_id + 1, $this->max_esim_id])->orderBy('id', 'asc')->first();
-
-        if ($next_esim->id < $this->last_requested_esim_id) {
-            $next_esim = Esim::find($this->last_requested_esim_id);
-        }
-
-        $exec_result = self::execEsim($next_esim, $this->id);
-
-        if ( $exec_result['message'] === self::$SUCCESS_MESSAGE ) {
-            $this->last_requested_esim_id = $next_esim->id;
-        } else {
-            $this->request_status = -1;
-        }
-
-        $this->last_response_code = $exec_result['response_code'];
-        $this->request_message = $exec_result['message'];
-
-        if ($this->last_requested_esim_id === $this->max_esim_id) {
-            $this->end_at = Carbon::now();
-            $this->request_status = 1;
-        } else {
+        if ( self::isMaxWaitingReached() ) {
             $this->setWaiting();
-        }
+        } else {
+            $next_esim = Esim::whereBetween('id', [$this->last_requested_esim_id + 1, $this->max_esim_id])->orderBy('id', 'asc')->first();
 
-        $this->incrementRequestsSentCount(1, false);
+            if ($next_esim->id < $this->last_requested_esim_id) {
+                $next_esim = Esim::find($this->last_requested_esim_id);
+            }
+
+            $exec_result = self::execEsim($next_esim, $this->id);
+
+            if ($exec_result['message'] === self::$SUCCESS_MESSAGE) {
+                $this->last_requested_esim_id = $next_esim->id;
+            } else {
+                $this->request_status = -1;
+            }
+
+            $this->last_response_code = $exec_result['response_code'];
+            $this->request_message = $exec_result['message'];
+
+            if ($this->last_requested_esim_id === $this->max_esim_id) {
+                $this->end_at = Carbon::now();
+                $this->request_status = 1;
+            } else {
+                $this->setWaiting();
+            }
+
+            $this->incrementRequestsSentCount(1, false);
+        }
 
         $this->save();
     }
@@ -308,6 +314,20 @@ class ArisStatusRequest extends Model
     }
     public static function getMaxWaitingRequests() {
         return config('Settings.arisrequest.max_waiting.status');
+    }
+
+    public static function isMaxWaitingReached(): bool {
+        $requests_waiting_result_count_all = ArisStatusRequest::
+            where( 'request_status', ArisStatusRequest::$STATUS_CODE_WAITING )
+            ->orWhere( 'request_status', ArisStatusRequest::$STATUS_CODE_QUEUEING )
+            ->orWhere( 'request_status', ArisStatusRequest::$STATUS_CODE_BUSY )
+            ->sum( 'requests_waiting_result_count' );
+        $max_waiting_requests = ArisStatusRequest::getMaxWaitingRequests();
+
+        Log::info("requests_waiting_result_count - all: " . $requests_waiting_result_count_all);
+        Log::info("getMaxWaitingRequests: " . $max_waiting_requests);
+
+        return ( $requests_waiting_result_count_all >= $max_waiting_requests );
     }
 
     public static function getById(int $id) : ?ArisStatusRequest {

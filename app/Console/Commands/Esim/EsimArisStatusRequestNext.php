@@ -4,6 +4,7 @@ namespace App\Console\Commands\Esim;
 
 use Illuminate\Console\Command;
 use App\Jobs\ArisStatusRequestJob;
+use Illuminate\Support\Facades\Log;
 use App\Models\Aris\ArisStatusRequest;
 
 class EsimArisStatusRequestNext extends Command

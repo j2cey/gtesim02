@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\QueueEnum;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\SerializesModels;
@@ -21,7 +22,7 @@ class ArisStatusRequestJob implements ShouldQueue
      */
     public function __construct(ArisStatusRequest $arisstatusrequest)
     {
-        $this->onQueue('aris_status_request');
+        $this->onQueue(QueueEnum::ARISSTATUSREQUEST->value);
 
         $arisstatusrequest->setQueueing();
         $this->arisstatusrequest_id = $arisstatusrequest->id;

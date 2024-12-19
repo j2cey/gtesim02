@@ -18,9 +18,6 @@ enum QueueEnum: string
     #[Description('Update Progression')]
     case PROGRESSION = 'progression';
 
-    #[Description('Treatment Starting or Ending')]
-    case TREATMENTSTARTEND = 'treatmentstartend';
-
     #[Description('Execution de Listeners')]
     case LISTENER = 'listener';
 
@@ -28,8 +25,8 @@ enum QueueEnum: string
     case MAIN = 'main';
 
 
-    #[Description('Telechargement Fichiers')]
-    case DOWNLOADFILE = 'downloadfile';
+    #[Description('Traitement des Requetes de Statut ARIS')]
+    case ARISSTATUSREQUEST = 'aris_status_request';
 
     #[Description('Importation Lignes Fichier')]
     case IMPORTFILE = 'importfile';
@@ -39,7 +36,4 @@ enum QueueEnum: string
 
     #[Description('Merge des Lignes formatees de Fichier')]
     case MERGEFILE = 'mergefile';
-
-    #[Description('Notifie les Fichiers')]
-    case NOTIFYFILE = 'notifyfile';
 }

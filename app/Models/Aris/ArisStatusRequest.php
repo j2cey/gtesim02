@@ -31,6 +31,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property Carbon|null $last_queueing_start_at
  * @property Carbon|null $last_queueing_end_at
  * @property int|null $last_queueing_job_id
+ *
+ * @property int|null $requests_to_send_count
+ * @property int|null $requests_sent_count
+ * @property int|null $requests_sent_rate
+ *
+ * @property int|null $requests_waiting_result_count
+ * @property int|null $requests_waiting_result_rate
+ *
+ * @property int|null $requests_received_count
+ * @property int|null $requests_received_rate
  */
 class ArisStatusRequest extends Model
 {
@@ -76,11 +86,17 @@ class ArisStatusRequest extends Model
             return null;
         }
 
+        if ( ArisStatusRequest::whereRequestStatus( self::$STATUS_CODE_WAITING )->sum('requests_waiting_result_count') >= self::getMaxWaitingRequests() ) {
+            return null;
+        }
+
         $last_request = ArisStatusRequest::orderBy('id', 'desc')->first();
         $arisstatusrequest = New ArisStatusRequest();
 
         $arisstatusrequest->setStarted();
         $arisstatusrequest->setNextEsimsInterval($last_request);
+
+        $arisstatusrequest->setRequestsToSendCount();
 
         return $arisstatusrequest;
     }
@@ -172,12 +188,15 @@ class ArisStatusRequest extends Model
             $this->setWaiting();
         }
 
+        $this->incrementRequestsSentCount(1, false);
+
         $this->save();
     }
 
     public static function execEsim(Esim $esim, $request_id)
     {
         $result_message = self::$SUCCESS_MESSAGE;
+        $response_url = "http://gtesimtest.moov-africa.ga/api/arisstatuses";
         $response_code = 0;
         try {
             //Create Client object to deal with
@@ -194,6 +213,7 @@ class ArisStatusRequest extends Model
                 'iccid' => $esim->iccid,
                 'imsi' => $esim->imsi,
                 'request_id' => $request_id,
+                'response_url' => $response_url,
             ];
 
             // POST request using the created object
@@ -223,6 +243,60 @@ class ArisStatusRequest extends Model
         }
     }
 
+    public function setRequestsToSendCount(bool $save = true) {
+        $requests_to_send_count = 0;
+        for ($i = $this->min_esim_id; $i <= $this->max_esim_id; $i++) {
+            $requests_to_send_count += Esim::find($i) ? 1 : 0;
+        }
+
+        $this->requests_to_send_count = $requests_to_send_count;
+        if ( $save ) {
+            $this->save();
+        }
+    }
+    public function incrementRequestsSentCount(int $nb_requests = 1, bool $save = true) {
+        $this->requests_sent_count += $nb_requests;
+        $this->setRequestsSentRate($save);
+
+        $this->setRequestsWaitingResultCount($save);
+    }
+    public function setRequestsSentRate(bool $save = true) {
+        if ($this->requests_to_send_count > 0) {
+            $this->requests_sent_rate = round(($this->requests_sent_count / $this->requests_to_send_count) * 100, 2);
+            if ($save) {
+                $this->save();
+            }
+        }
+    }
+
+    public function setRequestsWaitingResultCount(bool $save = true) {
+        $this->requests_waiting_result_count = $this->requests_sent_count - $this->requests_received_count;
+        $this->setRequestsWaitingResultRate($save);
+    }
+    public function setRequestsWaitingResultRate(bool $save = true) {
+        if ($this->requests_sent_count > 0) {
+            $this->requests_waiting_result_rate = round(($this->requests_waiting_result_count / $this->requests_sent_count) * 100, 2);
+            if ($save) {
+                $this->save();
+            }
+        }
+    }
+
+    public function incrementRequestsReceivedCount(int $nb_requests = 1, bool $save = true) {
+        $this->requests_received_count += $nb_requests;
+        $this->setRequestsReceivedRate($save);
+
+        $this->setRequestsWaitingResultCount($save);
+    }
+    public function setRequestsReceivedRate(bool $save = true) {
+        if ($this->requests_to_send_count > 0) {
+            $this->requests_received_rate = round(($this->requests_received_count / $this->requests_to_send_count) * 100, 2);
+            if ($save) {
+                $this->save();
+            }
+        }
+    }
+
     public static function getMaxEsimsByRequest() {
         return config('Settings.arisrequest.max_esims.status');
     }
@@ -231,6 +305,9 @@ class ArisStatusRequest extends Model
     }
     public static function isRequestsActivated() {
         return config('Settings.arisrequest.activate');
+    }
+    public static function getMaxWaitingRequests() {
+        return config('Settings.arisrequest.max_waiting.status');
     }
 
     public static function getById(int $id) : ?ArisStatusRequest {

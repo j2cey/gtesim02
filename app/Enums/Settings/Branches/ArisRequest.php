@@ -12,6 +12,7 @@ use App\Enums\Settings\SettingNode;
  * @method max_esims()
  * @method max_running()
  * @method max_retries()
+ * @method max_waiting()
  * @method formatcolumns()
  */
 class ArisRequest extends SettingNode
@@ -32,5 +33,8 @@ class ArisRequest extends SettingNode
 
         $max_retries = $this->addChild("max_retries", "10", "integer", "nombre max de tentatives de Requête.");
         $max_retries->addChild("status", "10", "integer", "nombre max de tentatives de Requêtes de Statut.");
+
+        $max_retries = $this->addChild("max_waiting", "10", "integer", "nombre max de Requêtes en attente.");
+        $max_retries->addChild("status", "10", "integer", "nombre max de Requêtes de Statut en attente.");
     }
 }

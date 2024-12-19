@@ -130,8 +130,9 @@ class ArisStatus extends Model
         }
 
         if ( ! is_null($request_id) ) {
-            $statusrequest = ArisStatusRequest::whereId($request_id)->first();
+            $statusrequest = ArisStatusRequest::getById($request_id);
             if ($statusrequest) {
+                $statusrequest->incrementRequestsReceivedCount();
                 $arisstatus->statusrequest()->associate($statusrequest)->save();
             }
         }

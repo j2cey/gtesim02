@@ -6,6 +6,7 @@ use App\Models\Setting;
 use App\Events\LdapUserSaved;
 use App\Listeners\FormatLdapUser;
 use App\Events\UserActivatedEvent;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use App\Events\ClientEsimCreatedEvent;
 use Illuminate\Support\ServiceProvider;

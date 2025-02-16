@@ -25,7 +25,7 @@ return new class extends Migration
             $table->integer('max_esim_id')->nullable()->comment('max esim id requested');
             $table->integer('request_status')->default(0)->comment('request status: 0 -> not done; 2 -> running; 1 -> done; < 0 -> ERROR');
             $table->integer('last_response_code')->nullable()->comment('last response code');
-            $table->string('request_message', 500)->nullable()->comment('request message');
+            $table->longText('request_message')->nullable()->comment('request message');
 
             $table->timestamp('start_at')->nullable()->comment('request start date');
             $table->timestamp('end_at')->nullable()->comment('request end date');

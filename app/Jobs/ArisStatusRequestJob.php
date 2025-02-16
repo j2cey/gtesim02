@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Throwable;
 use App\Enums\QueueEnum;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -44,5 +45,14 @@ class ArisStatusRequestJob implements ShouldQueue
         } else {
             Log::error("ArisStatusRequestJob - ArisStatusRequest Model (" . $this->arisstatusrequest_id . ") NOT FOUND !");
         }
+    }
+
+    /**
+     * Handle a job failure.
+     */
+    public function failed(?Throwable $exception): void
+    {
+        $arisstatusrequest = ArisStatusRequest::getById($this->arisstatusrequest_id);
+        $arisstatusrequest->setWaiting();
     }
 }

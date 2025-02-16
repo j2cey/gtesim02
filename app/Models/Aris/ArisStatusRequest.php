@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property int|null $min_esim_id
  * @property int $last_requested_esim_id
  * @property int|null $max_esim_id
+ * @property int $prev_request_status
  * @property int $request_status
  * @property int $last_response_code
  * @property Carbon|null $start_at
@@ -52,8 +53,9 @@ class ArisStatusRequest extends Model
     public static int $STATUS_CODE_WAITING = 2;
     public static int $STATUS_CODE_BUSY = 3;
     public static int $STATUS_CODE_QUEUEING = 4;
-    //public static int $MAX_ESIMS_BY_REQUEST = 100;
     public static string $SUCCESS_MESSAGE = "Success";
+    public static int $STATUS_CODE_SUCCESS = 1;
+    public static int $STATUS_CODE_FAIL = -1;
 
     #region Validation Rules
 
@@ -79,15 +81,20 @@ class ArisStatusRequest extends Model
     #region Custom Functions
     public static function startNew(): ?ArisStatusRequest
     {
-        if ( ArisStatusRequest::whereRequestStatus( self::$STATUS_CODE_WAITING )->count() > 0 ) {
+        /*if ( ArisStatusRequest::whereRequestStatus( self::$STATUS_CODE_WAITING )->count() > 0 ) {
+            return null;
+        }*/
+        if ( ArisStatusRequestStat::isThereRequestsToBeProcessed() ) {
+            return null;
+        }
+        /*if ( ArisStatusRequest::whereRequestStatus( self::$STATUS_CODE_WAITING )->count() === self::getMaxRunningRequests() ) {
+            return null;
+        }*/
+        if ( ArisStatusRequestStat::isMaxRequestsToBeProcessedReached() ) {
             return null;
         }
 
-        if ( ArisStatusRequest::whereRequestStatus( self::$STATUS_CODE_WAITING )->count() === self::getMaxRunningRequests() ) {
-            return null;
-        }
-
-        if ( self::isMaxWaitingReached() ) {
+        if ( ArisStatusRequestStat::isMaxWaitingRequestsReached() ) {
             return null;
         }
 
@@ -98,38 +105,86 @@ class ArisStatusRequest extends Model
         $arisstatusrequest->setNextEsimsInterval($last_request);
 
         $arisstatusrequest->setRequestsToSendCount();
+        ArisStatusRequestStat::incrementRequestsToSendCount( $arisstatusrequest->requests_to_send_count );
 
         return $arisstatusrequest;
     }
 
+    #region Manage Status
+    private function setPrevStatus(bool $save = true) {
+        $this->prev_request_status = is_null( $this->request_status ) ? 0 : $this->request_status;
+        if ( $save ) {
+            $this->save();
+        }
+    }
+    private function setStatus($newvalue, bool $save = true) {
+        Log::error("ArisStatusRequest - Change Status - PREV: " . $this->prev_request_status . ". From ( " . $this->request_status . " ) To ( " . $newvalue . " )");
+        $this->setPrevStatus(false);
+        $this->request_status = $newvalue;
+        if ( $save ) {
+            $this->save();
+        }
+    }
     public function setStarted() {
-        $this->request_status = self::$STATUS_CODE_WAITING;
         $this->start_at = Carbon::now();
         $this->save();
+
+        if ( $this->request_status !== self::$STATUS_CODE_WAITING ) {
+            $this->setStatus(self::$STATUS_CODE_WAITING);
+            ArisStatusRequestStat::incrementWaitingRequestsCount();
+        }
     }
     public function setWaiting() {
-        $this->request_status = self::$STATUS_CODE_WAITING;
-        $this->save();
-    }
+        if ( $this->request_status !== self::$STATUS_CODE_WAITING ) {
+            $this->setStatus(self::$STATUS_CODE_WAITING);
 
-    public function setBusy() {
-        $this->request_status = self::$STATUS_CODE_BUSY;
-        $this->save();
-    }
-
-    public function setQueueing(string $job_id = null) {
-        $this->request_status = self::$STATUS_CODE_QUEUEING;
-        $this->last_queueing_start_at = Carbon::now();
-        if ( ! is_null($job_id) ) {
-            $this->last_queueing_job_id = $job_id;
+            ArisStatusRequestStat::incrementWaitingRequestsCount();
+            $this->decrementStatPreviousStatusRequests();
         }
-        $this->save();
     }
+    public function setBusy() {
+        if ( $this->request_status !== self::$STATUS_CODE_BUSY ) {
+            $this->setStatus(self::$STATUS_CODE_BUSY);
 
+            ArisStatusRequestStat::incrementRequestsBusyCount();
+            $this->decrementStatPreviousStatusRequests();
+        }
+    }
+    public function setQueueing(string $job_id = null) {
+        if ( $this->request_status !== self::$STATUS_CODE_QUEUEING ) {
+            $this->setStatus(self::$STATUS_CODE_QUEUEING, false);
+
+            $this->last_queueing_start_at = Carbon::now();
+            if (!is_null($job_id)) {
+                $this->last_queueing_job_id = $job_id;
+            }
+            $this->save();
+
+            ArisStatusRequestStat::incrementRequestsQueueingCount();
+            $this->decrementStatPreviousStatusRequests();
+        }
+    }
     public function endQueueing() {
         $this->last_queueing_end_at = Carbon::now();
+        /*if ( $this->request_status === self::$STATUS_CODE_QUEUEING ) {
+            $this->setPrevStatus(false);
+            $this->decrementStatPreviousStatusRequests();
+        }*/
         $this->save();
     }
+    public function setSuccess(bool $save = true) {
+        if ( $this->request_status !== self::$STATUS_CODE_SUCCESS) {
+            $this->setStatus(self::$STATUS_CODE_SUCCESS);
+            $this->decrementStatPreviousStatusRequests();
+        }
+    }
+    public function setFail(bool $save = true) {
+        if ( $this->request_status !== self::$STATUS_CODE_FAIL ) {
+            $this->setStatus(self::$STATUS_CODE_FAIL);
+            $this->decrementStatPreviousStatusRequests();
+        }
+    }
+    #endregion
 
     public function setNextEsimsInterval(ArisStatusRequest $last_request = null) {
 
@@ -166,7 +221,7 @@ class ArisStatusRequest extends Model
 
         $this->setBusy();
 
-        if ( self::isMaxWaitingReached() ) {
+        if ( ArisStatusRequestStat::isMaxWaitingRequestsReached() ) {
             $this->setWaiting();
         } else {
             $next_esim = Esim::whereBetween('id', [$this->last_requested_esim_id + 1, $this->max_esim_id])->orderBy('id', 'asc')->first();
@@ -179,21 +234,21 @@ class ArisStatusRequest extends Model
 
             if ($exec_result['message'] === self::$SUCCESS_MESSAGE) {
                 $this->last_requested_esim_id = $next_esim->id;
+
+                if ($this->last_requested_esim_id === $this->max_esim_id) {
+                    $this->end_at = Carbon::now();
+                    $this->setSuccess();
+                } else {
+                    $this->setWaiting();
+                }
+
+                $this->incrementRequestsSentCount(1, false);
             } else {
-                $this->request_status = -1;
+                $this->setFail();
             }
 
             $this->last_response_code = $exec_result['response_code'];
             $this->request_message = $exec_result['message'];
-
-            if ($this->last_requested_esim_id === $this->max_esim_id) {
-                $this->end_at = Carbon::now();
-                $this->request_status = 1;
-            } else {
-                $this->setWaiting();
-            }
-
-            $this->incrementRequestsSentCount(1, false);
         }
 
         $this->save();
@@ -249,6 +304,7 @@ class ArisStatusRequest extends Model
         }
     }
 
+    #region Manage Requests Treatments
     public function setRequestsToSendCount(bool $save = true) {
         $requests_to_send_count = 0;
         for ($i = $this->min_esim_id; $i <= $this->max_esim_id; $i++) {
@@ -260,13 +316,17 @@ class ArisStatusRequest extends Model
             $this->save();
         }
     }
-    public function incrementRequestsSentCount(int $nb_requests = 1, bool $save = true) {
+    public function incrementRequestsSentCount(int $nb_requests = 1, bool $save = true): void
+    {
         $this->requests_sent_count += $nb_requests;
         $this->setRequestsSentRate($save);
 
         $this->setRequestsWaitingResultCount($save);
+
+        ArisStatusRequestStat::incrementRequestsSentCount($nb_requests);
     }
-    public function setRequestsSentRate(bool $save = true) {
+    public function setRequestsSentRate(bool $save = true): void
+    {
         if ($this->requests_to_send_count > 0) {
             $this->requests_sent_rate = round(($this->requests_sent_count / $this->requests_to_send_count) * 100, 2);
             if ($save) {
@@ -274,12 +334,12 @@ class ArisStatusRequest extends Model
             }
         }
     }
-
-    public function setRequestsWaitingResultCount(bool $save = true) {
+    public function setRequestsWaitingResultCount(bool $save = true): void {
         $this->requests_waiting_result_count = $this->requests_sent_count - $this->requests_received_count;
         $this->setRequestsWaitingResultRate($save);
     }
-    public function setRequestsWaitingResultRate(bool $save = true) {
+    public function setRequestsWaitingResultRate(bool $save = true): void
+    {
         if ($this->requests_sent_count > 0) {
             $this->requests_waiting_result_rate = round(($this->requests_waiting_result_count / $this->requests_sent_count) * 100, 2);
             if ($save) {
@@ -287,14 +347,17 @@ class ArisStatusRequest extends Model
             }
         }
     }
-
-    public function incrementRequestsReceivedCount(int $nb_requests = 1, bool $save = true) {
+    public function incrementRequestsReceivedCount(int $nb_requests = 1, bool $save = true): void
+    {
         $this->requests_received_count += $nb_requests;
         $this->setRequestsReceivedRate($save);
 
         $this->setRequestsWaitingResultCount($save);
+
+        ArisStatusRequestStat::incrementRequestsReceivedCount($nb_requests);
     }
-    public function setRequestsReceivedRate(bool $save = true) {
+    public function setRequestsReceivedRate(bool $save = true): void
+    {
         if ($this->requests_to_send_count > 0) {
             $this->requests_received_rate = round(($this->requests_received_count / $this->requests_to_send_count) * 100, 2);
             if ($save) {
@@ -302,37 +365,38 @@ class ArisStatusRequest extends Model
             }
         }
     }
+    #endregion
 
+    /**
+     * @return ArisStatusRequest|null
+     */
+    public static function getOneWaiting() : ?ArisStatusRequest {
+        return ArisStatusRequest::whereRequestStatus(ArisStatusRequest::$STATUS_CODE_WAITING)->orderBy('id', 'asc')->first();
+    }
+
+    #region Read Settings Values
     public static function getMaxEsimsByRequest() {
         return config('Settings.arisrequest.max_esims.status');
-    }
-    public static function getMaxRunningRequests() {
-        return config('Settings.arisrequest.max_running.status');
     }
     public static function isRequestsActivated() {
         return config('Settings.arisrequest.activate');
     }
-    public static function getMaxWaitingRequests() {
-        return config('Settings.arisrequest.max_waiting.status');
-    }
+    #endregion
 
-    public static function isMaxWaitingReached(): bool {
-        $requests_waiting_result_count_all = ArisStatusRequest::
-            where( 'request_status', ArisStatusRequest::$STATUS_CODE_WAITING )
-            ->orWhere( 'request_status', ArisStatusRequest::$STATUS_CODE_QUEUEING )
-            ->orWhere( 'request_status', ArisStatusRequest::$STATUS_CODE_BUSY )
-            ->sum( 'requests_waiting_result_count' );
-        $max_waiting_requests = ArisStatusRequest::getMaxWaitingRequests();
-
-        $result = ( $requests_waiting_result_count_all >= $max_waiting_requests );
-
-        if ( $result ) {
-            Log::info("ArisStatusRequest - Max Waiting Reached !");
-            Log::info("MaxWaitingRequests Treshold: " . $max_waiting_requests . ", requests waiting All count: " . $requests_waiting_result_count_all);
+    #region Manage Stats
+    private function decrementStatPreviousStatusRequests(int $nb_requests = 1): void
+    {
+        if ( $this->prev_request_status === self::$STATUS_CODE_WAITING ) {
+            ArisStatusRequestStat::decrementWaitingRequestsCount($nb_requests);
         }
-
-        return $result;
+        if ( $this->prev_request_status === self::$STATUS_CODE_BUSY ) {
+            ArisStatusRequestStat::decrementRequestsBusyCount($nb_requests);
+        }
+        if ( $this->prev_request_status === self::$STATUS_CODE_QUEUEING ) {
+            ArisStatusRequestStat::decrementRequestsQueueingCount($nb_requests);
+        }
     }
+    #endregion
 
     public static function getById(int $id) : ?ArisStatusRequest {
         return ArisStatusRequest::find($id);

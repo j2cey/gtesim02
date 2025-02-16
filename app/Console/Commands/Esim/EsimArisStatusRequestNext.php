@@ -29,7 +29,7 @@ class EsimArisStatusRequestNext extends Command
     public function handle()
     {
         if ( ArisStatusRequest::isRequestsActivated() ) {
-            $curr_request = ArisStatusRequest::whereRequestStatus(ArisStatusRequest::$STATUS_CODE_WAITING)->orderBy('id', 'asc')->first();
+            $curr_request = ArisStatusRequest::getOneWaiting();
             if ($curr_request) {
                 //$curr_request->execNextEsim();
                 ArisStatusRequestJob::dispatch($curr_request);

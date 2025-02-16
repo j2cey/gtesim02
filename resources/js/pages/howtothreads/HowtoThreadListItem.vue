@@ -56,7 +56,7 @@ onMounted(() => {
                 <a class="text text-xs" v-if="can('howtothreads-delete')" href="#" @click.prevent="$emit('confirmHowtothreadDeletion', howtothread)">
                     <i class="fa fa-trash-alt mr-2 text-danger font-weight-light"></i>
                 </a>
-                <router-link v-if="can('howtothreads-update')" :to="`/howtothreads/${howtothread.uuid}/read`">
+                <router-link v-if="can('howtothreads-read')" :to="`/howtothreads/${howtothread.uuid}/read`">
                     Lire <i class="fa fa-hand-point-right mr-2 font-weight-light"></i>
                 </router-link>
             </span>

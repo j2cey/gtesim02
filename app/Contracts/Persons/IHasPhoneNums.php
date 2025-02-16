@@ -20,6 +20,6 @@ interface IHasPhoneNums extends Auditable
 
     public function switchPhonenumsPosi(PhoneNum $switched_phonenum);
 
-    public function custumUpdateRules(array $current_rules): array;
-    public function custumUpdateRulesMessages(array $current_rules_messages): array;
+    public function customUpdateRules(array $current_rules): array;
+    public function customUpdateRulesMessages(array $current_rules_messages): array;
 }

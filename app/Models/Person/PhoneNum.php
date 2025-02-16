@@ -68,7 +68,7 @@ class PhoneNum extends BaseModel implements IsBaseModel, IHasEsim
         ]);
     }
 
-    public static function updateRules($model,$phone_number,$hasphonenum_type,IHasPhoneNums $hasphonenum) {
+    public static function updateRules($model,$phone_number,$hasphonenum_type, IHasPhoneNums|null $hasphonenum) {
         $default_rules = self::defaultRules();
         $default_rules['phone_number'][] = Rule::unique('phone_nums', 'phone_number')
             ->where(function ($query) use($phone_number,$hasphonenum_type,$model) {
@@ -79,7 +79,9 @@ class PhoneNum extends BaseModel implements IsBaseModel, IHasEsim
             })->ignore($model);
 
         // Add rules from hasphonenum, if any
-        $default_rules = $hasphonenum->custumUpdateRules($default_rules);
+        if ( ! is_null($hasphonenum) ) {
+            $default_rules = $hasphonenum->customUpdateRules($default_rules);
+        }
 
         return array_merge($default_rules, [
         ]);
@@ -95,7 +97,7 @@ class PhoneNum extends BaseModel implements IsBaseModel, IHasEsim
 
         // Add messages rules from hasphonenum, if any
         if ( ! is_null($hasphonenum) ) {
-            $messages = $hasphonenum->custumUpdateRulesMessages($messages);
+            $messages = $hasphonenum->customUpdateRulesMessages($messages);
         }
 
         return $messages;

@@ -106,7 +106,7 @@ abstract class Permissions
         return new BaseModelAction("howtos", null, $additionalactions);
     }
     public static function HowtoThread() : BaseModelAction {
-        $additionalactions = ['update-code' => 1,'add-step' => 1];
+        $additionalactions = ['update-code' => 1,'add-step' => 1,'read' => 1];
         return new BaseModelAction("howtothreads", null, $additionalactions);
     }
     public static function HowtoStep() : BaseModelAction {

@@ -19,3 +19,4 @@ yarn-error.log
 /.vscode
 /TipsAndTricks/github_token.md
 /dbbackups
+/public/uploads

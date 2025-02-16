@@ -52,6 +52,7 @@ const pickupNewEsim = () => {
 };
 const pickupNewEsimSaved = () => {
     $('#pickupEsimModal').modal('hide');
+    console.log("pickupNewEsimSaved, formMode.value: ", formMode.value, ", modeltype.value: ", modeltype.value)
     form.esim_id = esimStore.esimpicked.id;
     if (formMode.value === 'create' && modeltype.value === 'clientesims') {
         storePhoneNum();
@@ -105,6 +106,7 @@ const storePhoneNum = (values, actions) => {
             }).then(() => {
                 form.posi = response.data.posi;
                 phonenum.value = response.data;
+                console.log("storePhoneNum success, modeltype.value: ", modeltype.value)
                 if (modeltype.value === 'clientesims') {
                     window.location = '/clientesims.previewpdf/' + response.data?.phonenum.id;
                 }

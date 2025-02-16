@@ -248,12 +248,12 @@ class Employe extends BaseModel implements Auditable, IsBaseModel, IHasPhoneNums
         return $this->nom . " " . $this->prenom;
     }
 
-    public function custumUpdateRules(array $current_rules): array
+    public function customUpdateRules(array $current_rules): array
     {
         return $current_rules;
     }
 
-    public function custumUpdateRulesMessages(array $current_rules_messages): array
+    public function customUpdateRulesMessages(array $current_rules_messages): array
     {
         return $current_rules_messages;
     }

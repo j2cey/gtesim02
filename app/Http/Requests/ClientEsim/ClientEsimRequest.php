@@ -18,6 +18,7 @@ use Illuminate\Foundation\Http\FormRequest;
  * @property string $puk
  *
  * @property integer|null $esim_id
+ * @property ClientEsim|null $clientesim
  */
 
 class ClientEsimRequest extends FormRequest
@@ -51,6 +52,6 @@ class ClientEsimRequest extends FormRequest
      */
     public function messages()
     {
-        return ClientEsim::messagesRules();
+        return ClientEsim::messagesRules($this->clientesim);
     }
 }

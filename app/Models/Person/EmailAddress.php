@@ -100,6 +100,7 @@ class EmailAddress extends BaseModel implements IsBaseModel, Auditable
         $this->save();
 
         $this->hasemailaddress->switchEmailaddressesPosi($this);
+        $this->hasemailaddress->setEmailAddressList();
 
         return $this;
     }

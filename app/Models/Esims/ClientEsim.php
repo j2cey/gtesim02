@@ -232,4 +232,17 @@ class ClientEsim extends BaseModel implements IsBaseModel, IHasPhoneNums, IHasEm
     {
         return $this->nom_raison_sociale . " " . $this->prenom;
     }
+
+    public function custumUpdateRules(array $current_rules): array
+    {
+        $current_rules['phone_number'][] = ['starts_with:060,061,062,065,066'];
+
+        return $current_rules;
+    }
+
+    public function custumUpdateRulesMessages(array $current_rules_messages): array
+    {
+        $current_rules_messages['phone_number.starts_with'][] = 'Le numéro de téléphone doit commencer par 060,061,062,065,066';
+        return $current_rules_messages;
+    }
 }

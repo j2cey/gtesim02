@@ -68,7 +68,7 @@ class PhoneNum extends BaseModel implements IsBaseModel, IHasEsim
         ]);
     }
 
-    public static function updateRules($model,$phone_number,$hasphonenum_type) {
+    public static function updateRules($model,$phone_number,$hasphonenum_type,IHasPhoneNums $hasphonenum) {
         $default_rules = self::defaultRules();
         $default_rules['phone_number'][] = Rule::unique('phone_nums', 'phone_number')
             ->where(function ($query) use($phone_number,$hasphonenum_type,$model) {
@@ -78,17 +78,27 @@ class PhoneNum extends BaseModel implements IsBaseModel, IHasEsim
                 ;
             })->ignore($model);
 
+        // Add rules from hasphonenum, if any
+        $default_rules = $hasphonenum->custumUpdateRules($default_rules);
+
         return array_merge($default_rules, [
         ]);
     }
 
-    public static function messagesRules() {
-        return [
+    public static function messagesRules(IHasPhoneNums|null $hasphonenum) {
+        $messages = [
             'phone_number.required' => 'Numéro de téléphone requis',
             'phone_number.regex' => 'Numéro de téléphone non valide',
             'phone_number.min' => 'Numéro de téléphone doit avoir 8 digits minimum',
             'phone_number.unique' => 'Numéro déjà attribué',
         ];
+
+        // Add messages rules from hasphonenum, if any
+        if ( ! is_null($hasphonenum) ) {
+            $messages = $hasphonenum->custumUpdateRulesMessages($messages);
+        }
+
+        return $messages;
     }
 
     #endregion
@@ -118,6 +128,7 @@ class PhoneNum extends BaseModel implements IsBaseModel, IHasEsim
         $this->save();
 
         $this->hasphonenum->switchPhonenumsPosi($this);
+        $this->hasphonenum->setPhonenumList();
 
         return $this;
     }

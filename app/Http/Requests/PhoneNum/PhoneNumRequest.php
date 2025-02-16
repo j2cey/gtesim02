@@ -51,6 +51,6 @@ class PhoneNumRequest extends FormRequest
      */
     public function messages()
     {
-        return PhoneNum::messagesRules();
+        return PhoneNum::messagesRules($this->hasphonenum);
     }
 }

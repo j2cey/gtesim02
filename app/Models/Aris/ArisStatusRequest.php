@@ -85,16 +85,19 @@ class ArisStatusRequest extends Model
             return null;
         }*/
         if ( ArisStatusRequestStat::isThereRequestsToBeProcessed() ) {
+            Log::error("There are Requests To Be Processed !");
             return null;
         }
         /*if ( ArisStatusRequest::whereRequestStatus( self::$STATUS_CODE_WAITING )->count() === self::getMaxRunningRequests() ) {
             return null;
         }*/
         if ( ArisStatusRequestStat::isMaxRequestsToBeProcessedReached() ) {
+            Log::error("The Max Requests To Be Processed is Reached !");
             return null;
         }
 
         if ( ArisStatusRequestStat::isMaxWaitingRequestsReached() ) {
+            Log::error("The Max Waiting Requests is Reached !");
             return null;
         }
 
@@ -118,7 +121,7 @@ class ArisStatusRequest extends Model
         }
     }
     private function setStatus($newvalue, bool $save = true) {
-        Log::error("ArisStatusRequest - Change Status - PREV: " . $this->prev_request_status . ". From ( " . $this->request_status . " ) To ( " . $newvalue . " )");
+        Log::info("ArisStatusRequest - Change Status - PREV: " . $this->prev_request_status . ". From ( " . $this->request_status . " ) To ( " . $newvalue . " )");
         $this->setPrevStatus(false);
         $this->request_status = $newvalue;
         if ( $save ) {
@@ -257,7 +260,7 @@ class ArisStatusRequest extends Model
     public static function execEsim(Esim $esim, $request_id)
     {
         $result_message = self::$SUCCESS_MESSAGE;
-        $response_url = "http://gtesimtest.moov-africa.ga/api/arisstatuses";
+        $response_url = "http://gtesim.moov-africa.ga/api/arisstatuses";
         $response_code = 0;
         try {
             //Create Client object to deal with

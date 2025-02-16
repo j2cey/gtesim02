@@ -38,7 +38,7 @@ class AddClientEsimPhoneNumRequest extends FormRequest
     public function rules()
     {
         return [
-            'phone_number' => array_merge(PhoneNum::createRules($this->phone_number, ClientEsim::class)['phone_number'], ['starts_with:060,065,066']),
+            'phone_number' => array_merge(PhoneNum::createRules($this->phone_number, ClientEsim::class)['phone_number'], ['starts_with:060,061,062,065,066']),
             'model_selected'=> ['required',],
         ];
     }
@@ -56,7 +56,7 @@ class AddClientEsimPhoneNumRequest extends FormRequest
             'phone_number.min' => 'Numéro de téléphone doit avoir 8 digits minimum',
             'phone_number.unique' => 'Numéro déjà attribué',
             'model_selected.required' => 'Veuillez sélectionner un Client',
-            'phone_number.starts_with' => 'Le numéro de téléphone doit commencer par 060,065,066',
+            'phone_number.starts_with' => 'Le numéro de téléphone doit commencer par 060,061,062,065,066',
         ];
     }
 

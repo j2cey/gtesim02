@@ -29,7 +29,9 @@ class SettingController extends Controller
     }
 
     public function test() {
-        $result = config('Settings.date.format');
+        $result = config('Settings.arisrequest.max_running.status');
+
+        dd(Setting::getByFullPath("arisrequest.max_running.status")->value);
 
         return json_encode($result);
     }

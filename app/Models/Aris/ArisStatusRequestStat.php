@@ -2,6 +2,7 @@
 
 namespace App\Models\Aris;
 
+use App\Models\Setting;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Model;
@@ -272,7 +273,7 @@ class ArisStatusRequestStat extends Model
         $result = ( $requests_waiting_result_count_all >= $max_waiting_requests );
 
         if ( $result ) {
-            Log::info("ArisStatusRequest - Max Waiting Reached !");
+            Log::info("ArisStatusRequest - Max Waiting (". $max_waiting_requests .") Reached !");
             Log::info("MaxWaitingRequests Treshold: " . $max_waiting_requests . ", requests waiting All count: " . $requests_waiting_result_count_all);
         }
 
@@ -280,10 +281,21 @@ class ArisStatusRequestStat extends Model
     }
 
     public static function getMaxRunningRequests() {
-        return config('Settings.arisrequest.max_running.status');
+        $setting_value = config('Settings.arisrequest.max_running.status');
+        if ( empty($setting_value) ) {
+            return Setting::getByFullPath("arisrequest.max_running.status")->value;
+        } else {
+            return $setting_value;
+        }
     }
     public static function getMaxWaitingRequests() {
-        return config('Settings.arisrequest.max_waiting.status');
+        //return config('Settings.arisrequest.max_waiting.status');
+        $setting_value = config('Settings.arisrequest.max_waiting.status');
+        if ( empty($setting_value) ) {
+            return Setting::getByFullPath("arisrequest.max_waiting.status")->value;
+        } else {
+            return $setting_value;
+        }
     }
 
     public static function getStat() : ?ArisStatusRequestStat {

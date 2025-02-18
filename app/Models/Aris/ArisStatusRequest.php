@@ -209,6 +209,7 @@ class ArisStatusRequest extends Model
         }
 
         $this->min_esim_id = $min_esim_id;
+        $this->last_requested_esim_id = ($this->min_esim_id - 1) < 0 ? 0 : $this->min_esim_id - 1;
         $this->max_esim_id = Esim::where('id', '>=', $min_esim_id + ArisStatusRequest::getMaxEsimsByRequest())->orderBy('id', 'asc')->first()->id;
 
         $this->save();
@@ -227,7 +228,11 @@ class ArisStatusRequest extends Model
         if ( ArisStatusRequestStat::isMaxWaitingRequestsReached() ) {
             $this->setWaiting();
         } else {
-            $next_esim = Esim::whereBetween('id', [$this->last_requested_esim_id + 1, $this->max_esim_id])->orderBy('id', 'asc')->first();
+            if ($this->last_requested_esim_id === 0) {
+                $next_esim = $this->min_esim_id;
+            } else {
+                $next_esim = Esim::whereBetween('id', [$this->last_requested_esim_id + 1, $this->max_esim_id])->orderBy('id', 'asc')->first();
+            }
 
             if ($next_esim->id < $this->last_requested_esim_id) {
                 $next_esim = Esim::find($this->last_requested_esim_id);

@@ -97,9 +97,11 @@ class EsimState extends BaseModel implements Auditable
         $details = "";
 
         if ($statutesim && $statutesim->id === $statutesim_attribue->id) {
-            $details = $esim->phonenum->numero;
-            if ( ! $user ) {
-                $user = $esim->phonenum->creator;
+            if ($esim->phonenum) {
+                $details = $esim->phonenum?->numero;
+                if (!$user) {
+                    $user = $esim->phonenum?->creator;
+                }
             }
         }
 

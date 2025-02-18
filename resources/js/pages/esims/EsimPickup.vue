@@ -1,6 +1,7 @@
 <script setup>
 import { useEsimStore } from "../../stores/EsimStore.js";
 import { formatDate } from '../../services/helper.js'
+import {computed} from "vue";
 
 const esimStore = useEsimStore();
 
@@ -9,6 +10,10 @@ const pickupCanceled = () => {
     esimStore.pickupEsimRelease();
     emit('pickupCanceled');
 }
+
+const arisStatus = computed(() => {
+    return esimStore.esimpicked?.latestarisstatus ? esimStore.esimpicked?.latestarisstatus?.formatted_status : 'NaN';
+});
 
 </script>
 
@@ -29,17 +34,17 @@ const pickupCanceled = () => {
                             <th class="text text-sm text-capitalize">imsi</th>
                             <th class="text text-sm text-capitalize">iccid</th>
                             <th class="text text-sm text-capitalize">Etat</th>
-                            <th class="text text-sm text-capitalize">Statut ARIS</th>
-                            <th class="text text-sm text-capitalize">Date Statut ARIS</th>
+                            <th class="text text-xs text-capitalize">Statut ARIS</th>
+                            <th class="text text-xs text-capitalize">Date ARIS</th>
                         </tr>
                         </thead>
                         <tbody v-if="esimStore.esimpicked">
                         <tr>
-                            <td class="text text-xs" >{{ esimStore.esimpicked?.imsi }}</td>
-                            <td class="text text-xs" >{{ esimStore.esimpicked?.iccid }}</td>
-                            <td class="text text-xs" >{{ esimStore.esimpicked?.lateststate?.prevesimstate ? esimStore.esimpicked?.lateststate?.prevesimstate?.statutesim?.libelle : esimStore.esimpicked?.statutesim?.libelle }}</td>
-                            <td class="text text-xs" >{{ esimStore.esimpicked?.latestarisstatus ? esimStore.esimpicked?.latestarisstatus?.formatted_status : 'NaN' }}</td>
-                            <td class="text text-xs" >{{ esimStore.esimpicked?.latestarisstatus ? formatDate(esimStore.esimpicked?.latestarisstatus?.status_change_date) : 'NaN' }}</td>
+                            <td class="text text-xs" ><small>{{ esimStore.esimpicked?.imsi }}</small></td>
+                            <td class="text text-xs" ><small>{{ esimStore.esimpicked?.iccid }}</small></td>
+                            <td class="text text-xs" ><small>{{ esimStore.esimpicked?.lateststate?.prevesimstate ? esimStore.esimpicked?.lateststate?.prevesimstate?.statutesim?.libelle : esimStore.esimpicked?.statutesim?.libelle }}</small></td>
+                            <td class="text text-xs text-bold" :class="'text-' + (arisStatus === 'NaN' ? 'default' : (arisStatus === 'Libre' ? 'success' : 'danger')) " >{{ arisStatus }}</td>
+                            <td class="text text-xs" style="width: 100px"><small>{{ esimStore.esimpicked?.latestarisstatus ? formatDate(esimStore.esimpicked?.latestarisstatus?.status_change_date) : 'NaN' }}</small></td>
                         </tr>
                         </tbody>
                         <tbody v-else>

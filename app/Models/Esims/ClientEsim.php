@@ -87,14 +87,15 @@ class ClientEsim extends BaseModel implements IsBaseModel, IHasPhoneNums, IHasEm
             'nom_raison_sociale' => ['required'],
         ];
     }
+    // TODO: Centralize custom PhoneNum (+ EmailAddress) validation rules
     public static function createRules($phone_number) {
         return array_merge(self::defaultRules(), PhoneNum::createRules($phone_number,self::class), [
             'email_address' => ['required','email'],
-            'phone_number' => ['starts_with:060,065,066'],
+            'phone_number' => ['starts_with:060,061,062,065,066'],
         ]);
     }
     public static function updateRules($model,$phone_number) {
-        return array_merge(self::defaultRules(), PhoneNum::updateRules($model,$phone_number,self::class), [
+        return array_merge(self::defaultRules(), PhoneNum::updateRules($model,$phone_number,self::class,$model), [
 
         ]);
     }
@@ -103,7 +104,7 @@ class ClientEsim extends BaseModel implements IsBaseModel, IHasPhoneNums, IHasEm
             'nom_raison_sociale.required' => 'Nom ou Raison Sociale du client requis',
             'email_address.required' => 'Adresse e-mail requise',
             'email_address.email' => 'Adresse e-mail non valide',
-            'phone_number.starts_with' => 'Le numéro de téléphone doit commencer par 060,065,066',
+            'phone_number.starts_with' => 'Le numéro de téléphone doit commencer par 060,061,062,065,066',
         ]);
     }
 

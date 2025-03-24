@@ -68,7 +68,7 @@ abstract class Permissions
     }
     public static function Esim() : BaseModelAction {
         $additionalactions = [
-            'attach' => 3,'import' => 3,
+            'attach' => 3,'direct-attach' => 2,'import' => 3,
             'attributor-list' => 2,'attributor-department-list' => 2,
             'phonenum-update' => 2,'phonenum-delete' => 2
         ];

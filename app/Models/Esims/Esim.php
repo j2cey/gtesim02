@@ -262,10 +262,12 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
     public static function getFirstFree($esim_id = -1): Esim {
         if ($esim_id === -1 || is_null($esim_id)) {
             $esim_nouveau_statut = StatutEsim::where('code', "nouveau")->first();
+            $esim_suspendue_statut = StatutEsim::where('code', "suspendue")->first();
 
-            //$esim = Esim::where('statut_esim_id', $esim_nouveau_statut->id)->first();
-            $esim_picked = ModelPicker::pick(Esim::class, [['field'=>"statut_esim_id", 'value'=>$esim_nouveau_statut->id]]);
-            $esim = Esim::find($esim_picked->model_id);
+            $esim = Esim::where('statut_esim_id', $esim_nouveau_statut->id)->orWhere('statut_esim_id', $esim_suspendue_statut->id)->first();
+            //$esim_picked = ModelPicker::pick(Esim::class, [['field'=>"statut_esim_id", 'value'=>$esim_nouveau_statut->id]]);
+
+            //$esim = Esim::find($esim_picked->model_id);
 
             $esim->setStatutAttribution();
 
@@ -275,12 +277,19 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
         }
     }
 
-    public static function pickupFirstFree(Esim $old_esim = null): Esim
+    public static function pickupFirstFree(Esim $old_esim = null, $iccid = null): Esim
     {
         // Revert old esim status if any
         $old_esim?->revertPreLastPickupStatus();
 
-        return Esim::getFirstFree();
+        if ( ! is_null($iccid) ) {
+            $new_esim = Esim::where('iccid', $iccid)->first();
+            $esim_id = $new_esim ? $new_esim->id : -1;
+        } else {
+            $esim_id = -1;
+        }
+
+        return Esim::getFirstFree($esim_id);
     }
 
     public static function createNew($imsi, $iccid, $ac, $pin, $puk, $eki = null, $pin2 = null, $puk2 = null, $adm1 = null, $opc = null, StatutEsim $statutesim = null, TechnologieEsim $technologieesim = null)

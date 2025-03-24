@@ -21,6 +21,18 @@ export const useEsimStore = defineStore('EsimStore', () => {
                 loadingesim.value = false;
             });
     };
+    const pickupEsimByIccid = (iccid) => {
+        loadingesim.value = true;
+        axios.get('/api/esims/pickupbyiccid/' + iccid)
+            .then((response) => {
+                esimpicked.value = response.data;
+                console.log('STORE EsimStore pickupEsim, response: ', response);
+                console.log('STORE EsimStore esimpicked.value: ', esimpicked.value);
+                loadingesim.value = false;
+            }).catch((error) => {
+                loadingesim.value = false;
+            });
+    };
     const pickupEsimRelease = () => {
         if (esimpicked.value) {
             loadingesim.value = true;
@@ -36,5 +48,5 @@ export const useEsimStore = defineStore('EsimStore', () => {
         }
     };
 
-    return { esimpicked, loadingesim, pickupEsim, pickupEsimReset, pickupEsimRelease };
+    return { esimpicked, loadingesim, pickupEsim, pickupEsimReset, pickupEsimRelease, pickupEsimByIccid };
 });

@@ -160,6 +160,12 @@ class EsimController extends Controller
         return New EsimResource( $new_esim->load(['statutesim', 'technologieesim', 'phonenum', 'states', 'lateststate', 'arisstatuses', 'latestarisstatus']) );
     }
 
+    public function pickupbyiccid($iccid) {
+        $new_esim = Esim::pickupFirstFree(null, $iccid);
+
+        return New EsimResource( $new_esim->load(['statutesim', 'technologieesim', 'phonenum', 'states', 'lateststate', 'arisstatuses', 'latestarisstatus']) );
+    }
+
     public function release(Esim $esim) {
         $esim->setStatutFree();
         return response()->json(['status' => 'ok'], 200);

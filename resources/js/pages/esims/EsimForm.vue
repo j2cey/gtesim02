@@ -247,6 +247,8 @@ const getEsimStates = (page = 1) => {
     });
 }
 
+const loadingEsimPhoneAttach = ref(false);
+
 //<editor-fold desc="Status">
 const status = ref({});
 const statusChanged = (obj) => {
@@ -491,6 +493,17 @@ onMounted(() => {
                                                         :modeltype="esim.modeltype"
                                                         :modelid="esimid"
                                             ></StatusShow>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row small">
+                                    <div v-if="can( 'arisstatusesXXXX-add') || form.statutesim !== 'attribue'" class="col-md-3">
+                                        <div class="form-group">
+                                            <button @click.prevent="attachPhone" type="button" class="btn btn-xs btn-danger" :disabled="loadingEsimPhoneAttach">
+                                                <span v-if="loadingEsimPhoneAttach" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                Attribuer
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

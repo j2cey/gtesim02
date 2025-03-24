@@ -1,11 +1,15 @@
 <script setup>
 import { useEsimStore } from "../../stores/EsimStore.js";
 import { formatDate } from '../../services/helper.js'
-import {computed} from "vue";
+import {computed, ref} from "vue";
+import { useAbility } from "@casl/vue";
 
 const esimStore = useEsimStore();
 
 const emit = defineEmits(['pickupCanceled','pickupSaved']);
+const { can, cannot } = useAbility();
+
+const selectIccid = ref(null);
 const pickupCanceled = () => {
     esimStore.pickupEsimRelease();
     emit('pickupCanceled');
@@ -57,6 +61,22 @@ const arisStatus = computed(() => {
                         </tbody>
                     </table>
                     <p><span v-show="esimStore.esimpicked" class="text text-xs text-danger font-weight-bold">Valider Cette ESIM ?</span></p>
+                    <div class="d-flex" v-if="can( 'esims-direct-attach')" >
+                        <div class="input-group mb-3">
+                            <input @keyup.enter="esimStore.pickupEsimByIccid(selectIccid)" v-model="selectIccid" type="search" class="form-control text-xs form-control-sm" placeholder="ICCID..." />
+                            <button v-if="selectIccid && !esimStore.loadingesim" @click="pickupCanceled" type="button" class="btn btn-xs bg-transparent" style="margin-left: -30px; z-index: 100;">
+                                <i class="fa fa-times"></i>
+                            </button>
+                            <div class="input-group-append">
+                                <button class="btn btn-sm btn-default" @click="esimStore.pickupEsimByIccid(selectIccid)">
+                                    <div v-if="esimStore.loadingesim" class="spinner-border spinner-border-sm" role="status">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                    <span v-else><i class="fa fa-check"></i></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-xs btn-secondary" @click.prevent="pickupCanceled">Annuler</button>

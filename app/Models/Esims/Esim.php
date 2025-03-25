@@ -77,6 +77,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  *
  * @property EsimState|null $lateststate latest esim state
  * @property PhoneNum|null $phonenum
+ * @property bool $is_in_attribution
  */
 class Esim extends BaseModel implements IsBaseModel, Auditable
 {
@@ -148,6 +149,16 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
     public function getQrcodeimageFolderpathAttribute() {
         $separator = "/";
         return public_path('/') . config('app.' . self::CONFIG_DIR) . $separator;
+    }
+
+    public function getIsInAttributionAttribute() {
+        $attribution_status = StatutEsim::where('code', "attribution")->first();
+
+        if ( $attribution_status ) {
+            return $this->statut_esim_id === $attribution_status->id;
+        } else {
+            return false;
+        }
     }
 
     #endregion
@@ -382,6 +393,19 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
 
     public static function getById(int $esim_id): ?Esim {
         return Esim::where('id', $esim_id)->first();
+    }
+
+    /**
+     * @return Esim[]|null
+     */
+    public static function inAttributionGet() {
+        $attribution_status = StatutEsim::where('code', "attribution")->first();
+
+        if ( $attribution_status ) {
+            return Esim::where('statut_esim_id', $attribution_status->id)->get();
+        } else {
+            return null;
+        }
     }
 
     public static function getByIccid(string $iccid): ?Esim {

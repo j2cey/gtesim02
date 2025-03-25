@@ -12,6 +12,9 @@ import Swal from "sweetalert2";
 import StatusShow from "../statuses/StatusShow.vue";
 import { formatDate } from '../../services/helper.js'
 import ArisStatusList from "../arisstatuses/ArisStatusList.vue";
+import {useAbility} from "@casl/vue";
+
+const { can, cannot } = useAbility();
 
 // TODO: Add attach-esim button
 
@@ -476,7 +479,7 @@ onMounted(() => {
                                         </div>
                                     </div>
 
-                                    <div v-if="(formMode === 'edit' || formMode === 'show') && phonenum" class="col-md-3">
+                                    <div v-if="(formMode === 'edit' && formMode === 'show') && phonenum" class="col-md-3">
                                         <div class="form-group">
                                             <label for="opc" class="text text-danger">Téléphone rattaché</label>
                                             <input v-model="phonenum.phone_number" type="text" class="form-control form-control-sm border-0" id="phonenum" placeholder="Numéo Téléphone" readonly>

@@ -28,6 +28,9 @@ enum QueueEnum: string
     #[Description('Traitement des Requetes de Statut ARIS')]
     case ARISSTATUSREQUEST = 'aris_status_request';
 
+    #[Description('Traitement ESIM restees longtemps en attribution')]
+    case ESIMLONGATTRIBUTION = 'esim_long_attribution';
+
     #[Description('Importation Lignes Fichier')]
     case IMPORTFILE = 'importfile';
 

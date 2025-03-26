@@ -221,7 +221,7 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
         }
     }
 
-    public function setStatutAttribue() {
+    public function setStatutAttribue(bool $setattributor = true) {
         $esim_attribue_statut = StatutEsim::where('code', "attribue")->first();
         $this->statutesim()->associate($esim_attribue_statut);
 
@@ -231,7 +231,9 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
             $esim_picked->setFree();
         }
 
-        $this->setAttributor();
+        if ($setattributor) {
+            $this->setAttributor();
+        }
 
         $this->save();
     }
@@ -244,6 +246,7 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
     }
 
     public function setStatutFree() {
+        $this->load('phonenum');
         if ( ! $this->phonenum ) {
             $esim_nouveau_statut = StatutEsim::where('code', "nouveau")->first();
             $this->statutesim()->associate($esim_nouveau_statut)->save();
@@ -403,6 +406,19 @@ class Esim extends BaseModel implements IsBaseModel, Auditable
 
         if ( $attribution_status ) {
             return Esim::where('statut_esim_id', $attribution_status->id)->get();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @return Esim[]|null
+     */
+    public static function isNewGet() {
+        $esim_nouveau_statut = StatutEsim::where('code', "nouveau")->first();
+
+        if ( $esim_nouveau_statut ) {
+            return Esim::where('statut_esim_id', $esim_nouveau_statut->id)->get();
         } else {
             return null;
         }

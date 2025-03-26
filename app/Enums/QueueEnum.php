@@ -31,6 +31,9 @@ enum QueueEnum: string
     #[Description('Traitement ESIM restees longtemps en attribution')]
     case ESIMLONGATTRIBUTION = 'esim_long_attribution';
 
+    #[Description('Regule les ESIM en status NOUVEAU')]
+    case ESIMSTATUSNEWREGULATION = 'esim_status_new_regulation';
+
     #[Description('Importation Lignes Fichier')]
     case IMPORTFILE = 'importfile';
 

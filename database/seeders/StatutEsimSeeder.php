@@ -17,5 +17,7 @@ class StatutEsimSeeder extends Seeder
         StatutEsim::updateOrNew("Attribution", "attribution", "attribution", "warning");
         StatutEsim::updateOrNew("Attribue", "attribue", "attribue", "success");
         StatutEsim::updateOrNew("Suspendue", "suspendue", "suspendue", "danger");
+        StatutEsim::updateOrNew("Reservee", "reservee", "reservee", "warning");
+        StatutEsim::updateOrNew("Stock", "stock", "en stock", "info");
     }
 }
